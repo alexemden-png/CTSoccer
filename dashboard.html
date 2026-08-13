@@ -23,6 +23,10 @@
     .tab-btn.active{background:var(--accent);color:#fff;}
     .tab-btn:not(.active){background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);}
     .tab-btn:not(.active):hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.8);}
+    .qf-btn{padding:6px 13px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);font-family:'Montserrat',Arial,sans-serif;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);transition:all .15s;}
+    .qf-btn.active{background:rgba(43,124,233,.2);border-color:rgba(43,124,233,.4);color:var(--accent-lt);}
+    .qf-btn:not(.active):hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.8);}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
     .match-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;transition:background .15s;}
     .match-row:hover{background:rgba(255,255,255,.06);}
     .data-row{display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 68px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.855rem;transition:background .15s;}
@@ -224,27 +228,34 @@
 
       <!-- ===== CLUBS ===== -->
       <section id="section-clubs" style="display:none;" class="fade-in">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-          <div style="font-size:1.2rem;font-weight:800;letter-spacing:-.03em;color:#fff;">CT Club Directory <span id="club-count-lbl" style="font-size:.85rem;font-weight:600;color:var(--muted);"></span></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <div style="position:relative;">
-              <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="club-search" type="search" placeholder="Search..." style="padding-left:33px;width:170px;" oninput="filterClubs()">
-            </div>
-            <select id="tier-filter" onchange="filterClubs()" style="width:150px;">
-              <option value="">All Tiers</option>
-              <option value="Professional">Professional</option>
-              <option value="Semi-Professional">Semi-Pro</option>
-              <option value="Amateur / Semi-Pro">Amateur/Semi-Pro</option>
-              <option value="Amateur">Amateur</option>
-              <option value="Youth">Youth</option>
-            </select>
+
+        <!-- Search hero -->
+        <div style="background:linear-gradient(135deg,rgba(43,124,233,.1) 0%,rgba(43,124,233,.03) 100%);border:1px solid rgba(43,124,233,.15);border-radius:16px;padding:24px 28px;margin-bottom:20px;">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:10px;">Search All CT Clubs</div>
+          <div style="position:relative;margin-bottom:14px;">
+            <svg style="position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none;" width="18" height="18" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="club-search" type="search" placeholder="Search by club name, city, or league…" autocomplete="off"
+              style="width:100%;padding:14px 44px 14px 46px;font-size:1rem;font-weight:600;background:rgba(255,255,255,.06);border:1.5px solid rgba(43,124,233,.25);border-radius:11px;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(43,124,233,.25)'" oninput="filterClubs()">
+            <button id="club-search-clear" onclick="clearClubSearch()" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;color:rgba(255,255,255,.6);font-size:1rem;line-height:1;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">✕</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:.72rem;color:var(--muted);font-weight:600;margin-right:4px;">Filter:</span>
+            <button class="qf-btn active" onclick="setTierFilter('',this)">All</button>
+            <button class="qf-btn" onclick="setTierFilter('Professional',this)">Pro</button>
+            <button class="qf-btn" onclick="setTierFilter('Semi-Professional',this)">Semi-Pro</button>
+            <button class="qf-btn" onclick="setTierFilter('Amateur / Semi-Pro',this)">NPSL</button>
+            <button class="qf-btn" onclick="setTierFilter('Amateur',this)">Amateur</button>
+            <button class="qf-btn" onclick="setTierFilter('Youth',this)">Youth</button>
+            <span id="club-count-lbl" style="margin-left:auto;font-size:.78rem;font-weight:700;color:var(--muted);"></span>
           </div>
         </div>
+
         <div id="clubs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
         <div id="clubs-empty" style="display:none;text-align:center;padding:56px 20px;color:var(--muted);">
           <div style="font-size:1.5rem;margin-bottom:10px;font-weight:800;">No clubs match</div>
-          <div style="font-size:.85rem;">Try adjusting your search or filter</div>
+          <div style="font-size:.85rem;">Try a different name, city, or clear the filter</div>
+          <button onclick="clearClubSearch()" style="margin-top:14px;background:rgba(43,124,233,.15);border:1px solid rgba(43,124,233,.25);color:var(--accent-lt);font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:.8rem;padding:8px 18px;border-radius:8px;cursor:pointer;">Clear Search</button>
         </div>
       </section>
 
@@ -270,9 +281,13 @@
 
       <!-- ===== MATCHES ===== -->
       <section id="section-matches" style="display:none;" class="fade-in">
-        <div style="display:flex;gap:8px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
           <button class="tab-btn active" id="mtab-upcoming" onclick="showMatches('upcoming',this)">Upcoming</button>
           <button class="tab-btn" id="mtab-results" onclick="showMatches('results',this)">Recent Results</button>
+          <span id="espn-live-indicator" style="display:none;align-items:center;gap:5px;margin-left:8px;font-size:.68rem;font-weight:700;color:#5CDD8B;background:rgba(92,221,139,.1);border:1px solid rgba(92,221,139,.25);padding:4px 10px;border-radius:6px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>
+            Hartford Athletic — Live Data
+          </span>
         </div>
         <div style="display:flex;flex-direction:column;gap:9px;" id="matches-list"></div>
       </section>
@@ -382,12 +397,13 @@
                <div style="font-size:.88rem;font-weight:800;color:${clubGD(c)>=0?'#5BA3FF':'#ff7070'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
                <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">GD</div>
              </div>`;
+        const liveBadge = c._espnLive ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.3);padding:3px 7px;border-radius:5px;vertical-align:middle;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>Live</span>` : '';
         return `<a class="club-card" href="club.html?id=${c.id}">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px;">
             <div style="display:flex;align-items:center;gap:11px;min-width:0;">
               ${clubAvatar(c,46)}
               <div style="min-width:0;">
-                <div style="font-size:.92rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+                <div style="font-size:.92rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name} ${liveBadge}</div>
                 <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; Est. ${c.founded}</div>
               </div>
             </div>
@@ -400,11 +416,32 @@
       }).join('');
     }
 
+    let _activeTierFilter = '';
+
+    function setTierFilter(tier, btn) {
+      _activeTierFilter = tier;
+      document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      filterClubs();
+    }
+
+    function clearClubSearch() {
+      document.getElementById('club-search').value = '';
+      _activeTierFilter = '';
+      document.querySelectorAll('.qf-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+      filterClubs();
+    }
+
     function filterClubs() {
-      const q  = (document.getElementById('club-search').value||'').toLowerCase();
-      const t  = document.getElementById('tier-filter').value;
+      const q   = (document.getElementById('club-search').value||'').toLowerCase().trim();
+      const t   = _activeTierFilter;
+      const clearBtn = document.getElementById('club-search-clear');
+      if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
       renderClubs(ALL_CLUBS.filter(c=>{
-        if (q && !c.name.toLowerCase().includes(q) && !c.city.toLowerCase().includes(q) && !c.league.toLowerCase().includes(q)) return false;
+        if (q) {
+          const haystack = (c.name+' '+c.city+' '+(c.league||'')+' '+(c.leagueShort||'')).toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
         if (t && c.tier !== t) return false;
         return true;
       }));
@@ -527,6 +564,8 @@
 
     function handleGlobalSearch(val) {
       if (!val.trim()) return;
+      _activeTierFilter = '';
+      document.querySelectorAll('.qf-btn').forEach((b,i) => b.classList.toggle('active', i===0));
       showSection('clubs');
       document.getElementById('club-search').value = val;
       filterClubs();
@@ -545,9 +584,85 @@
       } catch(e){}
     })();
 
+    // ─── Live Data ─────────────────────────────────────────────────────────────
+    // Tries local cache (/live-data.json, updated every 5 min by Windows task),
+    // falls back to direct TheSportsDB browser fetch.
+
+    function applyLiveMatches(upcoming, results) {
+      if (!upcoming.length && !results.length) return;
+      const keepUp  = ALL_UPCOMING.filter(m => m.homeId !== 'hartford-athletic');
+      const keepRes = ALL_RESULTS.filter(m =>
+        !m.home.includes('Hartford Athletic') && !m.away.includes('Hartford Athletic'));
+      ALL_UPCOMING.length = 0; ALL_UPCOMING.push(...upcoming, ...keepUp);
+      ALL_RESULTS.length  = 0; ALL_RESULTS.push(...results,  ...keepRes);
+      renderOverviewUpcoming();
+      if (document.getElementById('section-matches').style.display !== 'none')
+        showMatches('upcoming', null);
+      const club = CT_CLUBS.find(c => c.id === 'hartford-athletic');
+      if (club) { club._espnLive = true; filterClubs(); }
+      const badge = document.getElementById('espn-live-indicator');
+      if (badge) badge.style.display = 'inline-flex';
+    }
+
+    function cacheMatchToCard(m, isResult) {
+      const d = new Date(m.date + 'T00:00:00');
+      const base = {
+        home: m.home, away: m.away,
+        date: d.toLocaleDateString('en-US', {month:'short', day:'numeric'}),
+        time: m.time || 'TBD',
+        venue: m.venue || 'Trinity Health Stadium',
+        league: m.league || 'USL Championship', leagueShort: m.leagueShort || 'USL-C',
+        homeId: 'hartford-athletic',
+      };
+      return isResult ? {...base, homeScore: m.homeScore ?? 0, awayScore: m.awayScore ?? 0} : base;
+    }
+
+    async function initLiveData() {
+      // 1. Try local cache first (fastest, no external request)
+      try {
+        const cache = await fetch('/live-data.json?t=' + Date.now()).then(r => r.ok ? r.json() : null);
+        if (cache && (cache.upcoming?.length || cache.results?.length)) {
+          const upcoming = (cache.upcoming || []).map(m => cacheMatchToCard(m, false));
+          const results  = (cache.results  || []).map(m => cacheMatchToCard(m, true));
+          applyLiveMatches(upcoming, results);
+          console.info('[Live] Loaded from local cache, generatedAt=' + cache.meta?.generatedAt);
+          return;
+        }
+      } catch {}
+
+      // 2. Fall back to direct TheSportsDB fetch
+      try {
+        const TEAM = '138877';
+        const BASE = 'https://www.thesportsdb.com/api/v1/json/3';
+        const [lastR, nextR] = await Promise.all([
+          fetch(`${BASE}/eventslast.php?id=${TEAM}`).then(r => r.json()),
+          fetch(`${BASE}/eventsnext.php?id=${TEAM}`).then(r => r.json()),
+        ]);
+        function evToMatch(ev, isResult) {
+          if (!ev) return null;
+          const d = new Date(ev.dateEvent + (ev.strTime ? 'T' + ev.strTime : 'T00:00:00'));
+          const base = {
+            home: ev.strHomeTeam, away: ev.strAwayTeam,
+            date: d.toLocaleDateString('en-US', {month:'short', day:'numeric'}),
+            time: ev.strTime ? ev.strTime.substring(0,5) : 'TBD',
+            venue: ev.strVenue || 'Trinity Health Stadium',
+            league: 'USL Championship', leagueShort: 'USL-C', homeId: 'hartford-athletic'
+          };
+          return isResult ? {...base, homeScore: +ev.intHomeScore||0, awayScore: +ev.intAwayScore||0} : base;
+        }
+        const results  = [evToMatch(lastR.results?.[0], true)].filter(Boolean);
+        const upcoming = [evToMatch(nextR.events?.[0],  false)].filter(Boolean);
+        applyLiveMatches(upcoming, results);
+        console.info('[Live] Loaded from TheSportsDB directly');
+      } catch (err) {
+        console.info('[Live] All sources unavailable:', err.message);
+      }
+    }
+
     // Init
     renderOverviewUpcoming();
     renderClubs(CT_CLUBS);
+    initLiveData(); // non-blocking — runs in background
   </script>
 </body>
 </html>
