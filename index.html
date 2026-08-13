@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CT Soccer — Connecticut Soccer United</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="_contact.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
@@ -633,8 +634,100 @@
   </section>
 
 
+  <!-- CONTACT FORM -->
+  <section id="contact" style="padding:96px 0;background:var(--navy-800);border-top:1px solid rgba(255,255,255,.06);">
+    <div style="max-width:680px;margin:0 auto;padding:0 24px;">
+      <div style="text-align:center;margin-bottom:48px;">
+        <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.25);border-radius:100px;padding:5px 14px;font-size:.7rem;font-weight:700;color:var(--accent-lt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Get In Touch</div>
+        <h2 style="font-size:clamp(1.75rem,4vw,2.75rem);font-weight:800;letter-spacing:-.04em;color:#fff;margin:0 0 14px;">Contact Us</h2>
+        <p style="font-size:1rem;color:rgba(255,255,255,.45);line-height:1.7;margin:0;">Questions about clubs, leagues, or the site? We'll get back to you.</p>
+      </div>
+
+      <form id="contact-form" onsubmit="submitContact(event)" style="display:flex;flex-direction:column;gap:16px;">
+        <!-- FormSubmit hidden config fields (set dynamically by _contact.js) -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" id="cf-next" name="_next" value="">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Name</label>
+            <input name="name" type="text" placeholder="Your name" required
+              style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;"
+              onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+          </div>
+          <div>
+            <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Email</label>
+            <input name="email" type="email" placeholder="your@email.com" required
+              style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;"
+              onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Subject</label>
+          <select name="subject"
+            style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;appearance:none;cursor:pointer;"
+            onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+            <option value="General Question">General Question</option>
+            <option value="Club Information">Club Information</option>
+            <option value="League / Tournament">League / Tournament</option>
+            <option value="Add My Club">Add My Club to the Directory</option>
+            <option value="Report an Error">Report an Error</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Message</label>
+          <textarea name="message" placeholder="How can we help?" required rows="5"
+            style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;resize:vertical;transition:border-color .2s;"
+            onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:4px;">
+          <p id="cf-status" style="font-size:.82rem;color:rgba(255,255,255,.4);margin:0;"></p>
+          <button type="submit" id="cf-btn" class="btn-primary" style="padding:13px 32px;font-size:.9rem;">
+            Send Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+  <script>
+    (function() {
+      const email = window.CT_CONTACT_EMAIL;
+      if (email) {
+        const form = document.getElementById('contact-form');
+        form.action = 'https://formsubmit.co/' + email;
+        form.method = 'POST';
+        document.getElementById('cf-next').value = window.location.origin + window.location.pathname + '?sent=1';
+      }
+    })();
+
+    function submitContact(e) {
+      const email = window.CT_CONTACT_EMAIL;
+      if (!email) {
+        e.preventDefault();
+        document.getElementById('cf-status').textContent = 'Contact not configured.';
+        return;
+      }
+      // Let the form submit naturally to FormSubmit — show sending state
+      const btn = document.getElementById('cf-btn');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+    }
+
+    // Show success message if redirected back after submission
+    if (new URLSearchParams(window.location.search).get('sent') === '1') {
+      const status = document.getElementById('cf-status');
+      if (status) {
+        status.textContent = '✓ Message sent! We\'ll get back to you soon.';
+        status.style.color = '#5CDD8B';
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  </script>
+
   <!-- FOOTER -->
-  <footer id="contact" style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;">
+  <footer style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;">
     <div style="max-width:1180px;margin:0 auto;padding:0 24px;">
 
       <div class="grid-footer" style="padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.06);">

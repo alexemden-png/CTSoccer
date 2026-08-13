@@ -2,3 +2,4 @@ node_modules/
 temporary screenshots/
 *.png
 package-lock.json
+_contact.js
