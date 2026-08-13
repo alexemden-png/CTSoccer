@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Register — CT Soccer</title>
+  <title>Register â€” CT Soccer</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -115,7 +115,7 @@
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
       <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
         <div style="width:42px;height:42px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px;">
-          <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
         </div>
         <div>
           <div style="font-size:1.1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">Join CT Soccer</div>
@@ -148,19 +148,19 @@
       </div>
 
       <div>
-        <label class="field-label">I am a…</label>
+        <label class="field-label">I am aâ€¦</label>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
           <div class="role-opt selected" onclick="selectRole('player',this)">
             <input type="radio" name="role" value="player" checked style="display:none;">
-            <div class="role-label" style="color:var(--accent-lt);">⚽ Player</div>
+            <div class="role-label" style="color:var(--accent-lt);">âš½ Player</div>
           </div>
           <div class="role-opt" onclick="selectRole('coach',this)">
             <input type="radio" name="role" value="coach" style="display:none;">
-            <div class="role-label">📋 Coach</div>
+            <div class="role-label">ðŸ“‹ Coach</div>
           </div>
           <div class="role-opt" onclick="selectRole('fan',this)">
             <input type="radio" name="role" value="fan" style="display:none;">
-            <div class="role-label">🏟️ Fan</div>
+            <div class="role-label">ðŸŸï¸ Fan</div>
           </div>
         </div>
       </div>
@@ -180,7 +180,7 @@
   </div>
 
   <script>
-    // Already logged in → skip to dashboard
+    // Already logged in â†’ skip to dashboard
     const existing = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
     if (existing && existing.firstName) window.location.href = 'dashboard.html';
 
@@ -215,7 +215,7 @@
         joined: new Date().toISOString(),
         followedClubs: [],
         notifications: true,
-        stats: { goals: 0, assists: 0, appearances: 0, rating: '—' }
+        stats: { goals: 0, assists: 0, appearances: 0, rating: 'â€”' }
       };
       localStorage.setItem('ctsoccer_user', JSON.stringify(user));
       window.location.href = 'dashboard.html';

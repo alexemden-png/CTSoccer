@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -46,7 +46,7 @@
 <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
   <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
     <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
-      <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
     </div>
     <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
   </a>
@@ -134,7 +134,7 @@
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Appearances</div>
           </div>
           <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
-            <div id="stat-rating" style="font-size:1.6rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.03em;">—</div>
+            <div id="stat-rating" style="font-size:1.6rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.03em;">â€”</div>
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Avg Rating</div>
           </div>
         </div>
@@ -205,7 +205,7 @@
           <div><label class="field-label">Opponent</label><input type="text" id="res-opponent" placeholder="Opponent club name..."></div>
           <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
             <div><label class="field-label">Your Score</label><input type="text" id="res-home" placeholder="0" style="text-align:center;"></div>
-            <div style="font-size:1.2rem;font-weight:800;color:var(--muted);padding-top:20px;">—</div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--muted);padding-top:20px;">â€”</div>
             <div><label class="field-label">Their Score</label><input type="text" id="res-away" placeholder="0" style="text-align:center;"></div>
           </div>
           <div><label class="field-label">Date</label><input type="text" id="res-date" placeholder="e.g. Aug 16, 2026"></div>
@@ -281,7 +281,7 @@
         <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(43,124,233,.07);pointer-events:none;"></div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
           <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
-            <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="" style="width:100%;height:100%;object-fit:contain;">
+            <img src="logo.png" alt="" style="width:100%;height:100%;object-fit:contain;">
           </div>
           <span style="font-size:.9rem;font-weight:800;color:#fff;letter-spacing:-.02em;">CT Soccer</span>
         </div>
@@ -357,7 +357,7 @@
   let user = {};
   try { user = JSON.parse(localStorage.getItem('ct_user')||'{}'); } catch(e){}
   if (!user.firstName) {
-    // Not logged in — redirect to home
+    // Not logged in â€” redirect to home
     // (leave page accessible but show a "not signed in" banner)
   }
 
@@ -406,7 +406,7 @@
       document.getElementById('stat-goals').textContent   = user.stats.goals||0;
       document.getElementById('stat-assists').textContent = user.stats.assists||0;
       document.getElementById('stat-apps').textContent    = user.stats.apps||0;
-      document.getElementById('stat-rating').textContent  = user.stats.rating||'—';
+      document.getElementById('stat-rating').textContent  = user.stats.rating||'â€”';
     }
 
     // Team manager
@@ -535,7 +535,7 @@
       goals:   parseInt(document.getElementById('inp-goals').value)||0,
       assists: parseInt(document.getElementById('inp-assists').value)||0,
       apps:    parseInt(document.getElementById('inp-apps').value)||0,
-      rating:  user.stats?.rating||'—',
+      rating:  user.stats?.rating||'â€”',
     };
     saveUser();
     document.getElementById('stat-goals').textContent   = user.stats.goals;
