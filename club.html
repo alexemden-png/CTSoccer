@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -58,7 +58,7 @@
           <a href="dashboard.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:700;padding:11px 22px;border-radius:10px;text-decoration:none;">Back to Dashboard</a>
         </div>`;
     } else {
-      document.title = club.name + ' â€” CT Soccer';
+      document.title = club.name + ' "” CT Soccer';
       document.getElementById('nav-club-name').textContent = club.name;
 
       let followed = false;
@@ -87,7 +87,7 @@
         const btn = document.getElementById('follow-btn');
         if (!btn) return;
         if (followed) {
-          btn.textContent = 'Following âœ”';
+          btn.textContent = 'Following ';
           btn.className = 'btn-outline btn-followed';
         } else {
           btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Follow Club';
