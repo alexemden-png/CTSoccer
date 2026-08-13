@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard &mdash; CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;height:100%;overflow-x:hidden;}
+    input[type="search"],select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px 14px;font-size:.875rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;transition:border-color .2s;}
+    input[type="search"]:focus,select:focus{border-color:var(--accent);}
+    select option{background:var(--navy-800);color:#fff;}
+    .slink{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;font-size:.875rem;font-weight:600;color:rgba(255,255,255,.45);text-decoration:none;cursor:pointer;transition:background .18s,color .18s;}
+    .slink:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);}
+    .slink.active{background:rgba(43,124,233,.14);color:var(--accent-lt);}
+    .stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;}
+    .club-card{background:var(--navy-800);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;transition:border-color .2s,transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s;cursor:pointer;text-decoration:none;display:block;color:#fff;}
+    .club-card:hover{border-color:rgba(43,124,233,.35);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.35),0 0 0 1px rgba(43,124,233,.12);}
+    .tab-btn{padding:8px 18px;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
+    .tab-btn.active{background:var(--accent);color:#fff;}
+    .tab-btn:not(.active){background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);}
+    .tab-btn:not(.active):hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.8);}
+    .match-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;transition:background .15s;}
+    .match-row:hover{background:rgba(255,255,255,.06);}
+    .data-row{display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 68px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.855rem;transition:background .15s;}
+    .data-row:hover{background:rgba(255,255,255,.03);}
+    .data-row:last-child{border-bottom:none;}
+    .progress-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;}
+    .progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent-lt));}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{animation:fadeIn .4s cubic-bezier(.16,1,.3,1) both;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    .btn-sm{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:8px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .2s,transform .2s cubic-bezier(.16,1,.3,1);}
+    .btn-sm:hover{opacity:.85;transform:translateY(-1px);}
+    .btn-outline-sm{display:inline-flex;align-items:center;gap:6px;background:transparent;color:rgba(255,255,255,.6);font-weight:600;font-size:.82rem;padding:7px 14px;border-radius:8px;text-decoration:none;border:1px solid rgba(255,255,255,.18);cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:border-color .2s,color .2s;}
+    .btn-outline-sm:hover{border-color:rgba(255,255,255,.45);color:#fff;}
+  </style>
+</head>
+<body style="display:flex;height:100vh;overflow:hidden;">
+
+  <!-- SIDEBAR -->
+  <aside style="width:230px;flex-shrink:0;background:var(--navy-800);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;">
+    <a href="index.html" style="display:flex;align-items:center;gap:10px;padding:20px 18px 14px;text-decoration:none;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+        <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.95rem;font-weight:800;letter-spacing:-.02em;color:#fff;">CT Soccer</span>
+    </a>
+
+    <nav style="padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:2px;">
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:8px 14px 5px;margin-top:4px;">Explore</div>
+      <a class="slink active" id="nav-overview"  onclick="showSection('overview')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a class="slink" id="nav-clubs" onclick="showSection('clubs')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clubs
+      </a>
+      <a class="slink" id="nav-standings" onclick="showSection('standings')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Standings
+      </a>
+      <a class="slink" id="nav-matches" onclick="showSection('matches')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Matches
+      </a>
+
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:12px 14px 5px;">Account</div>
+      <a class="slink" href="account.html">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        My Account
+      </a>
+      <a class="slink" id="nav-directory" onclick="showSection('directory')" style="cursor:pointer;">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Full Directory
+      </a>
+      <a class="slink" href="index.html">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Back to Site
+      </a>
+    </nav>
+
+    <div style="padding:12px 10px;border-top:1px solid var(--border);">
+      <a href="account.html" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);text-decoration:none;transition:background .18s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+        <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;font-weight:800;color:#fff;">?</div>
+        <div style="overflow:hidden;">
+          <div id="user-name" style="font-size:.82rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">My Account</div>
+          <div id="user-role" style="font-size:.7rem;color:rgba(255,255,255,.3);">Click to manage</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+    <header style="position:sticky;top:0;z-index:100;background:rgba(13,27,42,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div id="topbar-title" style="font-size:1rem;font-weight:800;letter-spacing:-.02em;color:#fff;">Overview</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="position:relative;">
+          <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="global-search" type="search" placeholder="Search clubs..." style="padding-left:33px;width:190px;" oninput="handleGlobalSearch(this.value)">
+        </div>
+        <a href="account.html" class="btn-sm" style="padding:7px 14px;font-size:.78rem;">My Account</a>
+      </div>
+    </header>
+
+    <div style="padding:28px 32px;flex:1;">
+
+      <!-- ===== OVERVIEW ===== -->
+      <section id="section-overview" class="fade-in">
+        <!-- Welcome banner -->
+        <div id="welcome-banner" style="background:linear-gradient(135deg,rgba(43,124,233,.18) 0%,rgba(27,42,74,.6) 100%);border:1px solid rgba(43,124,233,.22);border-radius:16px;padding:20px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div id="welcome-text" style="font-size:1.05rem;font-weight:800;color:#fff;">Welcome to CT Soccer</div>
+            <div style="font-size:.82rem;color:rgba(255,255,255,.45);margin-top:3px;">Explore clubs, standings, and matches across Connecticut.</div>
+          </div>
+          <a href="account.html" class="btn-sm">Set Up My Account &rarr;</a>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
+          <div class="stat-card">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">CT Clubs</div>
+            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">20</div>
+            <div style="font-size:.75rem;color:rgba(43,124,233,.9);font-weight:600;">10 adult &bull; 10 youth</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">Registered Players</div>
+            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">8,400+</div>
+            <div style="font-size:.75rem;color:rgba(43,124,233,.9);font-weight:600;">Youth &amp; adult combined</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">Matches Played</div>
+            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">134</div>
+            <div style="font-size:.75rem;color:rgba(139,164,188,.7);font-weight:600;">62 remaining</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">Leagues</div>
+            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">4</div>
+            <div style="font-size:.75rem;color:rgba(255,189,46,.8);font-weight:600;">USL-C &bull; NISA &bull; NPSL &bull; CT State</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;margin-bottom:18px;">
+          <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+            <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:.9rem;font-weight:800;color:#fff;">Featured Club &mdash; Hartford Athletic</div>
+              <a href="club.html?id=hartford-athletic" class="btn-sm" style="font-size:.72rem;padding:6px 12px;">View Club</a>
+            </div>
+            <div style="padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
+              <div style="width:80px;height:80px;border-radius:16px;background:rgba(27,42,74,.8);border:2px solid rgba(245,168,0,.3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;flex-shrink:0;">
+                <div style="font-size:.55rem;font-weight:800;color:#F5A800;letter-spacing:.06em;">USL-C</div>
+                <div style="font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:.02em;">HFD</div>
+              </div>
+              <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Hartford Athletic FC</div>
+                <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:10px;">USL Championship &bull; Trinity Health Stadium, Hartford CT &bull; Est. 2018</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                  <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 14px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:800;color:#fff;">14W&nbsp;8D&nbsp;10L</div>
+                    <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">2026 Record</div>
+                  </div>
+                  <div style="background:rgba(245,168,0,.1);border:1px solid rgba(245,168,0,.2);border-radius:8px;padding:8px 14px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:800;color:#F5A800;">50 pts</div>
+                    <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">Points</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 14px;text-align:center;">
+                    <div style="font-size:1rem;font-weight:800;color:#fff;">48&ndash;39</div>
+                    <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">Goals F/A</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:0 22px 18px;">
+              <div style="font-size:.78rem;color:rgba(255,255,255,.4);line-height:1.65;">Connecticut's only professional club. Plays in USL Championship (Division II). Harry Watling is head coach. Home games at Trinity Health Stadium (cap. 5,500), Hartford.</div>
+            </div>
+          </div>
+
+          <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+            <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);">
+              <div style="font-size:.9rem;font-weight:800;color:#fff;">Upcoming Matches</div>
+            </div>
+            <div style="padding:12px 14px;display:flex;flex-direction:column;gap:7px;" id="overview-upcoming"></div>
+            <div style="padding:0 14px 14px;">
+              <a onclick="showSection('matches')" class="btn-outline-sm" style="width:100%;justify-content:center;display:flex;">View All Matches</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- League tiers -->
+        <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;padding:22px;">
+          <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:16px;">Connecticut Soccer Ecosystem</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.18);border-radius:12px;padding:14px;">
+              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#F5A800;margin-bottom:6px;">Professional</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">USL Championship</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Div II of US soccer</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">1 CT club</div>
+            </div>
+            <div style="background:rgba(43,124,233,.08);border:1px solid rgba(43,124,233,.18);border-radius:12px;padding:14px;">
+              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:6px;">Semi-Pro</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">NISA</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">National Independent</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">1 CT club</div>
+            </div>
+            <div style="background:rgba(139,164,188,.07);border:1px solid rgba(139,164,188,.15);border-radius:12px;padding:14px;">
+              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--silver-lt);margin-bottom:6px;">Amateur/Semi-Pro</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">NPSL</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">National Premier</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">3 CT clubs</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;">
+              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;">Amateur</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">CT State League</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Statewide divisions</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">5 CT clubs</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CLUBS ===== -->
+      <section id="section-clubs" style="display:none;" class="fade-in">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:1.2rem;font-weight:800;letter-spacing:-.03em;color:#fff;">CT Club Directory <span id="club-count-lbl" style="font-size:.85rem;font-weight:600;color:var(--muted);"></span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="position:relative;">
+              <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="club-search" type="search" placeholder="Search..." style="padding-left:33px;width:170px;" oninput="filterClubs()">
+            </div>
+            <select id="tier-filter" onchange="filterClubs()" style="width:150px;">
+              <option value="">All Tiers</option>
+              <option value="Professional">Professional</option>
+              <option value="Semi-Professional">Semi-Pro</option>
+              <option value="Amateur / Semi-Pro">Amateur/Semi-Pro</option>
+              <option value="Amateur">Amateur</option>
+              <option value="Youth">Youth</option>
+            </select>
+          </div>
+        </div>
+        <div id="clubs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+        <div id="clubs-empty" style="display:none;text-align:center;padding:56px 20px;color:var(--muted);">
+          <div style="font-size:1.5rem;margin-bottom:10px;font-weight:800;">No clubs match</div>
+          <div style="font-size:.85rem;">Try adjusting your search or filter</div>
+        </div>
+      </section>
+
+      <!-- ===== STANDINGS ===== -->
+      <section id="section-standings" style="display:none;" class="fade-in">
+        <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;" id="standings-tabs">
+          <button class="tab-btn active" onclick="showStandings('usl',this)">USL Championship</button>
+          <button class="tab-btn" onclick="showStandings('nisa',this)">NISA</button>
+          <button class="tab-btn" onclick="showStandings('npsl',this)">NPSL</button>
+          <button class="tab-btn" onclick="showStandings('ct',this)">CT State League</button>
+          <button class="tab-btn" onclick="showStandings('youth',this)">Youth Clubs</button>
+        </div>
+        <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+          <div id="standings-header" style="display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 68px;gap:8px;padding:11px 20px;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.26);border-bottom:1px solid var(--border);">
+            <div>#</div><div>Club</div><div style="text-align:center;">W</div><div style="text-align:center;">D</div><div style="text-align:center;">L</div><div style="text-align:center;">GD</div><div style="text-align:right;">Pts</div>
+          </div>
+          <div id="standings-body"></div>
+        </div>
+        <div style="margin-top:16px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
+          <div style="font-size:.75rem;color:rgba(255,255,255,.3);line-height:1.8;"><span style="color:rgba(255,255,255,.55);font-weight:600;">Note:</span> Standings reflect current 2026 season data. Hartford Athletic competes in USL Championship East. Connecticut clubs in NPSL and CT State League compete in Northeast regional conferences. Click any club to view full details.</div>
+        </div>
+      </section>
+
+      <!-- ===== MATCHES ===== -->
+      <section id="section-matches" style="display:none;" class="fade-in">
+        <div style="display:flex;gap:8px;margin-bottom:18px;">
+          <button class="tab-btn active" id="mtab-upcoming" onclick="showMatches('upcoming',this)">Upcoming</button>
+          <button class="tab-btn" id="mtab-results" onclick="showMatches('results',this)">Recent Results</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;" id="matches-list"></div>
+      </section>
+
+      <!-- ===== FULL DIRECTORY ===== -->
+      <section id="section-directory" style="display:none;" class="fade-in">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:1.05rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CJSA Club Directory</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:3px;">All 163 Connecticut Junior Soccer Association member clubs</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="position:relative;">
+              <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="dir-search" type="search" placeholder="Search by name or city..." style="padding-left:33px;width:240px;" oninput="filterDirectory()">
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1fr 160px 1fr auto;gap:12px;padding:11px 20px;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.26);border-bottom:1px solid var(--border);">
+            <div>Club Name</div><div>City</div><div>Website</div><div></div>
+          </div>
+          <div id="dir-body"></div>
+        </div>
+        <div style="margin-top:12px;font-size:.75rem;color:rgba(255,255,255,.25);text-align:center;">Source: Connecticut Junior Soccer Association (cjsa.org). Clubs marked with a star have full profiles on this platform.</div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="clubs-data.js"></script>
+  <script src="cjsa-directory.js"></script>
+  <script>
+    const ALL_UPCOMING = [
+      { home:'Hartford Athletic',  away:'FC Tulsa',           date:'Aug 16',  time:'7:30 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Hartford Athletic',  away:'Sacramento Republic',date:'Aug 23',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Danbury FC',         away:'Miami FC',           date:'Aug 18',  time:'7:00 PM', venue:'Danbury High School Stadium', league:'NISA', leagueShort:'NISA', homeId:'danbury-fc' },
+      { home:'New Haven FC',       away:'Ocean State FC',     date:'Aug 16',  time:'6:00 PM', venue:'Hamden Memorial Field', league:'NPSL', leagueShort:'NPSL', homeId:'new-haven-fc' },
+      { home:'Westport FC',        away:'Stamford AFC',       date:'Aug 17',  time:'4:00 PM', venue:'Wakeman Fields', league:'CT State', leagueShort:'CT', homeId:'westport-fc' },
+      { home:'Glastonbury FC',     away:'Norwich City CT',    date:'Aug 18',  time:'6:00 PM', venue:'Addison Park', league:'CT State', leagueShort:'CT', homeId:'glastonbury-fc' },
+      { home:'Greenwich FC',       away:'Norwalk United',     date:'Aug 17',  time:'3:00 PM', venue:'Greenwich HS Field', league:'CT State', leagueShort:'CT', homeId:'greenwich-fc' },
+      { home:'Hartford Wanderers', away:'Greenwich FC',       date:'Aug 19',  time:'6:00 PM', venue:'Colt Park', league:'CT State', leagueShort:'CT', homeId:'hartford-wanderers' },
+      { home:'Hartford Athletic',  away:'New Mexico United',  date:'Aug 30',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Danbury FC',         away:'Chicago House AC',   date:'Aug 25',  time:'8:00 PM', venue:'Danbury HS Stadium', league:'NISA', leagueShort:'NISA', homeId:'danbury-fc' },
+    ];
+
+    const ALL_RESULTS = [
+      { home:'Hartford Athletic',   homeScore:2, away:'Louisville City FC',   awayScore:1, date:'Aug 10', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Pittsburgh Riverhounds',homeScore:0, away:'Hartford Athletic', awayScore:0, date:'Aug 3',  venue:'Highmark Stadium',       league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Danbury FC',           homeScore:4, away:'California FC',       awayScore:0, date:'Aug 4',  venue:'Danbury HS Stadium',     league:'NISA',            leagueShort:'NISA', homeId:'danbury-fc' },
+      { home:'Miami FC',             homeScore:0, away:'Danbury FC',          awayScore:1, date:'Aug 11', venue:'Riccardo Silva Stadium', league:'NISA',            leagueShort:'NISA', homeId:'danbury-fc' },
+      { home:'Boston City FC',       homeScore:1, away:'New Haven FC',        awayScore:2, date:'Aug 9',  venue:'Gill Stadium',           league:'NPSL',            leagueShort:'NPSL', homeId:'new-haven-fc' },
+      { home:'Greenwich FC',         homeScore:0, away:'Westport FC',         awayScore:2, date:'Aug 10', venue:'Greenwich HS Field',     league:'CT State',        leagueShort:'CT', homeId:'greenwich-fc' },
+      { home:'Waterbury Wolves',     homeScore:1, away:'Hartford Wanderers',  awayScore:0, date:'Aug 11', venue:'Municipal Stadium',      league:'CT State',        leagueShort:'CT', homeId:'waterbury-wolves' },
+      { home:'Glastonbury FC',       homeScore:2, away:'Waterbury Wolves',    awayScore:2, date:'Aug 4',  venue:'Addison Park',           league:'CT State',        leagueShort:'CT', homeId:'glastonbury-fc' },
+    ];
+
+    function leaguePill(short) {
+      const map = {
+        'USL-C': 'background:rgba(245,168,0,.14);color:#F5A800;border:1px solid rgba(245,168,0,.25);',
+        'NISA':  'background:rgba(43,124,233,.14);color:#5BA3FF;border:1px solid rgba(43,124,233,.25);',
+        'NPSL':  'background:rgba(139,164,188,.12);color:#C8D8E8;border:1px solid rgba(139,164,188,.22);',
+        'CT':    'background:rgba(255,255,255,.07);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.12);',
+      };
+      return `<span style="${map[short]||map['CT']}font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:5px;">${short}</span>`;
+    }
+
+    function clubAvatar(c, size=34) {
+      return `<div style="width:${size}px;height:${size}px;border-radius:${Math.round(size*.22)}px;background:${c.primary}22;border:1.5px solid ${c.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${size*.22}px;font-weight:800;color:${c.primary};letter-spacing:.03em;">${c.abbr}</div>`;
+    }
+
+    function renderOverviewUpcoming() {
+      const el = document.getElementById('overview-upcoming');
+      el.innerHTML = ALL_UPCOMING.slice(0,4).map(m=>`
+        <a href="club.html?id=${m.homeId}" class="match-row" style="text-decoration:none;">
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:.8rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.home} <span style="color:var(--muted);font-weight:500;">vs</span> ${m.away}</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.28);margin-top:2px;">${m.date} &middot; ${m.time}</div>
+          </div>
+          <div style="margin-left:8px;flex-shrink:0;">${leaguePill(m.leagueShort)}</div>
+        </a>
+      `).join('');
+    }
+
+    function renderClubs(list) {
+      const grid  = document.getElementById('clubs-grid');
+      const empty = document.getElementById('clubs-empty');
+      document.getElementById('club-count-lbl').textContent = `(${list.length})`;
+      if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+      empty.style.display='none';
+      grid.innerHTML = list.map(c=>{
+        const isYouth = c.type === 'youth';
+        const statsHtml = isYouth
+          ? `<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;grid-column:1/-1;">
+               <div style="font-size:.78rem;font-weight:700;color:#5CDD8B;">${(c.ageGroups||[]).join(' &middot; ')}</div>
+               <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">Age Groups</div>
+             </div>`
+          : `<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
+               <div style="font-size:.88rem;font-weight:800;color:#fff;">${c.wins}W-${c.draws}D-${c.losses}L</div>
+               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Record</div>
+             </div>
+             <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
+               <div style="font-size:.88rem;font-weight:800;color:#fff;">${clubPts(c)}</div>
+               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Points</div>
+             </div>
+             <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
+               <div style="font-size:.88rem;font-weight:800;color:${clubGD(c)>=0?'#5BA3FF':'#ff7070'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
+               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">GD</div>
+             </div>`;
+        return `<a class="club-card" href="club.html?id=${c.id}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px;">
+            <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+              ${clubAvatar(c,46)}
+              <div style="min-width:0;">
+                <div style="font-size:.92rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+                <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; Est. ${c.founded}</div>
+              </div>
+            </div>
+            ${tierBadgeHtml(c.tier)}
+          </div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:12px;">${c.leagueShort} &bull; ${c.stadium}</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;">${statsHtml}</div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.28);">${isYouth?'Youth Club':'Coach: '+c.coach} &nbsp;&bull;&nbsp; Est. ${c.founded}</div>
+        </a>`;
+      }).join('');
+    }
+
+    function filterClubs() {
+      const q  = (document.getElementById('club-search').value||'').toLowerCase();
+      const t  = document.getElementById('tier-filter').value;
+      renderClubs(ALL_CLUBS.filter(c=>{
+        if (q && !c.name.toLowerCase().includes(q) && !c.city.toLowerCase().includes(q) && !c.league.toLowerCase().includes(q)) return false;
+        if (t && c.tier !== t) return false;
+        return true;
+      }));
+    }
+
+    function showStandings(league, btn) {
+      document.querySelectorAll('#standings-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+
+      if (league === 'youth') {
+        document.getElementById('standings-header').style.display = 'none';
+        document.getElementById('standings-body').innerHTML = CT_YOUTH_CLUBS.map(c=>`
+          <a class="data-row" href="club.html?id=${c.id}" style="text-decoration:none;padding:14px 20px;cursor:pointer;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              ${clubAvatar(c,32)}
+              <div>
+                <div style="font-weight:700;color:#fff;font-size:.875rem;">${c.name}</div>
+                <div style="font-size:.68rem;color:var(--muted);">${c.city} &middot; Est. ${c.founded} &middot; ${(c.ageGroups||[]).slice(0,4).join(', ')}${(c.ageGroups||[]).length>4?'...':''}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span style="background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.25);font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:6px;">${c.leagueShort}</span>
+            </div>
+          </a>
+        `).join('') || '<div style="padding:32px;text-align:center;color:var(--muted);">No youth clubs found.</div>';
+        return;
+      }
+
+      document.getElementById('standings-header').style.display = '';
+      const tierMap = {
+        usl:  ['Professional'],
+        nisa: ['Semi-Professional'],
+        npsl: ['Amateur / Semi-Pro'],
+        ct:   ['Amateur'],
+      };
+      const tiers = tierMap[league] || ['Amateur'];
+      const sorted = CT_CLUBS.filter(c=>tiers.includes(c.tier)).sort((a,b)=>(clubPts(b)-clubPts(a))||(clubGD(b)-clubGD(a)));
+      document.getElementById('standings-body').innerHTML = sorted.map((c,i)=>`
+        <a class="data-row" href="club.html?id=${c.id}" style="text-decoration:none;padding:13px 20px;cursor:pointer;">
+          <div style="font-weight:800;color:${i<2?'var(--accent-lt)':'var(--muted)'};">${i+1}</div>
+          <div style="display:flex;align-items:center;gap:9px;">${clubAvatar(c,32)}<div><div style="font-weight:700;color:#fff;font-size:.875rem;">${c.name}</div><div style="font-size:.68rem;color:var(--muted);">${c.city}</div></div></div>
+          <div style="text-align:center;font-weight:600;color:rgba(255,255,255,.75);">${c.wins}</div>
+          <div style="text-align:center;font-weight:600;color:rgba(255,255,255,.75);">${c.draws}</div>
+          <div style="text-align:center;font-weight:600;color:rgba(255,255,255,.75);">${c.losses}</div>
+          <div style="text-align:center;font-weight:600;color:${clubGD(c)>0?'#5CDD8B':clubGD(c)<0?'#ff7070':'var(--muted)'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
+          <div style="text-align:right;font-weight:800;font-size:.95rem;color:${i===0?'var(--accent-lt)':'#fff'};">${clubPts(c)}</div>
+        </a>
+      `).join('') || `<div style="padding:32px;text-align:center;color:var(--muted);font-size:.875rem;">No clubs in this league yet.</div>`;
+    }
+
+    function showMatches(type, btn) {
+      document.getElementById('mtab-upcoming').classList.toggle('active', type==='upcoming');
+      document.getElementById('mtab-results').classList.toggle('active', type==='results');
+      const list = type==='upcoming' ? ALL_UPCOMING : ALL_RESULTS;
+      const el   = document.getElementById('matches-list');
+      if (type==='upcoming') {
+        el.innerHTML = list.map(m=>`
+          <a href="club.html?id=${m.homeId}" class="match-row" style="padding:16px 20px;text-decoration:none;">
+            <div style="flex:1;">
+              <div style="margin-bottom:5px;">${leaguePill(m.leagueShort)}</div>
+              <div style="font-size:.92rem;font-weight:700;color:#fff;">${m.home} <span style="color:var(--muted);font-weight:500;">vs</span> ${m.away}</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.28);margin-top:3px;">${m.date}, 2026 &middot; ${m.time} &middot; ${m.venue}</div>
+            </div>
+            <span style="background:rgba(43,124,233,.12);border:1px solid rgba(43,124,233,.22);color:var(--accent-lt);border-radius:7px;font-size:.65rem;font-weight:700;padding:5px 11px;white-space:nowrap;flex-shrink:0;margin-left:12px;">Upcoming</span>
+          </a>
+        `).join('');
+      } else {
+        el.innerHTML = list.map(m=>{
+          const hWon = m.homeScore > m.awayScore;
+          const aWon = m.awayScore > m.homeScore;
+          return `
+          <a href="club.html?id=${m.homeId}" class="match-row" style="padding:16px 20px;text-decoration:none;">
+            <div style="flex:1;">
+              <div style="margin-bottom:5px;">${leaguePill(m.leagueShort)}</div>
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:.92rem;font-weight:${hWon?800:500};color:${hWon?'#fff':'rgba(255,255,255,.55)'};">${m.home}</span>
+                <div style="background:rgba(255,255,255,.07);border-radius:7px;padding:5px 14px;font-size:1.05rem;font-weight:800;color:var(--accent-lt);letter-spacing:.02em;flex-shrink:0;">${m.homeScore}&ndash;${m.awayScore}</div>
+                <span style="font-size:.92rem;font-weight:${aWon?800:500};color:${aWon?'#fff':'rgba(255,255,255,.55)'};">${m.away}</span>
+              </div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.28);margin-top:3px;">${m.date}, 2026 &middot; ${m.venue}</div>
+            </div>
+          </a>`;
+        }).join('');
+      }
+    }
+
+    function showSection(name) {
+      ['overview','clubs','standings','matches','directory'].forEach(s=>{
+        const el = document.getElementById('section-'+s);
+        if (el) { el.style.display = s===name ? '' : 'none'; if(s===name){el.classList.remove('fade-in');void el.offsetWidth;el.classList.add('fade-in');} }
+      });
+      ['overview','clubs','standings','matches','directory'].forEach(s=>{
+        const nav = document.getElementById('nav-'+s);
+        if (nav) nav.classList.toggle('active', s===name);
+      });
+      const titles = { overview:'Overview', clubs:'Club Directory', standings:'League Standings', matches:'Matches', directory:'Full CJSA Directory' };
+      document.getElementById('topbar-title').textContent = titles[name]||name;
+      if (name==='standings')  showStandings('usl', document.querySelector('#standings-tabs .tab-btn'));
+      if (name==='matches')    showMatches('upcoming', null);
+      if (name==='clubs')      filterClubs();
+      if (name==='directory')  filterDirectory();
+    }
+
+    function filterDirectory() {
+      const q = (document.getElementById('dir-search')?.value||'').toLowerCase();
+      if (typeof CJSA_DIRECTORY === 'undefined') return;
+      const list = q ? CJSA_DIRECTORY.filter(c=>c.name.toLowerCase().includes(q)||c.city.toLowerCase().includes(q)) : CJSA_DIRECTORY;
+      const el = document.getElementById('dir-body');
+      if (!el) return;
+      el.innerHTML = list.map(c=>{
+        const hasProfile = !!c.edpClubId;
+        return `<div style="display:grid;grid-template-columns:1fr 160px 1fr auto;gap:12px;align-items:center;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:.855rem;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+          <div style="font-weight:700;color:#fff;">${c.name}${hasProfile?'<span title="Full profile available" style="margin-left:6px;font-size:.65rem;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Profile</span>':''}</div>
+          <div style="color:var(--muted);font-size:.8rem;">${c.city}, CT</div>
+          <div><a href="${c.website}" target="_blank" rel="noopener" style="color:var(--accent-lt);text-decoration:none;font-size:.78rem;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${c.website.replace('https://','').replace('http://','').replace(/\/$/,'')}</a></div>
+          <div>${hasProfile?`<a href="club.html?id=${c.edpClubId}" style="font-size:.75rem;font-weight:700;color:var(--accent-lt);text-decoration:none;padding:5px 10px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);border-radius:7px;">View &rarr;</a>`:`<a href="${c.website}" target="_blank" rel="noopener" style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.4);text-decoration:none;padding:5px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:7px;">Website &rarr;</a>`}</div>
+        </div>`;
+      }).join('') || '<div style="padding:32px;text-align:center;color:var(--muted);">No clubs match your search.</div>';
+    }
+
+    function handleGlobalSearch(val) {
+      if (!val.trim()) return;
+      showSection('clubs');
+      document.getElementById('club-search').value = val;
+      filterClubs();
+    }
+
+    // Load user info
+    (function() {
+      try {
+        const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+        if (u.firstName) {
+          document.getElementById('user-name').textContent = u.firstName + ' ' + u.lastName;
+          document.getElementById('user-role').textContent = u.role ? (u.role[0].toUpperCase()+u.role.slice(1)) : 'Member';
+          document.getElementById('user-avatar').textContent = (u.firstName[0]+(u.lastName||'')[0]).toUpperCase();
+          document.getElementById('welcome-text').textContent = 'Welcome back, ' + u.firstName + '!';
+        }
+      } catch(e){}
+    })();
+
+    // Init
+    renderOverviewUpcoming();
+    renderClubs(CT_CLUBS);
+  </script>
+</body>
+</html>

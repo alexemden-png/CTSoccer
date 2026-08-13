@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club &mdash; CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    .tab-btn{padding:9px 20px;border-radius:9px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
+    .tab-btn.active{background:var(--accent);color:#fff;}
+    .tab-btn:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);}
+    .tab-btn:not(.active):hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
+    .result-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:10px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .2s,transform .2s cubic-bezier(.16,1,.3,1);}
+    .btn-primary:hover{opacity:.85;transform:translateY(-1px);}
+    .btn-outline{display:inline-flex;align-items:center;gap:7px;background:transparent;color:rgba(255,255,255,.7);font-weight:600;font-size:.9rem;padding:10px 20px;border-radius:10px;text-decoration:none;border:1.5px solid rgba(255,255,255,.18);cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:border-color .2s,color .2s;}
+    .btn-outline:hover{border-color:rgba(255,255,255,.5);color:#fff;}
+    .btn-followed{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1.5px solid rgba(255,255,255,.12);}
+    .modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{animation:fadeIn .35s cubic-bezier(.16,1,.3,1) both;}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:20px;">
+    <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span id="nav-club-name" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</span>
+    <div style="flex:1;"></div>
+    <a href="account.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">My Account</a>
+  </nav>
+
+  <div id="page-content"></div>
+
+  <script src="clubs-data.js"></script>
+  <script>
+    const params  = new URLSearchParams(location.search);
+    const clubId  = params.get('id');
+    const club    = clubId ? getClubById(clubId) : null;
+
+    if (!club) {
+      document.getElementById('page-content').innerHTML = `
+        <div style="max-width:600px;margin:120px auto;text-align:center;padding:0 24px;">
+          <div style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:12px;">Club not found</div>
+          <div style="color:var(--muted);margin-bottom:28px;">The club you're looking for doesn't exist or the link is incorrect.</div>
+          <a href="dashboard.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:700;padding:11px 22px;border-radius:10px;text-decoration:none;">Back to Dashboard</a>
+        </div>`;
+    } else {
+      document.title = club.name + ' — CT Soccer';
+      document.getElementById('nav-club-name').textContent = club.name;
+
+      let followed = false;
+      try {
+        const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+        followed = (u.followedClubs||[]).includes(club.id);
+      } catch(e) {}
+
+      function toggleFollow() {
+        try {
+          const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+          if (!u.followedClubs) u.followedClubs = [];
+          if (followed) {
+            u.followedClubs = u.followedClubs.filter(x=>x!==club.id);
+            followed = false;
+          } else {
+            u.followedClubs.push(club.id);
+            followed = true;
+          }
+          localStorage.setItem('ct_user', JSON.stringify(u));
+          updateFollowBtn();
+        } catch(e){}
+      }
+
+      function updateFollowBtn() {
+        const btn = document.getElementById('follow-btn');
+        if (!btn) return;
+        if (followed) {
+          btn.textContent = 'Following ✔';
+          btn.className = 'btn-outline btn-followed';
+        } else {
+          btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Follow Club';
+          btn.className = 'btn-outline';
+        }
+      }
+
+      function resultDot(r) {
+        const col = r==='W'?'#5CDD8B':r==='L'?'#ff7070':'#F5A800';
+        return `<span class="result-dot" style="background:${col};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;"></span>`;
+      }
+
+      let activeTab = 'overview';
+      function showTab(name) {
+        activeTab = name;
+        ['overview','roster','results','schedule','tryouts'].forEach(t=>{
+          const el = document.getElementById('tab-'+t);
+          const btn = document.getElementById('tabBtn-'+t);
+          if (el) { el.style.display = t===name?'':'none'; if(t===name){el.classList.remove('fade-in');void el.offsetWidth;el.classList.add('fade-in');} }
+          if (btn) btn.classList.toggle('active', t===name);
+        });
+      }
+
+      function openContactModal() {
+        document.getElementById('contact-modal').style.display='flex';
+      }
+      function closeContactModal() {
+        document.getElementById('contact-modal').style.display='none';
+      }
+      document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeContactModal(); });
+
+      const ptsLabel = clubPts(club);
+      const gdLabel  = (clubGD(club)>0?'+':'')+clubGD(club);
+
+      document.getElementById('page-content').innerHTML = `
+        <!-- HERO -->
+        <div style="background:linear-gradient(180deg,${club.primary}44 0%,${club.primary}11 60%,transparent 100%);border-bottom:1px solid var(--border);padding:36px 0 0;">
+          <div style="max-width:1100px;margin:0 auto;padding:0 32px;">
+            <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:28px;flex-wrap:wrap;">
+              <div style="width:88px;height:88px;border-radius:20px;background:${club.primary}22;border:2.5px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;">
+                <div style="font-size:.58rem;font-weight:700;letter-spacing:.08em;color:${club.secondary};opacity:.8;">${club.leagueShort}</div>
+                <div style="font-size:1.5rem;font-weight:900;color:${club.primary};letter-spacing:.03em;">${club.abbr}</div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+                  <h1 style="margin:0;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;letter-spacing:-.035em;color:#fff;">${club.name}</h1>
+                  ${tierBadgeHtml(club.tier)}
+                </div>
+                <div style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:14px;">${club.league} &bull; ${club.city}, CT &bull; Founded ${club.founded} &bull; ${club.stadium}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button id="follow-btn" class="${followed?'btn-outline btn-followed':'btn-outline'}" onclick="toggleFollow()" style="font-size:.82rem;padding:8px 16px;">
+                    ${followed ? 'Following &#10004;' : '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Follow Club'}
+                  </button>
+                  <a href="account.html?action=join&club=${club.id}" class="btn-primary" style="font-size:.82rem;padding:8px 16px;">+ Join as Player</a>
+                  <button class="btn-outline" onclick="openContactModal()" style="font-size:.82rem;padding:8px 16px;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    Contact Club
+                  </button>
+                  ${club.website ? `<a href="https://${club.website}" target="_blank" rel="noopener" class="btn-outline" style="font-size:.82rem;padding:8px 16px;">Website &rarr;</a>` : ''}
+                </div>
+              </div>
+              <!-- Season stats -->
+              <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
+                <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:#fff;">${club.wins}</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">Wins</div>
+                </div>
+                <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:#fff;">${club.draws}</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">Draws</div>
+                </div>
+                <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:#fff;">${club.losses}</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">Losses</div>
+                </div>
+                <div style="background:rgba(${club.primary.replace('#','').match(/../g).map(h=>parseInt(h,16)).join(',')},0.2);border:1px solid ${club.primary}44;border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:${club.secondary||'#fff'};">${ptsLabel}</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">Pts</div>
+                </div>
+                <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:${clubGD(club)>=0?'#5CDD8B':'#ff7070'};">${gdLabel}</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">GD</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div style="display:flex;gap:4px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap;">
+              ${['overview','roster','results','schedule','tryouts'].map(t=>`
+                <button id="tabBtn-${t}" class="tab-btn${t==='overview'?' active':''}" onclick="showTab('${t}')" style="border-radius:8px 8px 0 0;padding:9px 18px;">${t[0].toUpperCase()+t.slice(1)}</button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT -->
+        <div style="max-width:1100px;margin:0 auto;padding:28px 32px;">
+
+          <!-- OVERVIEW -->
+          <div id="tab-overview" class="fade-in">
+            <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;">
+              <div>
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:10px;">About ${club.name}</div>
+                  <p style="font-size:.875rem;line-height:1.75;color:rgba(255,255,255,.55);margin:0 0 14px;">${club.description}</p>
+                  <p style="font-size:.875rem;line-height:1.75;color:rgba(255,255,255,.45);margin:0;">${club.about||''}</p>
+                </div>
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+                  <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+                    <div style="font-size:.82rem;font-weight:800;color:#fff;">Recent Results</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;">
+                    ${(club.recentResults||[]).map(r=>`
+                      <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+                        <span style="width:24px;height:24px;border-radius:6px;background:${r.result==='W'?'rgba(92,221,139,.15)':r.result==='L'?'rgba(255,112,112,.15)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.3)':r.result==='L'?'rgba(255,112,112,.3)':'rgba(245,168,0,.25)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.68rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
+                        <div style="flex:1;min-width:0;">
+                          <div style="font-size:.85rem;font-weight:700;color:#fff;">${r.home===false ? r.opponent : club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.home===false ? club.name : r.opponent}</div>
+                          <div style="font-size:.7rem;color:rgba(255,255,255,.28);margin-top:2px;">${r.date}</div>
+                        </div>
+                        <div style="font-size:1rem;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:.02em;flex-shrink:0;">${r.score}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:14px;">Club Info</div>
+                  <div style="display:flex;flex-direction:column;gap:11px;">
+                    ${[
+                      ['Founded', club.founded],
+                      ['First Season', club.firstSeason],
+                      ['League', club.league],
+                      ['Stadium', club.stadium],
+                      ['Capacity', club.capacity.toLocaleString()],
+                      ['Head Coach', club.coach],
+                      ['Colors', club.colorName],
+                      ['City', club.city + ', CT'],
+                    ].map(([k,v])=>`
+                      <div style="display:flex;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.04);">
+                        <div style="font-size:.75rem;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">${k}</div>
+                        <div style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.8);text-align:right;">${v}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:12px;">Colors</div>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <div style="width:36px;height:36px;border-radius:8px;background:${club.primary};border:2px solid rgba(255,255,255,.12);"></div>
+                    <div style="width:36px;height:36px;border-radius:8px;background:${club.secondary};border:2px solid rgba(255,255,255,.12);"></div>
+                    <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-left:4px;">${club.colorName}</div>
+                  </div>
+                </div>
+
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:12px;">Stadium</div>
+                  <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${club.stadium}</div>
+                  <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:4px;line-height:1.55;">${club.stadiumAddress}</div>
+                  <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:6px;">Capacity: ${club.capacity.toLocaleString()}</div>
+                  <a href="https://maps.google.com/?q=${encodeURIComponent(club.stadiumAddress)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:var(--accent-lt);text-decoration:none;margin-top:10px;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    View on Maps
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROSTER -->
+          <div id="tab-roster" style="display:none;" class="fade-in">
+            <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+              <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:.9rem;font-weight:800;color:#fff;">Current Roster</div>
+                <a href="account.html?action=join&club=${club.id}" class="btn-primary" style="font-size:.78rem;padding:7px 14px;">+ Join this Club</a>
+              </div>
+              <div style="display:grid;grid-template-columns:48px 1fr 80px 100px;gap:0;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.26);padding:10px 22px;border-bottom:1px solid rgba(255,255,255,.05);">
+                <div>#</div><div>Player</div><div>POS</div><div>Nationality</div>
+              </div>
+              ${(club.roster||[]).map((p,i)=>`
+                <div style="display:grid;grid-template-columns:48px 1fr 80px 100px;gap:0;align-items:center;padding:13px 22px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+                  <div style="font-size:.9rem;font-weight:800;color:rgba(255,255,255,.4);">${p.number}</div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:32px;height:32px;border-radius:50%;background:${club.primary}22;border:1.5px solid ${club.primary}44;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:${club.primary};flex-shrink:0;">${p.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+                    <div style="font-size:.875rem;font-weight:700;color:#fff;">${p.name}</div>
+                  </div>
+                  <div style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.5);">
+                    <span style="background:rgba(255,255,255,.07);border-radius:5px;padding:3px 8px;">${p.pos}</span>
+                  </div>
+                  <div style="font-size:.78rem;color:rgba(255,255,255,.45);">${p.nationality}</div>
+                </div>
+              `).join('')}
+              <div style="padding:14px 22px;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06);">
+                <div style="font-size:.76rem;color:rgba(255,255,255,.3);">Showing key players. Full roster available to registered members. <a href="account.html" style="color:var(--accent-lt);text-decoration:none;font-weight:600;">Sign in</a> to view complete roster.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESULTS -->
+          <div id="tab-results" style="display:none;" class="fade-in">
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              ${(club.recentResults||[]).map(r=>`
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.15)'" onmouseout="this.style.borderColor='rgba(255,255,255,.07)'">
+                  <span style="width:32px;height:32px;border-radius:8px;background:${r.result==='W'?'rgba(92,221,139,.14)':r.result==='L'?'rgba(255,112,112,.14)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.28)':r.result==='L'?'rgba(255,112,112,.28)':'rgba(245,168,0,.22)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:.9rem;font-weight:700;color:#fff;">${club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.opponent}</div>
+                    <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${r.date} &middot; ${r.home===false?'Away':'Home'}</div>
+                  </div>
+                  <div style="font-size:1.3rem;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.02em;flex-shrink:0;background:rgba(255,255,255,.06);border-radius:8px;padding:6px 16px;">${r.score}</div>
+                </div>
+              `).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);">No results available yet.</div>'}
+            </div>
+          </div>
+
+          <!-- SCHEDULE -->
+          <div id="tab-schedule" style="display:none;" class="fade-in">
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              ${(club.upcoming||[]).map(m=>`
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(43,124,233,.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,.07)'">
+                  <div style="width:46px;height:46px;border-radius:10px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="font-size:.6rem;font-weight:700;color:var(--accent-lt);letter-spacing:.04em;">${m.date.split(' ')[0].toUpperCase()}</div>
+                    <div style="font-size:1rem;font-weight:800;color:#fff;line-height:1;">${m.date.split(' ')[1]}</div>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:.88rem;font-weight:700;color:#fff;">${club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${m.opponent}</div>
+                    <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${m.home===false?'Away at':'Home'} &middot; ${m.time}</div>
+                  </div>
+                  <span style="background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);color:var(--accent-lt);border-radius:7px;font-size:.65rem;font-weight:700;padding:5px 11px;white-space:nowrap;flex-shrink:0;">${m.home===false?'Away':'Home'}</span>
+                </div>
+              `).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);">No upcoming matches scheduled.</div>'}
+            </div>
+          </div>
+
+          <!-- TRYOUTS -->
+          <div id="tab-tryouts" style="display:none;" class="fade-in">
+            <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;">
+              <div>
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:4px;">Tryout Information</div>
+                  <div style="font-size:.75rem;color:rgba(255,255,255,.3);margin-bottom:16px;">${club.league}</div>
+                  ${club.tryoutsNote ? `
+                    <div style="background:rgba(43,124,233,.07);border:1px solid rgba(43,124,233,.18);border-radius:10px;padding:16px;margin-bottom:16px;">
+                      <div style="font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.75);">${club.tryoutsNote}</div>
+                    </div>` : `
+                    <div style="padding:32px;text-align:center;color:var(--muted);">
+                      <div style="font-size:.875rem;margin-bottom:10px;">Tryout details not yet listed.</div>
+                      <div style="font-size:.8rem;">Contact the club directly for current tryout schedule.</div>
+                    </div>`}
+                  ${club.tryoutsUrl ? `
+                    <a href="${club.tryoutsUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:700;font-size:.875rem;padding:11px 22px;border-radius:10px;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                      Register / View Tryouts &rarr;
+                    </a>` : ''}
+                </div>
+
+                ${(club.tournaments||[]).length ? `
+                  <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:24px;">
+                    <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:14px;">Tournaments & Events</div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                      ${club.tournaments.map(t=>`
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                          <div style="width:8px;height:8px;border-radius:50%;background:var(--accent-lt);flex-shrink:0;"></div>
+                          <div style="font-size:.85rem;font-weight:600;color:rgba(255,255,255,.8);">${t}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>` : ''}
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:14px;">Age Groups</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    ${(club.ageGroups||[]).map(ag=>`
+                      <span style="background:rgba(92,221,139,.1);border:1px solid rgba(92,221,139,.22);color:#5CDD8B;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">${ag}</span>
+                    `).join('') || '<div style="font-size:.82rem;color:var(--muted);">Contact club for age group details.</div>'}
+                  </div>
+                </div>
+
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+                  <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:14px;">Contact for Tryouts</div>
+                  ${club.contactEmail ? `
+                    <a href="mailto:${club.contactEmail}" style="display:flex;align-items:center;gap:9px;padding:11px 14px;background:rgba(43,124,233,.08);border:1px solid rgba(43,124,233,.2);border-radius:10px;text-decoration:none;margin-bottom:8px;transition:background .2s;" onmouseover="this.style.background='rgba(43,124,233,.15)'" onmouseout="this.style.background='rgba(43,124,233,.08)'">
+                      <svg width="14" height="14" fill="none" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <div>
+                        <div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em;">Email</div>
+                        <div style="font-size:.82rem;font-weight:700;color:var(--accent-lt);">${club.contactEmail}</div>
+                      </div>
+                    </a>` : ''}
+                  ${club.contactPhone ? `
+                    <a href="tel:${club.contactPhone.replace(/\D/g,'')}" style="display:flex;align-items:center;gap:9px;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;text-decoration:none;margin-bottom:8px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+                      <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.55 3.18 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5a16 16 0 0 0 6.59 6.59l1.06-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <div>
+                        <div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em;">Phone</div>
+                        <div style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.8);">${club.contactPhone}</div>
+                      </div>
+                    </a>` : ''}
+                  ${club.contactUrl ? `
+                    <a href="${club.contactUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:9px;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+                      <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                      <div>
+                        <div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em;">Website</div>
+                        <div style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.8);">${club.website||club.contactUrl.replace('https://','').replace('http://','')}</div>
+                      </div>
+                    </a>` : ''}
+                  ${!club.contactEmail && !club.contactPhone && !club.contactUrl ? `<div style="font-size:.82rem;color:var(--muted);padding:12px 0;">Contact information not on file. Check the club website for tryout inquiries.</div>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CONTACT MODAL -->
+        <div id="contact-modal" class="modal-overlay" style="display:none;" onclick="if(event.target.id==='contact-modal')closeContactModal()">
+          <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:460px;width:100%;position:relative;" onclick="event.stopPropagation()">
+            <button onclick="closeContactModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.07);border:none;width:30px;height:30px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">&times;</button>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+              <div style="width:44px;height:44px;border-radius:11px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:${club.primary};">${club.abbr}</div>
+              <div>
+                <div style="font-size:1rem;font-weight:800;color:#fff;">${club.name}</div>
+                <div style="font-size:.75rem;color:var(--muted);">Contact &amp; Info</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              ${club.contactEmail ? `
+                <a href="mailto:${club.contactEmail}?subject=Inquiry about ${encodeURIComponent(club.name)}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.25);border-radius:12px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(43,124,233,.18)'" onmouseout="this.style.background='rgba(43,124,233,.1)'">
+                  <svg width="16" height="16" fill="none" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <div style="flex:1;">
+                    <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Send Email</div>
+                    <div style="font-size:.875rem;font-weight:700;color:var(--accent-lt);">${club.contactEmail}</div>
+                  </div>
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>` : ''}
+              ${club.contactPhone ? `
+                <a href="tel:${club.contactPhone.replace(/\D/g,'')}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+                  <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.55 3.18 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5a16 16 0 0 0 6.59 6.59l1.06-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <div style="flex:1;">
+                    <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Call</div>
+                    <div style="font-size:.875rem;font-weight:700;color:rgba(255,255,255,.85);">${club.contactPhone}</div>
+                  </div>
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>` : ''}
+              ${club.tryoutsUrl ? `
+                <a href="${club.tryoutsUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(92,221,139,.07);border:1px solid rgba(92,221,139,.2);border-radius:12px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(92,221,139,.13)'" onmouseout="this.style.background='rgba(92,221,139,.07)'">
+                  <svg width="16" height="16" fill="none" stroke="#5CDD8B" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  <div style="flex:1;">
+                    <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Tryout Registration</div>
+                    <div style="font-size:.875rem;font-weight:700;color:#5CDD8B;">Register for Tryouts</div>
+                  </div>
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>` : ''}
+              ${club.website ? `
+                <a href="https://${club.website}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+                  <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <div style="flex:1;">
+                    <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Website</div>
+                    <div style="font-size:.875rem;font-weight:700;color:rgba(255,255,255,.7);">${club.website}</div>
+                  </div>
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>` : ''}
+              ${!club.contactEmail && !club.contactPhone && !club.tryoutsUrl ? `
+                <div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem;line-height:1.7;">No direct contact info on file.<br>Visit the club website for contact details.</div>` : ''}
+            </div>
+          </div>
+        </div>
+
+      `;
+
+      // Wire up buttons now that DOM is ready
+      updateFollowBtn();
+    }
+  </script>
+</body>
+</html>

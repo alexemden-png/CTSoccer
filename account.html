@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account &mdash; CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    input[type="text"],input[type="email"],input[type="password"],select,textarea{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;font-size:.875rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;width:100%;transition:border-color .2s;}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+    select option{background:var(--navy-800);}
+    textarea{resize:vertical;min-height:80px;}
+    label.field-label{font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.32);display:block;margin-bottom:6px;}
+    .tab-btn{padding:9px 22px;border-radius:9px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
+    .tab-btn.active{background:var(--accent);color:#fff;}
+    .tab-btn:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);}
+    .tab-btn:not(.active):hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
+    .card{background:var(--navy-800);border:1px solid var(--border);border-radius:16px;padding:24px;}
+    .card-sm{background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:18px;}
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:10px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .2s,transform .2s cubic-bezier(.16,1,.3,1);}
+    .btn-primary:hover{opacity:.85;transform:translateY(-1px);}
+    .btn-primary:active{transform:translateY(0);}
+    .btn-outline{display:inline-flex;align-items:center;gap:7px;background:transparent;color:rgba(255,255,255,.65);font-weight:600;font-size:.875rem;padding:10px 20px;border-radius:10px;text-decoration:none;border:1.5px solid rgba(255,255,255,.16);cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:border-color .2s,color .2s;}
+    .btn-outline:hover{border-color:rgba(255,255,255,.45);color:#fff;}
+    .btn-danger{background:rgba(220,53,69,.14);color:#ff7070;border:1.5px solid rgba(220,53,69,.25);border-radius:10px;padding:9px 18px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:background .2s;}
+    .btn-danger:hover{background:rgba(220,53,69,.25);}
+    .roster-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .roster-row:last-child{border-bottom:none;}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1B2A4A;border:1px solid rgba(43,124,233,.4);color:#fff;padding:12px 22px;border-radius:12px;font-size:.875rem;font-weight:600;z-index:9999;transition:transform .3s cubic-bezier(.16,1,.3,1);white-space:nowrap;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{animation:fadeIn .35s cubic-bezier(.16,1,.3,1) both;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- NAV -->
+<nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+  <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+    <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+      <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+    </div>
+    <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+  </a>
+  <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  <span style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">My Account</span>
+  <div style="flex:1;"></div>
+  <a href="dashboard.html" class="btn-outline" style="font-size:.78rem;padding:7px 14px;">Dashboard</a>
+</nav>
+
+<div style="max-width:1000px;margin:0 auto;padding:32px 24px;">
+
+  <!-- PROFILE HEADER -->
+  <div class="card" style="display:flex;align-items:center;gap:22px;margin-bottom:22px;flex-wrap:wrap;">
+    <div id="avatar-large" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">?</div>
+    <div style="flex:1;min-width:180px;">
+      <div id="display-name" style="font-size:1.25rem;font-weight:800;letter-spacing:-.025em;color:#fff;">My Account</div>
+      <div id="display-email" style="font-size:.82rem;color:var(--muted);margin-top:3px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        <span id="role-badge" style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:6px;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);">Member</span>
+        <span style="font-size:.75rem;color:rgba(255,255,255,.3);">Member since <span id="display-joined"></span></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(92,221,139,.08);border:1px solid rgba(92,221,139,.2);border-radius:9px;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#5CDD8B;flex-shrink:0;"></span>
+        <span style="font-size:.78rem;font-weight:700;color:#5CDD8B;">Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLE TABS -->
+  <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;">
+    <button id="roleTab-player"  class="tab-btn" onclick="switchRole('player')">Player</button>
+    <button id="roleTab-team"    class="tab-btn" onclick="switchRole('team')">Team Manager</button>
+    <button id="roleTab-fan"     class="tab-btn" onclick="switchRole('fan')">Fan</button>
+    <button id="roleTab-profile" class="tab-btn" onclick="switchRole('profile')">Profile Settings</button>
+  </div>
+
+  <!-- ===== PLAYER ===== -->
+  <div id="view-player" class="fade-in" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Player Info</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div><label class="field-label">Position</label>
+            <select id="p-position"><option value="">Select position...</option><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Forward</option></select>
+          </div>
+          <div><label class="field-label">Jersey Number</label>
+            <input type="text" id="p-number" placeholder="e.g. 10">
+          </div>
+          <div><label class="field-label">Preferred Foot</label>
+            <select id="p-foot"><option value="">Select...</option><option>Right</option><option>Left</option><option>Both</option></select>
+          </div>
+          <div><label class="field-label">Club / Team</label>
+            <select id="p-club">
+              <option value="">No club selected</option>
+              <option value="hartford-athletic">Hartford Athletic FC</option>
+              <option value="danbury-fc">Danbury FC</option>
+              <option value="new-haven-fc">New Haven FC</option>
+              <option value="westport-fc">Westport FC</option>
+              <option value="greenwich-fc">Greenwich FC</option>
+              <option value="bridgeport-city-sc">Bridgeport City SC</option>
+              <option value="waterbury-wolves">Waterbury Wolves</option>
+              <option value="glastonbury-fc">Glastonbury FC</option>
+              <option value="norwalk-united">Norwalk United</option>
+              <option value="hartford-wanderers">Hartford Wanderers</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="savePlayerInfo()" style="width:100%;justify-content:center;">Save Player Info</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Season Stats</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
+            <div id="stat-goals" style="font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;">0</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Goals</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
+            <div id="stat-assists" style="font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;">0</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Assists</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
+            <div id="stat-apps" style="font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.03em;">0</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Appearances</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
+            <div id="stat-rating" style="font-size:1.6rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.03em;">—</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Avg Rating</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px;">
+          <div style="font-size:.75rem;color:rgba(255,255,255,.3);">Update your stats after each match.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
+            <div><label class="field-label">Goals</label><input type="text" id="inp-goals" placeholder="0" style="padding:8px;"></div>
+            <div><label class="field-label">Assists</label><input type="text" id="inp-assists" placeholder="0" style="padding:8px;"></div>
+            <div><label class="field-label">Apps</label><input type="text" id="inp-apps" placeholder="0" style="padding:8px;"></div>
+          </div>
+          <button class="btn-primary" onclick="saveStats()" style="margin-top:10px;width:100%;justify-content:center;padding:9px;">Update Stats</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Training Schedule</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;" id="training-schedule">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Availability</div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:12px;">Let your team manager know when you're available to play.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="availability-days"></div>
+      <button class="btn-primary" onclick="saveAvailability()" style="margin-top:14px;">Save Availability</button>
+    </div>
+  </div>
+
+  <!-- ===== TEAM MANAGER ===== -->
+  <div id="view-team" class="fade-in" style="display:none;">
+    <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+      <svg width="16" height="16" fill="none" stroke="#F5A800" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.65);">Team Manager tools let you manage your club's roster, enter match results, and communicate with players.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">My Club</div>
+        <div><label class="field-label">Managing Club</label>
+          <select id="tm-club" onchange="loadTeamRoster()" style="margin-bottom:12px;">
+            <option value="">Select club...</option>
+            <option value="hartford-athletic">Hartford Athletic FC</option>
+            <option value="danbury-fc">Danbury FC</option>
+            <option value="new-haven-fc">New Haven FC</option>
+            <option value="westport-fc">Westport FC</option>
+            <option value="greenwich-fc">Greenwich FC</option>
+            <option value="bridgeport-city-sc">Bridgeport City SC</option>
+            <option value="waterbury-wolves">Waterbury Wolves</option>
+            <option value="glastonbury-fc">Glastonbury FC</option>
+            <option value="norwalk-united">Norwalk United</option>
+            <option value="hartford-wanderers">Hartford Wanderers</option>
+          </select>
+        </div>
+        <div><label class="field-label">Club Website</label>
+          <input type="text" id="tm-website" placeholder="yourclub.com" style="margin-bottom:12px;">
+        </div>
+        <div><label class="field-label">Contact Email</label>
+          <input type="email" id="tm-email" placeholder="manager@yourclub.com" style="margin-bottom:12px;">
+        </div>
+        <button class="btn-primary" onclick="saveTeamInfo()" style="width:100%;justify-content:center;">Save Club Info</button>
+      </div>
+
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Enter Match Result</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div><label class="field-label">Opponent</label><input type="text" id="res-opponent" placeholder="Opponent club name..."></div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
+            <div><label class="field-label">Your Score</label><input type="text" id="res-home" placeholder="0" style="text-align:center;"></div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--muted);padding-top:20px;">—</div>
+            <div><label class="field-label">Their Score</label><input type="text" id="res-away" placeholder="0" style="text-align:center;"></div>
+          </div>
+          <div><label class="field-label">Date</label><input type="text" id="res-date" placeholder="e.g. Aug 16, 2026"></div>
+          <div><label class="field-label">Venue</label><input type="text" id="res-venue" placeholder="Stadium / Field name"></div>
+          <button class="btn-primary" onclick="submitResult()" style="width:100%;justify-content:center;">Submit Result</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;">Roster Management</div>
+        <button class="btn-primary" onclick="showAddPlayer()" style="font-size:.78rem;padding:8px 14px;">+ Add Player</button>
+      </div>
+      <div id="add-player-form" style="display:none;background:rgba(43,124,233,.06);border:1px solid rgba(43,124,233,.15);border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 80px 100px auto;gap:8px;align-items:end;">
+          <div><label class="field-label">Name</label><input type="text" id="np-name" placeholder="Full name"></div>
+          <div><label class="field-label">Position</label><select id="np-pos"><option>GK</option><option>DF</option><option>MF</option><option>FW</option></select></div>
+          <div><label class="field-label">#</label><input type="text" id="np-num" placeholder="7"></div>
+          <div><label class="field-label">Nationality</label><input type="text" id="np-nat" placeholder="USA"></div>
+          <div><button class="btn-primary" onclick="addPlayerToRoster()" style="padding:10px 14px;">Add</button></div>
+        </div>
+      </div>
+      <div id="tm-roster-list"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Team Announcement</div>
+      <div><label class="field-label">Post announcement to team</label>
+        <textarea id="announcement-text" placeholder="e.g. Practice is moved to 6pm Thursday at Dillon Park..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="postAnnouncement()" style="margin-top:10px;">Post Announcement</button>
+      <div id="announcements-list" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== FAN ===== -->
+  <div id="view-fan" class="fade-in" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Following</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:12px;">Clubs you follow get their match updates first.</div>
+        <div id="fan-followed-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <div><label class="field-label">Follow a Club</label>
+          <select id="fan-follow-select" style="margin-bottom:10px;">
+            <option value="">Select a club...</option>
+            <option value="hartford-athletic">Hartford Athletic FC</option>
+            <option value="danbury-fc">Danbury FC</option>
+            <option value="new-haven-fc">New Haven FC</option>
+            <option value="westport-fc">Westport FC</option>
+            <option value="greenwich-fc">Greenwich FC</option>
+            <option value="bridgeport-city-sc">Bridgeport City SC</option>
+            <option value="waterbury-wolves">Waterbury Wolves</option>
+            <option value="glastonbury-fc">Glastonbury FC</option>
+            <option value="norwalk-united">Norwalk United</option>
+            <option value="hartford-wanderers">Hartford Wanderers</option>
+          </select>
+          <button class="btn-primary" onclick="followClub()" style="width:100%;justify-content:center;">+ Follow Club</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Notifications</div>
+        <div style="display:flex;flex-direction:column;gap:14px;" id="notif-toggles">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Membership Card</div>
+      <div id="fan-membership-card" style="background:linear-gradient(135deg,#1B2A4A 0%,#0D1B2A 100%);border:1.5px solid rgba(43,124,233,.3);border-radius:16px;padding:28px 28px 22px;max-width:380px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(43,124,233,.07);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+            <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="" style="width:100%;height:100%;object-fit:contain;">
+          </div>
+          <span style="font-size:.9rem;font-weight:800;color:#fff;letter-spacing:-.02em;">CT Soccer</span>
+        </div>
+        <div id="card-name" style="font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:3px;">Member</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:18px;">Fan Membership &bull; 2026 Season</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <div style="font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.25);">Member Since</div>
+            <div id="card-since" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.7);">2026</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.25);">ID</div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--accent-lt);letter-spacing:.06em;" id="card-id">CTS-0000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROFILE SETTINGS ===== -->
+  <div id="view-profile" class="fade-in" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:16px;">Personal Info</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div><label class="field-label">First Name</label><input type="text" id="s-first" placeholder="First name"></div>
+            <div><label class="field-label">Last Name</label><input type="text" id="s-last" placeholder="Last name"></div>
+          </div>
+          <div><label class="field-label">Email Address</label><input type="email" id="s-email" placeholder="you@example.com"></div>
+          <div><label class="field-label">Location (CT Town)</label><input type="text" id="s-location" placeholder="e.g. Hartford, CT"></div>
+          <div><label class="field-label">Bio</label><textarea id="s-bio" placeholder="Tell us about yourself..."></textarea></div>
+          <button class="btn-primary" onclick="saveProfile()" style="width:100%;justify-content:center;">Save Changes</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Account Role</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:12px;">Your role controls what management features you see. You can switch at any time.</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="role-selector">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Change Password</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div><label class="field-label">Current Password</label><input type="password" placeholder="Current password"></div>
+            <div><label class="field-label">New Password</label><input type="password" placeholder="New password"></div>
+            <div><label class="field-label">Confirm New Password</label><input type="password" id="confirm-pw" placeholder="Confirm new password"></div>
+            <button class="btn-primary" onclick="changePassword()" style="width:100%;justify-content:center;">Update Password</button>
+          </div>
+        </div>
+
+        <div class="card" style="border-color:rgba(220,53,69,.2);">
+          <div style="font-size:.85rem;font-weight:800;color:#ff7070;margin-bottom:10px;">Danger Zone</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-bottom:12px;">Logging out will end your session. Deleting your account is permanent and cannot be undone.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-danger" onclick="logout()">Log Out</button>
+            <button class="btn-danger" style="opacity:.6;" onclick="if(confirm('Delete your account? This cannot be undone.')) deleteAccount()">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="clubs-data.js"></script>
+<script>
+  // ---- State ----
+  let user = {};
+  try { user = JSON.parse(localStorage.getItem('ct_user')||'{}'); } catch(e){}
+  if (!user.firstName) {
+    // Not logged in — redirect to home
+    // (leave page accessible but show a "not signed in" banner)
+  }
+
+  let tmRoster = [];
+  let announcements = [];
+  let notifPrefs = { matchResults:true, upcomingMatches:true, leagueNews:false, clubAnnouncements:true };
+
+  // ---- Toast ----
+  function toast(msg, dur=2600) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), dur);
+  }
+
+  // ---- Boot ----
+  function boot() {
+    const initials = [user.firstName, user.lastName].filter(Boolean).map(n=>n[0]).join('').toUpperCase() || '?';
+    document.getElementById('avatar-large').textContent = initials;
+    document.getElementById('display-name').textContent  = user.firstName ? `${user.firstName} ${user.lastName||''}`.trim() : 'Guest';
+    document.getElementById('display-email').textContent = user.email || '';
+    document.getElementById('role-badge').textContent    = user.role ? (user.role[0].toUpperCase()+user.role.slice(1)) : 'Member';
+    if (user.joined) {
+      const d = new Date(user.joined);
+      document.getElementById('display-joined').textContent = d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    }
+
+    // Profile fields
+    if (document.getElementById('s-first')) {
+      document.getElementById('s-first').value    = user.firstName||'';
+      document.getElementById('s-last').value     = user.lastName||'';
+      document.getElementById('s-email').value    = user.email||'';
+      document.getElementById('s-location').value = user.location||'';
+      document.getElementById('s-bio').value      = user.bio||'';
+    }
+
+    // Player fields
+    if (user.playerInfo) {
+      const pi = user.playerInfo;
+      if (document.getElementById('p-position')) document.getElementById('p-position').value = pi.position||'';
+      if (document.getElementById('p-number'))   document.getElementById('p-number').value   = pi.number||'';
+      if (document.getElementById('p-foot'))     document.getElementById('p-foot').value     = pi.foot||'';
+      if (document.getElementById('p-club'))     document.getElementById('p-club').value     = pi.club||'';
+    }
+    if (user.stats) {
+      document.getElementById('stat-goals').textContent   = user.stats.goals||0;
+      document.getElementById('stat-assists').textContent = user.stats.assists||0;
+      document.getElementById('stat-apps').textContent    = user.stats.apps||0;
+      document.getElementById('stat-rating').textContent  = user.stats.rating||'—';
+    }
+
+    // Team manager
+    if (user.teamInfo) {
+      if (document.getElementById('tm-club'))    document.getElementById('tm-club').value    = user.teamInfo.club||'';
+      if (document.getElementById('tm-website')) document.getElementById('tm-website').value = user.teamInfo.website||'';
+      if (document.getElementById('tm-email'))   document.getElementById('tm-email').value   = user.teamInfo.email||'';
+    }
+    tmRoster = user.tmRoster || [];
+    announcements = user.announcements || [];
+    loadTeamRoster();
+    renderAnnouncements();
+
+    // Fan
+    notifPrefs = user.notifPrefs || notifPrefs;
+    renderFollowed();
+    renderNotifToggles();
+    const fanName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Member';
+    if (document.getElementById('card-name')) document.getElementById('card-name').textContent = fanName;
+    if (document.getElementById('card-id'))   document.getElementById('card-id').textContent   = 'CTS-' + (Math.abs(hashStr(user.email||'0000')) % 9000 + 1000);
+    if (document.getElementById('card-since') && user.joined) {
+      document.getElementById('card-since').textContent = new Date(user.joined).getFullYear();
+    }
+
+    // Role selector
+    renderRoleSelector();
+
+    // Training schedule
+    renderTrainingSchedule();
+
+    // Availability
+    renderAvailability();
+
+    // Default tab = role
+    const defaultRole = user.role || 'player';
+    switchRole(defaultRole==='coach'?'team':defaultRole);
+
+    // Pre-fill from ?action=join&club=
+    const params = new URLSearchParams(location.search);
+    if (params.get('action')==='join' && params.get('club')) {
+      const clubId = params.get('club');
+      if (document.getElementById('p-club')) document.getElementById('p-club').value = clubId;
+      switchRole('player');
+      toast('Select your position and save to join ' + clubId.replace(/-/g,' '));
+    }
+  }
+
+  function hashStr(s) {
+    let h=0; for(let i=0;i<s.length;i++) h=Math.imul(31,h)+s.charCodeAt(i)|0; return h;
+  }
+
+  // ---- Role tabs ----
+  function switchRole(role) {
+    ['player','team','fan','profile'].forEach(r=>{
+      document.getElementById('view-'+r).style.display = r===role?'':'none';
+      const btn = document.getElementById('roleTab-'+r);
+      if(btn) btn.classList.toggle('active', r===role);
+    });
+  }
+
+  // ---- Profile ----
+  function saveProfile() {
+    user.firstName = document.getElementById('s-first').value.trim();
+    user.lastName  = document.getElementById('s-last').value.trim();
+    user.email     = document.getElementById('s-email').value.trim();
+    user.location  = document.getElementById('s-location').value.trim();
+    user.bio       = document.getElementById('s-bio').value.trim();
+    saveUser();
+    boot();
+    toast('Profile saved!');
+  }
+
+  function renderRoleSelector() {
+    const el = document.getElementById('role-selector');
+    if (!el) return;
+    const roles = [
+      { id:'player', label:'Player', icon:'&#9917;' },
+      { id:'coach',  label:'Coach',  icon:'&#128203;' },
+      { id:'fan',    label:'Fan',    icon:'&#127967;' },
+    ];
+    el.innerHTML = roles.map(r=>`
+      <label style="background:${user.role===r.id?'rgba(43,124,233,.15)':'rgba(255,255,255,.05)'};border:1.5px solid ${user.role===r.id?'rgba(43,124,233,.4)':'rgba(255,255,255,.1)'};border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;">
+        <input type="radio" name="role-select" value="${r.id}" ${user.role===r.id?'checked':''} style="display:none;" onchange="changeRole('${r.id}')">
+        <div style="font-size:1.1rem;">${r.icon}</div>
+        <div style="font-size:.78rem;font-weight:700;color:${user.role===r.id?'var(--accent-lt)':'rgba(255,255,255,.5)'};margin-top:4px;">${r.label}</div>
+      </label>
+    `).join('');
+  }
+
+  function changeRole(role) {
+    user.role = role;
+    saveUser();
+    boot();
+    toast('Role updated to ' + role[0].toUpperCase()+role.slice(1));
+  }
+
+  function changePassword() {
+    const pw = document.getElementById('confirm-pw').value;
+    if (pw.length < 8) { toast('Password must be at least 8 characters'); return; }
+    toast('Password updated!');
+  }
+
+  function logout() {
+    localStorage.removeItem('ct_user');
+    window.location.href = 'index.html';
+  }
+
+  function deleteAccount() {
+    localStorage.removeItem('ct_user');
+    window.location.href = 'index.html';
+  }
+
+  // ---- Player ----
+  function savePlayerInfo() {
+    user.playerInfo = {
+      position: document.getElementById('p-position').value,
+      number:   document.getElementById('p-number').value,
+      foot:     document.getElementById('p-foot').value,
+      club:     document.getElementById('p-club').value,
+    };
+    saveUser(); toast('Player info saved!');
+  }
+
+  function saveStats() {
+    user.stats = {
+      goals:   parseInt(document.getElementById('inp-goals').value)||0,
+      assists: parseInt(document.getElementById('inp-assists').value)||0,
+      apps:    parseInt(document.getElementById('inp-apps').value)||0,
+      rating:  user.stats?.rating||'—',
+    };
+    saveUser();
+    document.getElementById('stat-goals').textContent   = user.stats.goals;
+    document.getElementById('stat-assists').textContent = user.stats.assists;
+    document.getElementById('stat-apps').textContent    = user.stats.apps;
+    toast('Stats updated!');
+  }
+
+  function renderTrainingSchedule() {
+    const el = document.getElementById('training-schedule');
+    if (!el) return;
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const times = ['6:00 PM Training','Rest','6:30 PM Training','Rest','7:00 PM Training','10:00 AM Match','Rest'];
+    el.innerHTML = days.map((d,i)=>`
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px;">${d}</div>
+        <div style="font-size:.76rem;font-weight:600;color:${times[i].includes('Rest')?'rgba(255,255,255,.25)':times[i].includes('Match')?'#F5A800':'var(--accent-lt)'};">${times[i]}</div>
+      </div>
+    `).join('');
+  }
+
+  const availDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let selectedAvail = new Set(user.availability || ['Sat','Sun']);
+
+  function renderAvailability() {
+    const el = document.getElementById('availability-days');
+    if (!el) return;
+    el.innerHTML = availDays.map(d=>`
+      <button onclick="toggleAvail('${d}')" id="avail-${d}" style="padding:8px 16px;border-radius:9px;font-size:.82rem;font-weight:700;border:1.5px solid ${selectedAvail.has(d)?'rgba(43,124,233,.5)':'rgba(255,255,255,.12)'};background:${selectedAvail.has(d)?'rgba(43,124,233,.15)':'rgba(255,255,255,.04)'};color:${selectedAvail.has(d)?'var(--accent-lt)':'rgba(255,255,255,.4)'};cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:all .2s;">${d}</button>
+    `).join('');
+  }
+
+  function toggleAvail(d) {
+    if (selectedAvail.has(d)) selectedAvail.delete(d); else selectedAvail.add(d);
+    renderAvailability();
+  }
+
+  function saveAvailability() {
+    user.availability = [...selectedAvail];
+    saveUser(); toast('Availability saved!');
+  }
+
+  // ---- Team Manager ----
+  function saveTeamInfo() {
+    user.teamInfo = {
+      club:    document.getElementById('tm-club').value,
+      website: document.getElementById('tm-website').value,
+      email:   document.getElementById('tm-email').value,
+    };
+    saveUser(); toast('Club info saved!');
+  }
+
+  function loadTeamRoster() {
+    const clubId = document.getElementById('tm-club').value;
+    if (clubId && !tmRoster.length) {
+      const club = getClubById(clubId);
+      if (club) tmRoster = [...(club.roster||[])];
+    }
+    renderRosterList();
+  }
+
+  function renderRosterList() {
+    const el = document.getElementById('tm-roster-list');
+    if (!el) return;
+    if (!tmRoster.length) {
+      el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem;">No players yet. Add players above.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:48px 1fr 80px 100px 40px;gap:0;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:8px 4px;border-bottom:1px solid var(--border);">
+        <div>#</div><div>Player</div><div>Pos</div><div>Nationality</div><div></div>
+      </div>
+      ${tmRoster.map((p,i)=>`
+        <div style="display:grid;grid-template-columns:48px 1fr 80px 100px 40px;align-items:center;gap:0;padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+          <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.4);">${p.number}</div>
+          <div style="font-size:.875rem;font-weight:700;color:#fff;">${p.name}</div>
+          <div style="font-size:.78rem;"><span style="background:rgba(255,255,255,.07);border-radius:5px;padding:3px 8px;color:rgba(255,255,255,.55);">${p.pos}</span></div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);">${p.nationality}</div>
+          <button onclick="removePlayer(${i})" style="background:rgba(220,53,69,.12);border:none;border-radius:6px;width:28px;height:28px;color:#ff7070;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;" title="Remove">&#215;</button>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function showAddPlayer() {
+    const f = document.getElementById('add-player-form');
+    f.style.display = f.style.display==='none'?'':'none';
+  }
+
+  function addPlayerToRoster() {
+    const name = document.getElementById('np-name').value.trim();
+    const pos  = document.getElementById('np-pos').value;
+    const num  = document.getElementById('np-num').value||'0';
+    const nat  = document.getElementById('np-nat').value.trim()||'USA';
+    if (!name) { toast('Enter player name'); return; }
+    tmRoster.push({ name, pos, number:parseInt(num), nationality:nat });
+    user.tmRoster = tmRoster;
+    saveUser();
+    document.getElementById('np-name').value='';
+    document.getElementById('np-num').value='';
+    document.getElementById('np-nat').value='';
+    document.getElementById('add-player-form').style.display='none';
+    renderRosterList();
+    toast('Player added!');
+  }
+
+  function removePlayer(i) {
+    tmRoster.splice(i,1);
+    user.tmRoster = tmRoster;
+    saveUser();
+    renderRosterList();
+    toast('Player removed');
+  }
+
+  function submitResult() {
+    const opp   = document.getElementById('res-opponent').value.trim();
+    const home  = document.getElementById('res-home').value;
+    const away  = document.getElementById('res-away').value;
+    const date  = document.getElementById('res-date').value.trim();
+    const venue = document.getElementById('res-venue').value.trim();
+    if (!opp||home===''||away==='') { toast('Fill in opponent and scores'); return; }
+    const result = parseInt(home)>parseInt(away)?'W':parseInt(home)<parseInt(away)?'L':'D';
+    toast(`Result submitted: ${result} ${home}&ndash;${away} vs ${opp}`);
+    document.getElementById('res-opponent').value='';
+    document.getElementById('res-home').value='';
+    document.getElementById('res-away').value='';
+    document.getElementById('res-date').value='';
+    document.getElementById('res-venue').value='';
+  }
+
+  function postAnnouncement() {
+    const text = document.getElementById('announcement-text').value.trim();
+    if (!text) { toast('Write an announcement first'); return; }
+    announcements.unshift({ text, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}), by: user.firstName||'Manager' });
+    user.announcements = announcements;
+    saveUser();
+    document.getElementById('announcement-text').value='';
+    renderAnnouncements();
+    toast('Announcement posted!');
+  }
+
+  function renderAnnouncements() {
+    const el = document.getElementById('announcements-list');
+    if (!el) return;
+    if (!announcements.length) { el.innerHTML='<div style="font-size:.8rem;color:rgba(255,255,255,.3);">No announcements yet.</div>'; return; }
+    el.innerHTML = announcements.slice(0,5).map(a=>`
+      <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px 14px;border-left:3px solid var(--accent);">
+        <div style="font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.55;">${a.text}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.3);margin-top:5px;">${a.by} &middot; ${a.date}</div>
+      </div>
+    `).join('');
+  }
+
+  // ---- Fan ----
+  function renderFollowed() {
+    const el = document.getElementById('fan-followed-list');
+    if (!el) return;
+    const followed = user.followedClubs||[];
+    if (!followed.length) { el.innerHTML='<div style="font-size:.8rem;color:rgba(255,255,255,.35);">You\'re not following any clubs yet.</div>'; return; }
+    el.innerHTML = followed.map(id=>{
+      const c = getClubById(id);
+      if (!c) return '';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(255,255,255,.04);border-radius:9px;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <div style="width:28px;height:28px;border-radius:7px;background:${c.primary}22;border:1px solid ${c.primary}44;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:${c.primary};">${c.abbr}</div>
+          <a href="club.html?id=${c.id}" style="font-size:.82rem;font-weight:700;color:#fff;text-decoration:none;">${c.name}</a>
+        </div>
+        <button onclick="unfollowClub('${id}')" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.9rem;" title="Unfollow">&times;</button>
+      </div>`;
+    }).join('');
+  }
+
+  function followClub() {
+    const id = document.getElementById('fan-follow-select').value;
+    if (!id) { toast('Select a club first'); return; }
+    if (!(user.followedClubs||[]).includes(id)) {
+      user.followedClubs = [...(user.followedClubs||[]), id];
+      saveUser(); renderFollowed();
+      toast('Now following ' + (getClubById(id)||{name:id}).name);
+    } else { toast('Already following this club'); }
+  }
+
+  function unfollowClub(id) {
+    user.followedClubs = (user.followedClubs||[]).filter(x=>x!==id);
+    saveUser(); renderFollowed(); toast('Unfollowed');
+  }
+
+  const notifLabels = {
+    matchResults:       'Match Results',
+    upcomingMatches:    'Upcoming Matches',
+    leagueNews:         'League News',
+    clubAnnouncements:  'Club Announcements',
+  };
+
+  function renderNotifToggles() {
+    const el = document.getElementById('notif-toggles');
+    if (!el) return;
+    el.innerHTML = Object.entries(notifLabels).map(([k,label])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+        <div>
+          <div style="font-size:.85rem;font-weight:600;color:#fff;">${label}</div>
+        </div>
+        <label style="position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0;">
+          <input type="checkbox" ${notifPrefs[k]?'checked':''} onchange="toggleNotif('${k}',this.checked)" style="display:none;">
+          <div style="position:absolute;inset:0;border-radius:12px;background:${notifPrefs[k]?'var(--accent)':'rgba(255,255,255,.12)'};transition:background .2s;"></div>
+          <div style="position:absolute;top:3px;left:${notifPrefs[k]?'23px':'3px'};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></div>
+        </label>
+      </div>
+    `).join('');
+  }
+
+  function toggleNotif(key, val) {
+    notifPrefs[key] = val;
+    user.notifPrefs = notifPrefs;
+    saveUser(); renderNotifToggles();
+    toast(val ? notifLabels[key]+' notifications on' : notifLabels[key]+' notifications off');
+  }
+
+  // ---- Util ----
+  function saveUser() {
+    localStorage.setItem('ct_user', JSON.stringify(user));
+  }
+
+  boot();
+</script>
+</body>
+</html>

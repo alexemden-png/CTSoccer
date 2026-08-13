@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sign In — CT Soccer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.38);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: var(--navy);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 900px 600px at 20% 10%, rgba(43,124,233,.13) 0%, transparent 70%),
+        radial-gradient(ellipse 700px 500px at 80% 90%, rgba(43,124,233,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .card {
+      background: var(--navy-800);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 440px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(43,124,233,.1);
+    }
+    input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .9rem;
+      color: #fff;
+      font-family: 'Montserrat', Arial, sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus { border-color: var(--accent); }
+    input::placeholder { color: rgba(255,255,255,.25); }
+    label.field-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.38);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%);
+      color: #fff;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: .925rem;
+      padding: 13px 20px;
+      border-radius: 11px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity .18s, transform .18s;
+      box-shadow: 0 4px 18px rgba(43,124,233,.38);
+    }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    #error-msg {
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: .82rem;
+      color: #fca5a5;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+      <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+        <div style="width:42px;height:42px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px;">
+          <img src="ChatGPT Image May 30, 2026, 09_41_49 PM.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</div>
+          <div style="font-size:.75rem;color:var(--muted);">Sign in to your account</div>
+        </div>
+      </a>
+    </div>
+
+    <form id="login-form" style="display:flex;flex-direction:column;gap:18px;">
+      <div id="error-msg">Incorrect email or password. Please try again.</div>
+
+      <div>
+        <label class="field-label">Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+
+      <div>
+        <label class="field-label">Password</label>
+        <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn-primary" style="margin-top:4px;">
+        Sign In
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
+      </button>
+    </form>
+
+    <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
+      Don't have an account?
+      <a href="register.html" style="color:var(--accent-lt);text-decoration:none;font-weight:700;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register free</a>
+    </p>
+
+    <p style="text-align:center;margin-top:10px;">
+      <a href="dashboard.html" style="font-size:.72rem;color:rgba(255,255,255,.2);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Continue as guest →</a>
+    </p>
+  </div>
+
+  <script>
+    // Check if already logged in
+    const existing = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+    if (existing && existing.firstName) {
+      window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email    = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const errorEl  = document.getElementById('error-msg');
+
+      // Load stored user
+      const user = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+
+      if (user && user.email && user.email.toLowerCase() === email && user.password === password) {
+        errorEl.style.display = 'none';
+        window.location.href = 'dashboard.html';
+      } else if (user && user.email && user.email.toLowerCase() === email) {
+        // Email matched but wrong password
+        errorEl.textContent = 'Incorrect password. Please try again.';
+        errorEl.style.display = 'block';
+      } else {
+        errorEl.textContent = 'No account found with that email. Register free below.';
+        errorEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
