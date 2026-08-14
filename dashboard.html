@@ -856,6 +856,18 @@
     renderFeaturedClub();
     renderClubs(CT_CLUBS);
     initLiveData(); // non-blocking, runs in background
+
+    // Deep-link support: dashboard.html?section=clubs&tier=Youth
+    (function initFromUrl() {
+      const params = new URLSearchParams(location.search);
+      const section = params.get('section');
+      const tier = params.get('tier');
+      if (section) showSection(section);
+      if (tier !== null) {
+        const btn = [...document.querySelectorAll('.qf-btn')].find(b => b.getAttribute('onclick')?.includes(`'${tier}'`));
+        setTierFilter(tier, btn || null);
+      }
+    })();
   </script>
 </body>
 </html>
