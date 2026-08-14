@@ -180,11 +180,137 @@
       .grid-2col, .grid-3col { grid-template-columns: 1fr; }
       .grid-footer { grid-template-columns: 1fr; gap: 32px; }
       .nav-desktop { display: none !important; }
+      .nav-inner { padding: 0 16px; }
+      .btn-primary, .btn-outline { min-height: 48px; }
+    }
+    @media (max-width: 480px) {
+      html { scroll-behavior: smooth; }
+      body { -webkit-text-size-adjust: 100%; padding-bottom: 88px; }
+      #navbar { height: 58px; }
+      .nav-inner { padding: 0 14px; }
+      .nav-inner > a:first-child { gap: 8px; }
+      .nav-inner > a:first-child span { font-size: .92rem; }
+      .nav-inner > a:first-child > div { width: 30px; height: 30px; }
+      section { overflow-x: hidden; }
+      .btn-primary, .btn-outline {
+        width: 100%;
+        justify-content: center;
+        min-height: 50px;
+      }
+      .grid-4col { grid-template-columns: 1fr; }
+      .glass, .card-silver, .card-accent { padding: 24px 18px; }
+      .browser-body {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 16px !important;
+      }
+      .browser-bar { padding: 10px 12px; }
+      .browser-body > div:first-child {
+        min-height: initial;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .browser-body > div:first-child > div {
+        padding: 10px 8px;
+        font-size: .72rem;
+      }
+      .browser-body > div:first-child > div:nth-child(1),
+      .browser-body > div:first-child > div:nth-child(2),
+      .browser-body > div:first-child > div:nth-child(3),
+      .browser-body > div:first-child > div:nth-child(4),
+      .browser-body > div:first-child > div:nth-child(5),
+      .browser-body > div:first-child > div:nth-child(6) {
+        padding: 9px 10px;
+      }
+      .browser-bar > div:nth-child(4) {
+        height: 20px !important;
+        margin-left: 6px !important;
+      }
+      .browser-bar .b-dot { width: 8px; height: 8px; }
+      .check-item { gap: 10px; padding: 14px 0; }
+      .check-item svg { width: 18px; height: 18px; }
+      #programs, #community, #join, #contact, footer { padding-left: 0; padding-right: 0; }
+      .grid-footer { grid-template-columns: 1fr; }
+      #contact-form .grid-2col, #signup-form .grid-2col, #contact-form > div:nth-child(1) {
+        grid-template-columns: 1fr !important;
+      }
+      #join .btn-primary, #join .btn-outline {
+        width: 100%;
+      }
+      .nav-link { font-size: .82rem; }
+      .nav-inner > div:nth-child(2) { gap: 10px; }
+      .nav-inner > div:nth-child(2) > a { padding: 9px 14px; }
+      .reveal { opacity: 1; transform: none; }
+		.mobile-app-bar {
+		  display: flex !important;
+		}
     }
     @media (min-width: 769px) { #nav-cta-mobile { display: none !important; } }
+    .mobile-app-bar {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 250;
+      display: none;
+      align-items: center;
+      justify-content: space-around;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 20px;
+      background: rgba(13, 27, 42, 0.92);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35), 0 0 1px rgba(255,255,255,0.1);
+    }
+    .mobile-app-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 10px;
+      font-weight: 700;
+      min-height: 52px;
+      border-radius: 14px;
+      transition: all .25s cubic-bezier(.16, 1, .3, 1);
+      position: relative;
+    }
+    .mobile-app-item:active {
+      transform: scale(0.92);
+    }
+    .mobile-app-item.active {
+      background: linear-gradient(135deg, rgba(43,124,233,0.18) 0%, rgba(43,124,233,0.08) 100%);
+      color: #7AC9FF;
+      box-shadow: 0 8px 16px rgba(43,124,233,0.2);
+    }
+    .mobile-app-item svg { width: 18px; height: 18px; }
   </style>
 </head>
 <body>
+  <div class="mobile-app-bar" aria-label="Mobile app navigation">
+    <a class="mobile-app-item active" href="#programs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      <span>Home</span>
+    </a>
+    <a class="mobile-app-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Clubs</span>
+    </a>
+    <a class="mobile-app-item" href="#join">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Join</span>
+    </a>
+    <a class="mobile-app-item" href="login.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </a>
+  </div>
 
   <!-- NAV -->
   <nav id="navbar">
@@ -860,15 +986,15 @@
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
             <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(0,174,91,.5);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="player" checked style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:var(--accent-lt);">âš½ Player</div>
+              <div style="font-size:.8rem;font-weight:700;color:var(--accent-lt);">⚽ Player</div>
             </label>
             <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="coach" style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">ðŸ“‹ Coach</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">📋 Coach</div>
             </label>
             <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
               <input type="radio" name="role" value="fan" style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">ðŸŸï¸ Fan</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">🏟️ Fan</div>
             </label>
           </div>
         </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard &mdash; CT Soccer</title>
+  <title>Dashboard — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -17,8 +17,13 @@
     .slink:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8);}
     .slink.active{background:rgba(43,124,233,.14);color:var(--accent-lt);}
     .stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;}
-    .club-card{background:var(--navy-800);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;transition:border-color .2s,transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s;cursor:pointer;text-decoration:none;display:block;color:#fff;}
-    .club-card:hover{border-color:rgba(43,124,233,.35);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.35),0 0 0 1px rgba(43,124,233,.12);}
+    .club-card{position:relative;overflow:hidden;background:linear-gradient(165deg,var(--navy-700) 0%,var(--navy-800) 55%);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;transition:border-color .25s,transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;cursor:pointer;text-decoration:none;display:block;color:#fff;}
+    .club-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--club-c,var(--accent)) 0%,transparent 160%);}
+    .club-card::after{content:'';position:absolute;top:-55%;right:-28%;width:70%;height:95%;background:radial-gradient(circle,var(--club-wash,transparent) 0%,transparent 72%);pointer-events:none;}
+    .club-card:hover{border-color:var(--club-c,rgba(43,124,233,.35));transform:translateY(-3px);box-shadow:0 18px 42px rgba(0,0,0,.4),0 0 0 1px var(--club-glow,rgba(43,124,233,.16)),0 0 28px var(--club-glow,rgba(43,124,233,.1));}
+    .tier-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .tier-header .tier-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:currentColor;box-shadow:0 0 0 4px var(--tier-glow,transparent);}
+    .tier-header .tier-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.14),transparent);}
     .tab-btn{padding:8px 18px;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
     .tab-btn.active{background:var(--accent);color:#fff;}
     .tab-btn:not(.active){background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);}
@@ -26,6 +31,83 @@
     .qf-btn{padding:6px 13px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);font-family:'Montserrat',Arial,sans-serif;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);transition:all .15s;}
     .qf-btn.active{background:rgba(43,124,233,.2);border-color:rgba(43,124,233,.4);color:var(--accent-lt);}
     .qf-btn:not(.active):hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.8);}
+    @media (max-width: 860px) {
+      body { display: block; height: auto; overflow-x: hidden; }
+      aside { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      aside nav { padding: 8px 10px 12px; }
+      main { overflow: visible; }
+      header { padding: 0 16px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+      #global-search { width: 100%; min-width: 0; }
+      header > div:last-child { width: 100%; }
+      .fade-in { animation: none; }
+    }
+    @media (max-width: 640px) {
+      body { padding-bottom: 84px; }
+      .stat-card { padding: 18px 16px; }
+      .stat-card .font-size\:2\.1rem { font-size: 1.5rem !important; }
+      #section-overview > div:nth-child(2) { grid-template-columns: 1fr !important; }
+      #section-overview > div:nth-child(3) { grid-template-columns: 1fr !important; }
+      #section-overview > div:nth-child(4) { grid-template-columns: 1fr !important; }
+      [style*="grid-template-columns:1fr 320px"] { grid-template-columns: 1fr !important; }
+      #welcome-banner { padding: 16px; }
+      #welcome-banner > div:first-child { width: 100%; }
+      .btn-sm { width: 100%; justify-content: center; }
+      .btn-outline-sm { width: 100%; justify-content: center; }
+      #club-search { font-size: .9rem; }
+      [style*="display:grid;grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+      .data-row { grid-template-columns: 24px 1fr 40px 40px 40px 40px 56px; font-size: .74rem; }
+      .match-row { padding: 10px 12px; }
+      .club-card { padding: 18px; }
+      main > div { padding: 20px 16px !important; }
+      header { padding-left: 16px; padding-right: 16px; }
+      .mobile-bottom-nav {
+        display: flex !important;
+      }
+    }
+    .mobile-bottom-nav {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: space-around;
+      gap: 6px;
+      padding: 8px 8px 10px;
+      border-radius: 20px;
+      background: rgba(13, 27, 42, 0.92);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35), 0 0 1px rgba(255,255,255,0.1);
+    }
+    .mobile-bottom-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 52px;
+      border-radius: 14px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      transition: all .25s cubic-bezier(.16, 1, .3, 1);
+    }
+    .mobile-bottom-item:active {
+      transform: scale(0.92);
+    }
+    .mobile-bottom-item.active {
+      background: linear-gradient(135deg, rgba(43,124,233,0.18) 0%, rgba(43,124,233,0.08) 100%);
+      color: #7AC9FF;
+      box-shadow: 0 8px 16px rgba(43,124,233,0.2);
+    }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
     .match-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;transition:background .15s;}
     .match-row:hover{background:rgba(255,255,255,.06);}
@@ -99,6 +181,25 @@
     </div>
   </aside>
 
+  <nav class="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
+    <a class="mobile-bottom-item active" href="#section-overview" onclick="showSection('overview'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="#section-clubs" onclick="showSection('clubs'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="#section-matches" onclick="showSection('matches'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Matches
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
   <!-- MAIN -->
   <main style="flex:1;overflow-y:auto;display:flex;flex-direction:column;">
     <header style="position:sticky;top:0;z-index:100;background:rgba(13,27,42,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
@@ -128,8 +229,8 @@
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
           <div class="stat-card">
             <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">CT Clubs</div>
-            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">20</div>
-            <div style="font-size:.75rem;color:rgba(43,124,233,.9);font-weight:600;">10 adult &bull; 10 youth</div>
+            <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">41</div>
+            <div style="font-size:.75rem;color:rgba(43,124,233,.9);font-weight:600;">5 adult &bull; 36 youth</div>
           </div>
           <div class="stat-card">
             <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">Registered Players</div>
@@ -144,14 +245,14 @@
           <div class="stat-card">
             <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);">Leagues</div>
             <div style="font-size:2.1rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;">4</div>
-            <div style="font-size:.75rem;color:rgba(255,189,46,.8);font-weight:600;">USL-C &bull; NISA &bull; NPSL &bull; CT State</div>
+            <div style="font-size:.75rem;color:rgba(255,189,46,.8);font-weight:600;">USL-C &bull; MLS NEXT Pro &bull; USL2 &bull; NPSL</div>
           </div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;margin-bottom:18px;">
           <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
             <div style="padding:18px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-              <div style="font-size:.9rem;font-weight:800;color:#fff;">Featured Club &mdash; Hartford Athletic</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;">Featured Club — Hartford Athletic</div>
               <a href="club.html?id=hartford-athletic" class="btn-sm" style="font-size:.72rem;padding:6px 12px;">View Club</a>
             </div>
             <div style="padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;">
@@ -164,15 +265,15 @@
                 <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:10px;">USL Championship &bull; Trinity Health Stadium, Hartford CT &bull; Est. 2018</div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                   <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 14px;text-align:center;">
-                    <div style="font-size:1rem;font-weight:800;color:#fff;">14W&nbsp;8D&nbsp;10L</div>
+                    <div id="feat-record" style="font-size:1rem;font-weight:800;color:#fff;"></div>
                     <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">2026 Record</div>
                   </div>
                   <div style="background:rgba(245,168,0,.1);border:1px solid rgba(245,168,0,.2);border-radius:8px;padding:8px 14px;text-align:center;">
-                    <div style="font-size:1rem;font-weight:800;color:#F5A800;">50 pts</div>
+                    <div id="feat-points" style="font-size:1rem;font-weight:800;color:#F5A800;"></div>
                     <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">Points</div>
                   </div>
                   <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 14px;text-align:center;">
-                    <div style="font-size:1rem;font-weight:800;color:#fff;">48&ndash;39</div>
+                    <div id="feat-gfga" style="font-size:1rem;font-weight:800;color:#fff;"></div>
                     <div style="font-size:.63rem;color:var(--muted);margin-top:2px;">Goals F/A</div>
                   </div>
                 </div>
@@ -200,27 +301,27 @@
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
             <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.18);border-radius:12px;padding:14px;">
               <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#F5A800;margin-bottom:6px;">Professional</div>
-              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">USL Championship</div>
-              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Div II of US soccer</div>
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">1 CT club</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">USL Championship &amp; MLS Next Pro</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Div II &amp; Div III of US soccer</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">2 CT clubs</div>
             </div>
             <div style="background:rgba(43,124,233,.08);border:1px solid rgba(43,124,233,.18);border-radius:12px;padding:14px;">
               <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:6px;">Semi-Pro</div>
-              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">NISA</div>
-              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">National Independent</div>
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">1 CT club</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">USL League Two</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Premier summer league</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">2 CT clubs</div>
             </div>
             <div style="background:rgba(139,164,188,.07);border:1px solid rgba(139,164,188,.15);border-radius:12px;padding:14px;">
               <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--silver-lt);margin-bottom:6px;">Amateur/Semi-Pro</div>
               <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">NPSL</div>
               <div style="font-size:.74rem;color:rgba(255,255,255,.4);">National Premier</div>
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">3 CT clubs</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">1 CT club</div>
             </div>
-            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;">
-              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;">Amateur</div>
-              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">CT State League</div>
-              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Statewide divisions</div>
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">5 CT clubs</div>
+            <div style="background:rgba(92,221,139,.07);border:1px solid rgba(92,221,139,.15);border-radius:12px;padding:14px;">
+              <div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5CDD8B;margin-bottom:6px;">Youth</div>
+              <div style="font-size:.9rem;font-weight:800;color:#fff;margin-bottom:3px;">CJSA / EDP / ECNL</div>
+              <div style="font-size:.74rem;color:rgba(255,255,255,.4);">Travel &amp; academy clubs</div>
+              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.6);margin-top:8px;">36 CT clubs</div>
             </div>
           </div>
         </div>
@@ -234,7 +335,7 @@
           <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-lt);margin-bottom:10px;">Search All CT Clubs</div>
           <div style="position:relative;margin-bottom:14px;">
             <svg style="position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none;" width="18" height="18" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input id="club-search" type="search" placeholder="Search by club name, city, or league"¦" autocomplete="off"
+            <input id="club-search" type="search" placeholder="Search by club name, city, or league…" autocomplete="off"
               style="width:100%;padding:14px 44px 14px 46px;font-size:1rem;font-weight:600;background:rgba(255,255,255,.06);border:1.5px solid rgba(43,124,233,.25);border-radius:11px;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;transition:border-color .2s;"
               onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(43,124,233,.25)'" oninput="filterClubs()">
             <button id="club-search-clear" onclick="clearClubSearch()" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;color:rgba(255,255,255,.6);font-size:1rem;line-height:1;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">×</button>
@@ -245,13 +346,12 @@
             <button class="qf-btn" onclick="setTierFilter('Professional',this)">Pro</button>
             <button class="qf-btn" onclick="setTierFilter('Semi-Professional',this)">Semi-Pro</button>
             <button class="qf-btn" onclick="setTierFilter('Amateur / Semi-Pro',this)">NPSL</button>
-            <button class="qf-btn" onclick="setTierFilter('Amateur',this)">Amateur</button>
             <button class="qf-btn" onclick="setTierFilter('Youth',this)">Youth</button>
             <span id="club-count-lbl" style="margin-left:auto;font-size:.78rem;font-weight:700;color:var(--muted);"></span>
           </div>
         </div>
 
-        <div id="clubs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+        <div id="clubs-grid" style="display:flex;flex-direction:column;gap:30px;"></div>
         <div id="clubs-empty" style="display:none;text-align:center;padding:56px 20px;color:var(--muted);">
           <div style="font-size:1.5rem;margin-bottom:10px;font-weight:800;">No clubs match</div>
           <div style="font-size:.85rem;">Try a different name, city, or clear the filter</div>
@@ -262,10 +362,9 @@
       <!-- ===== STANDINGS ===== -->
       <section id="section-standings" style="display:none;" class="fade-in">
         <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;" id="standings-tabs">
-          <button class="tab-btn active" onclick="showStandings('usl',this)">USL Championship</button>
-          <button class="tab-btn" onclick="showStandings('nisa',this)">NISA</button>
+          <button class="tab-btn active" onclick="showStandings('pro',this)">Professional</button>
+          <button class="tab-btn" onclick="showStandings('usl2',this)">USL League Two</button>
           <button class="tab-btn" onclick="showStandings('npsl',this)">NPSL</button>
-          <button class="tab-btn" onclick="showStandings('ct',this)">CT State League</button>
           <button class="tab-btn" onclick="showStandings('youth',this)">Youth Clubs</button>
         </div>
         <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
@@ -275,7 +374,7 @@
           <div id="standings-body"></div>
         </div>
         <div style="margin-top:16px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:14px 18px;">
-          <div style="font-size:.75rem;color:rgba(255,255,255,.3);line-height:1.8;"><span style="color:rgba(255,255,255,.55);font-weight:600;">Note:</span> Standings reflect current 2026 season data. Hartford Athletic competes in USL Championship East. Connecticut clubs in NPSL and CT State League compete in Northeast regional conferences. Click any club to view full details.</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.3);line-height:1.8;"><span style="color:rgba(255,255,255,.55);font-weight:600;">Note:</span> Hartford Athletic (USL-C), AC Connecticut and Connecticut Rush (USL League Two) update live from TheSportsDB. CT United FC (MLS Next Pro) and New Haven United FC (NPSL) are tracked with the latest known results pending a live data source. Click any club to view full details.</div>
         </div>
       </section>
 
@@ -286,7 +385,7 @@
           <button class="tab-btn" id="mtab-results" onclick="showMatches('results',this)">Recent Results</button>
           <span id="espn-live-indicator" style="display:none;align-items:center;gap:5px;margin-left:8px;font-size:.68rem;font-weight:700;color:#5CDD8B;background:rgba(92,221,139,.1);border:1px solid rgba(92,221,139,.25);padding:4px 10px;border-radius:6px;">
             <span style="width:6px;height:6px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>
-            Hartford Athletic "” Live Data
+            Live Data
           </span>
         </div>
         <div style="display:flex;flex-direction:column;gap:9px;" id="matches-list"></div>
@@ -322,27 +421,14 @@
   <script src="cjsa-directory.js"></script>
   <script>
     const ALL_UPCOMING = [
-      { home:'Hartford Athletic',  away:'FC Tulsa',           date:'Aug 16',  time:'7:30 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
-      { home:'Hartford Athletic',  away:'Sacramento Republic',date:'Aug 23',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
-      { home:'Danbury FC',         away:'Miami FC',           date:'Aug 18',  time:'7:00 PM', venue:'Danbury High School Stadium', league:'NISA', leagueShort:'NISA', homeId:'danbury-fc' },
-      { home:'New Haven FC',       away:'Ocean State FC',     date:'Aug 16',  time:'6:00 PM', venue:'Hamden Memorial Field', league:'NPSL', leagueShort:'NPSL', homeId:'new-haven-fc' },
-      { home:'Westport FC',        away:'Stamford AFC',       date:'Aug 17',  time:'4:00 PM', venue:'Wakeman Fields', league:'CT State', leagueShort:'CT', homeId:'westport-fc' },
-      { home:'Glastonbury FC',     away:'Norwich City CT',    date:'Aug 18',  time:'6:00 PM', venue:'Addison Park', league:'CT State', leagueShort:'CT', homeId:'glastonbury-fc' },
-      { home:'Greenwich FC',       away:'Norwalk United',     date:'Aug 17',  time:'3:00 PM', venue:'Greenwich HS Field', league:'CT State', leagueShort:'CT', homeId:'greenwich-fc' },
-      { home:'Hartford Wanderers', away:'Greenwich FC',       date:'Aug 19',  time:'6:00 PM', venue:'Colt Park', league:'CT State', leagueShort:'CT', homeId:'hartford-wanderers' },
-      { home:'Hartford Athletic',  away:'New Mexico United',  date:'Aug 30',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
-      { home:'Danbury FC',         away:'Chicago House AC',   date:'Aug 25',  time:'8:00 PM', venue:'Danbury HS Stadium', league:'NISA', leagueShort:'NISA', homeId:'danbury-fc' },
+      { home:'Hartford Athletic',  away:'Miami FC',             date:'Aug 15',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Hartford Athletic',  away:'Birmingham Legion FC', date:'Aug 29',  time:'7:00 PM', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Charleston Battery', away:'Hartford Athletic',    date:'Sep 2',   time:'TBD',      venue:'Patriots Point',         league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
     ];
 
     const ALL_RESULTS = [
-      { home:'Hartford Athletic',   homeScore:2, away:'Louisville City FC',   awayScore:1, date:'Aug 10', venue:'Trinity Health Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
-      { home:'Pittsburgh Riverhounds',homeScore:0, away:'Hartford Athletic', awayScore:0, date:'Aug 3',  venue:'Highmark Stadium',       league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
-      { home:'Danbury FC',           homeScore:4, away:'California FC',       awayScore:0, date:'Aug 4',  venue:'Danbury HS Stadium',     league:'NISA',            leagueShort:'NISA', homeId:'danbury-fc' },
-      { home:'Miami FC',             homeScore:0, away:'Danbury FC',          awayScore:1, date:'Aug 11', venue:'Riccardo Silva Stadium', league:'NISA',            leagueShort:'NISA', homeId:'danbury-fc' },
-      { home:'Boston City FC',       homeScore:1, away:'New Haven FC',        awayScore:2, date:'Aug 9',  venue:'Gill Stadium',           league:'NPSL',            leagueShort:'NPSL', homeId:'new-haven-fc' },
-      { home:'Greenwich FC',         homeScore:0, away:'Westport FC',         awayScore:2, date:'Aug 10', venue:'Greenwich HS Field',     league:'CT State',        leagueShort:'CT', homeId:'greenwich-fc' },
-      { home:'Waterbury Wolves',     homeScore:1, away:'Hartford Wanderers',  awayScore:0, date:'Aug 11', venue:'Municipal Stadium',      league:'CT State',        leagueShort:'CT', homeId:'waterbury-wolves' },
-      { home:'Glastonbury FC',       homeScore:2, away:'Waterbury Wolves',    awayScore:2, date:'Aug 4',  venue:'Addison Park',           league:'CT State',        leagueShort:'CT', homeId:'glastonbury-fc' },
+      { home:'Indy Eleven',        homeScore:1, away:'Hartford Athletic', awayScore:1, date:'Aug 9', venue:'Michael A. Carroll Stadium', league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
+      { home:'Loudoun United FC',  homeScore:2, away:'Hartford Athletic', awayScore:0, date:'Aug 1', venue:'Segra Field',                league:'USL Championship', leagueShort:'USL-C', homeId:'hartford-athletic' },
     ];
 
     function leaguePill(short) {
@@ -372,47 +458,83 @@
       `).join('');
     }
 
+    function renderFeaturedClub() {
+      const c = CT_CLUBS.find(x => x.id === 'hartford-athletic');
+      if (!c) return;
+      document.getElementById('feat-record').textContent = `${c.wins}W ${c.draws}D ${c.losses}L`;
+      document.getElementById('feat-points').textContent = `${clubPts(c)} pts`;
+      document.getElementById('feat-gfga').textContent = `${c.gf}–${c.ga}`;
+    }
+
+    const TIER_GROUPS = [
+      { tier: 'Professional',       label: 'Professional',  sub: 'USL Championship &middot; MLS Next Pro',        color: '#F5A800' },
+      { tier: 'Semi-Professional',  label: 'Semi-Pro',       sub: 'USL League Two',                                color: '#5BA3FF' },
+      { tier: 'Amateur / Semi-Pro', label: 'NPSL',           sub: 'National Premier Soccer League',                color: '#C8D8E8' },
+      { tier: 'Youth',              label: 'Youth Clubs',    sub: 'CJSA &middot; EDP &middot; ECNL &middot; MLS Next', color: '#5CDD8B' },
+    ];
+
+    function clubCardHtml(c) {
+      const isYouth = c.type === 'youth';
+      const statsHtml = isYouth
+        ? `<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;grid-column:1/-1;">
+             <div style="font-size:.78rem;font-weight:700;color:#5CDD8B;">${(c.ageGroups||[]).join(' &middot; ')}</div>
+             <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">Age Groups</div>
+           </div>`
+        : `<div style="background:rgba(255,255,255,.045);border-radius:8px;padding:9px;text-align:center;">
+             <div style="font-size:.88rem;font-weight:800;color:#fff;">${c.wins}W-${c.draws}D-${c.losses}L</div>
+             <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Record</div>
+           </div>
+           <div style="background:${c.primary}18;border:1px solid ${c.primary}30;border-radius:8px;padding:9px;text-align:center;">
+             <div style="font-size:.88rem;font-weight:800;color:${c.secondary||'#fff'};">${clubPts(c)}</div>
+             <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Points</div>
+           </div>
+           <div style="background:rgba(255,255,255,.045);border-radius:8px;padding:9px;text-align:center;">
+             <div style="font-size:.88rem;font-weight:800;color:${clubGD(c)>=0?'#5BA3FF':'#ff7070'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
+             <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">GD</div>
+           </div>`;
+      const liveBadge = c._espnLive ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.3);padding:3px 7px;border-radius:5px;vertical-align:middle;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>Live</span>` : '';
+      return `<a class="club-card" style="--club-c:${c.primary};--club-glow:${c.primary}2a;--club-wash:${c.primary}1c;" href="club.html?id=${c.id}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px;">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+            ${clubAvatar(c,46)}
+            <div style="min-width:0;">
+              <div style="font-size:.92rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name} ${liveBadge}</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; Est. ${c.founded}</div>
+            </div>
+          </div>
+          ${tierBadgeHtml(c.tier)}
+        </div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:12px;">${c.leagueShort} &bull; ${c.stadium}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;">${statsHtml}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.28);">${isYouth?'Youth Club':'Coach: '+c.coach} &nbsp;&bull;&nbsp; Est. ${c.founded}</div>
+      </a>`;
+    }
+
     function renderClubs(list) {
       const grid  = document.getElementById('clubs-grid');
       const empty = document.getElementById('clubs-empty');
       document.getElementById('club-count-lbl').textContent = `(${list.length})`;
       if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
       empty.style.display='none';
-      grid.innerHTML = list.map(c=>{
-        const isYouth = c.type === 'youth';
-        const statsHtml = isYouth
-          ? `<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;grid-column:1/-1;">
-               <div style="font-size:.78rem;font-weight:700;color:#5CDD8B;">${(c.ageGroups||[]).join(' &middot; ')}</div>
-               <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">Age Groups</div>
-             </div>`
-          : `<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
-               <div style="font-size:.88rem;font-weight:800;color:#fff;">${c.wins}W-${c.draws}D-${c.losses}L</div>
-               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Record</div>
-             </div>
-             <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
-               <div style="font-size:.88rem;font-weight:800;color:#fff;">${clubPts(c)}</div>
-               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Points</div>
-             </div>
-             <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:9px;text-align:center;">
-               <div style="font-size:.88rem;font-weight:800;color:${clubGD(c)>=0?'#5BA3FF':'#ff7070'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
-               <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">GD</div>
-             </div>`;
-        const liveBadge = c._espnLive ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.3);padding:3px 7px;border-radius:5px;vertical-align:middle;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>Live</span>` : '';
-        return `<a class="club-card" href="club.html?id=${c.id}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px;">
-            <div style="display:flex;align-items:center;gap:11px;min-width:0;">
-              ${clubAvatar(c,46)}
-              <div style="min-width:0;">
-                <div style="font-size:.92rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name} ${liveBadge}</div>
-                <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; Est. ${c.founded}</div>
+
+      grid.innerHTML = TIER_GROUPS.map(g => {
+        const clubs = list.filter(c => c.tier === g.tier);
+        if (!clubs.length) return '';
+        return `
+          <div>
+            <div class="tier-header" style="color:${g.color};--tier-glow:${g.color}22;">
+              <span class="tier-dot"></span>
+              <div style="color:#fff;">
+                <span style="font-size:.98rem;font-weight:800;letter-spacing:-.01em;">${g.label}</span>
+                <span style="font-size:.7rem;font-weight:700;color:${g.color};margin-left:8px;">${clubs.length}</span>
               </div>
+              <span style="font-size:.72rem;color:var(--muted);font-weight:600;">${g.sub}</span>
+              <span class="tier-line"></span>
             </div>
-            ${tierBadgeHtml(c.tier)}
-          </div>
-          <div style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:12px;">${c.leagueShort} &bull; ${c.stadium}</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;">${statsHtml}</div>
-          <div style="font-size:.72rem;color:rgba(255,255,255,.28);">${isYouth?'Youth Club':'Coach: '+c.coach} &nbsp;&bull;&nbsp; Est. ${c.founded}</div>
-        </a>`;
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;">
+              ${clubs.map(clubCardHtml).join('')}
+            </div>
+          </div>`;
       }).join('');
     }
 
@@ -472,12 +594,11 @@
 
       document.getElementById('standings-header').style.display = '';
       const tierMap = {
-        usl:  ['Professional'],
-        nisa: ['Semi-Professional'],
+        pro:  ['Professional'],
+        usl2: ['Semi-Professional'],
         npsl: ['Amateur / Semi-Pro'],
-        ct:   ['Amateur'],
       };
-      const tiers = tierMap[league] || ['Amateur'];
+      const tiers = tierMap[league] || ['Professional'];
       const sorted = CT_CLUBS.filter(c=>tiers.includes(c.tier)).sort((a,b)=>(clubPts(b)-clubPts(a))||(clubGD(b)-clubGD(a)));
       document.getElementById('standings-body').innerHTML = sorted.map((c,i)=>`
         <a class="data-row" href="club.html?id=${c.id}" style="text-decoration:none;padding:13px 20px;cursor:pointer;">
@@ -539,7 +660,7 @@
       });
       const titles = { overview:'Overview', clubs:'Club Directory', standings:'League Standings', matches:'Matches', directory:'Full CJSA Directory' };
       document.getElementById('topbar-title').textContent = titles[name]||name;
-      if (name==='standings')  showStandings('usl', document.querySelector('#standings-tabs .tab-btn'));
+      if (name==='standings')  showStandings('pro', document.querySelector('#standings-tabs .tab-btn'));
       if (name==='matches')    showMatches('upcoming', null);
       if (name==='clubs')      filterClubs();
       if (name==='directory')  filterDirectory();
@@ -584,22 +705,24 @@
       } catch(e){}
     })();
 
-    // â”€â”€â”€ Live Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Live Data ---
     // Tries local cache (/live-data.json, updated every 5 min by Windows task),
     // falls back to direct TheSportsDB browser fetch.
 
-    function applyLiveMatches(upcoming, results) {
+    function applyLiveMatches(upcoming, results, liveClubIds) {
       if (!upcoming.length && !results.length) return;
-      const keepUp  = ALL_UPCOMING.filter(m => m.homeId !== 'hartford-athletic');
-      const keepRes = ALL_RESULTS.filter(m =>
-        !m.home.includes('Hartford Athletic') && !m.away.includes('Hartford Athletic'));
+      const keepUp  = ALL_UPCOMING.filter(m => !liveClubIds.includes(m.homeId));
+      const keepRes = ALL_RESULTS.filter(m => !liveClubIds.includes(m.homeId));
       ALL_UPCOMING.length = 0; ALL_UPCOMING.push(...upcoming, ...keepUp);
       ALL_RESULTS.length  = 0; ALL_RESULTS.push(...results,  ...keepRes);
       renderOverviewUpcoming();
       if (document.getElementById('section-matches').style.display !== 'none')
         showMatches('upcoming', null);
-      const club = CT_CLUBS.find(c => c.id === 'hartford-athletic');
-      if (club) { club._espnLive = true; filterClubs(); }
+      liveClubIds.forEach(id => {
+        const club = ALL_CLUBS.find(c => c.id === id);
+        if (club) club._espnLive = true;
+      });
+      filterClubs();
       const badge = document.getElementById('espn-live-indicator');
       if (badge) badge.style.display = 'inline-flex';
     }
@@ -612,48 +735,63 @@
         time: m.time || 'TBD',
         venue: m.venue || 'Trinity Health Stadium',
         league: m.league || 'USL Championship', leagueShort: m.leagueShort || 'USL-C',
-        homeId: 'hartford-athletic',
+        homeId: m.homeId,
       };
       return isResult ? {...base, homeScore: m.homeScore ?? 0, awayScore: m.awayScore ?? 0} : base;
     }
 
     async function initLiveData() {
-      // 1. Try local cache first (fastest, no external request)
+      const tracked = ALL_CLUBS.filter(c => c.sportsDbId);
+      if (!tracked.length) return;
+      const trackedIds = tracked.map(c => c.id);
+
+      // 1. Try local cache first (fastest, no external request; refreshed every 5 min
+      //    by the CTSoccer-LiveData scheduled task on this machine)
       try {
         const cache = await fetch('/live-data.json?t=' + Date.now()).then(r => r.ok ? r.json() : null);
         if (cache && (cache.upcoming?.length || cache.results?.length)) {
-          const upcoming = (cache.upcoming || []).map(m => cacheMatchToCard(m, false));
-          const results  = (cache.results  || []).map(m => cacheMatchToCard(m, true));
-          applyLiveMatches(upcoming, results);
-          console.info('[Live] Loaded from local cache, generatedAt=' + cache.meta?.generatedAt);
-          return;
+          const upcoming = (cache.upcoming || []).filter(m => trackedIds.includes(m.homeId)).map(m => cacheMatchToCard(m, false));
+          const results  = (cache.results  || []).filter(m => trackedIds.includes(m.homeId)).map(m => cacheMatchToCard(m, true));
+          if (upcoming.length || results.length) {
+            applyLiveMatches(upcoming, results, trackedIds);
+            console.info('[Live] Loaded from local cache, generatedAt=' + cache.meta?.generatedAt);
+            return;
+          }
         }
       } catch {}
 
-      // 2. Fall back to direct TheSportsDB fetch
+      // 2. Fall back to direct TheSportsDB fetch, per tracked club
       try {
-        const TEAM = '138877';
         const BASE = 'https://www.thesportsdb.com/api/v1/json/3';
-        const [lastR, nextR] = await Promise.all([
-          fetch(`${BASE}/eventslast.php?id=${TEAM}`).then(r => r.json()),
-          fetch(`${BASE}/eventsnext.php?id=${TEAM}`).then(r => r.json()),
-        ]);
-        function evToMatch(ev, isResult) {
-          if (!ev) return null;
-          const d = new Date(ev.dateEvent + (ev.strTime ? 'T' + ev.strTime : 'T00:00:00'));
-          const base = {
-            home: ev.strHomeTeam, away: ev.strAwayTeam,
-            date: d.toLocaleDateString('en-US', {month:'short', day:'numeric'}),
-            time: ev.strTime ? ev.strTime.substring(0,5) : 'TBD',
-            venue: ev.strVenue || 'Trinity Health Stadium',
-            league: 'USL Championship', leagueShort: 'USL-C', homeId: 'hartford-athletic'
-          };
-          return isResult ? {...base, homeScore: +ev.intHomeScore||0, awayScore: +ev.intAwayScore||0} : base;
-        }
-        const results  = [evToMatch(lastR.results?.[0], true)].filter(Boolean);
-        const upcoming = [evToMatch(nextR.events?.[0],  false)].filter(Boolean);
-        applyLiveMatches(upcoming, results);
-        console.info('[Live] Loaded from TheSportsDB directly');
+        const results = [], upcoming = [];
+        await Promise.all(tracked.map(async club => {
+          try {
+            const [lastR, nextR] = await Promise.all([
+              fetch(`${BASE}/eventslast.php?id=${club.sportsDbId}`).then(r => r.json()),
+              fetch(`${BASE}/eventsnext.php?id=${club.sportsDbId}`).then(r => r.json()),
+            ]);
+            function evToMatch(ev, isResult) {
+              if (!ev) return null;
+              const d = new Date(ev.dateEvent + (ev.strTime ? 'T' + ev.strTime : 'T00:00:00'));
+              const base = {
+                home: ev.strHomeTeam, away: ev.strAwayTeam,
+                date: d.toLocaleDateString('en-US', {month:'short', day:'numeric'}),
+                time: ev.strTime ? ev.strTime.substring(0,5) : 'TBD',
+                venue: ev.strVenue || club.stadium,
+                league: club.league, leagueShort: club.leagueShort, homeId: club.id,
+              };
+              return isResult ? {...base, homeScore: +ev.intHomeScore||0, awayScore: +ev.intAwayScore||0} : base;
+            }
+            const r = evToMatch(lastR.results?.[0], true);
+            const u = evToMatch(nextR.events?.[0], false);
+            if (r) results.push(r);
+            if (u) upcoming.push(u);
+          } catch (err) {
+            console.info('[Live] ' + club.name + ' unavailable:', err.message);
+          }
+        }));
+        applyLiveMatches(upcoming, results, trackedIds);
+        console.info('[Live] Loaded from TheSportsDB directly for', tracked.length, 'club(s)');
       } catch (err) {
         console.info('[Live] All sources unavailable:', err.message);
       }
@@ -661,8 +799,9 @@
 
     // Init
     renderOverviewUpcoming();
+    renderFeaturedClub();
     renderClubs(CT_CLUBS);
-    initLiveData(); // non-blocking "” runs in background
+    initLiveData(); // non-blocking, runs in background
   </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Account &mdash; CT Soccer</title>
+  <title>My Account — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -32,6 +32,80 @@
     .roster-row:last-child{border-bottom:none;}
     .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1B2A4A;border:1px solid rgba(43,124,233,.4);color:#fff;padding:12px 22px;border-radius:12px;font-size:.875rem;font-weight:600;z-index:9999;transition:transform .3s cubic-bezier(.16,1,.3,1);white-space:nowrap;}
     .toast.show{transform:translateX(-50%) translateY(0);}
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; gap: 8px; }
+      nav .btn-outline { display: none; }
+      .card { padding: 18px; }
+      #view-player > div:first-child,
+      #view-team > div:first-child,
+      #view-team > div:nth-child(2),
+      #view-player > div:nth-child(2) {
+        grid-template-columns: 1fr !important;
+      }
+      #view-player > div:nth-child(3) > div { grid-template-columns: 1fr 1fr !important; }
+      #training-schedule { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      #availability-days { gap: 6px; }
+      #availability-days span { font-size: .72rem; }
+      #display-name { font-size: 1.05rem; }
+    }
+    .mobile-bottom-nav {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: space-around;
+      gap: 6px;
+      padding: 8px 8px 10px;
+      border-radius: 20px;
+      background: rgba(13, 27, 42, 0.92);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35), 0 0 1px rgba(255,255,255,0.1);
+    }
+    .mobile-bottom-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 52px;
+      border-radius: 14px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      transition: all .25s cubic-bezier(.16, 1, .3, 1);
+    }
+    .mobile-bottom-item:active {
+      transform: scale(0.92);
+    }
+    .mobile-bottom-item.active {
+      background: linear-gradient(135deg, rgba(43,124,233,0.18) 0%, rgba(43,124,233,0.08) 100%);
+      color: #7AC9FF;
+      box-shadow: 0 8px 16px rgba(43,124,233,0.2);
+    }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 480px) {
+      body { overflow-x: hidden; padding-bottom: 88px; }
+      .card { border-radius: 12px; }
+      nav { height: 52px; }
+      nav > a:first-child span { display: none; }
+      .btn-primary, .btn-outline { width: 100%; justify-content: center; }
+      #view-player > div:nth-child(3) > div { grid-template-columns: 1fr !important; }
+      #training-schedule { grid-template-columns: 1fr !important; }
+      #view-team #add-player-form > div { grid-template-columns: 1fr !important; }
+      #avatar-large { width: 54px; height: 54px; }
+      .tab-btn { padding: 8px 12px; }
+      .role-badge { display: none; }
+      .mobile-bottom-nav { display: flex !important; }
+    }
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .fade-in{animation:fadeIn .35s cubic-bezier(.16,1,.3,1) both;}
     ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
@@ -41,6 +115,21 @@
 
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
+
+<nav class="mobile-bottom-nav" aria-label="Mobile account navigation">
+  <a class="mobile-bottom-item" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+    Home
+  </a>
+  <a class="mobile-bottom-item" href="dashboard.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Clubs
+  </a>
+  <a class="mobile-bottom-item active" href="account.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Me
+  </a>
+</nav>
 
 <!-- NAV -->
 <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
@@ -104,15 +193,10 @@
             <select id="p-club">
               <option value="">No club selected</option>
               <option value="hartford-athletic">Hartford Athletic FC</option>
-              <option value="danbury-fc">Danbury FC</option>
-              <option value="new-haven-fc">New Haven FC</option>
-              <option value="westport-fc">Westport FC</option>
-              <option value="greenwich-fc">Greenwich FC</option>
-              <option value="bridgeport-city-sc">Bridgeport City SC</option>
-              <option value="waterbury-wolves">Waterbury Wolves</option>
-              <option value="glastonbury-fc">Glastonbury FC</option>
-              <option value="norwalk-united">Norwalk United</option>
-              <option value="hartford-wanderers">Hartford Wanderers</option>
+              <option value="ct-united-fc">CT United FC</option>
+              <option value="new-haven-united-fc">New Haven United FC</option>
+              <option value="ac-connecticut">AC Connecticut</option>
+              <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
             </select>
           </div>
           <button class="btn-primary" onclick="savePlayerInfo()" style="width:100%;justify-content:center;">Save Player Info</button>
@@ -134,7 +218,7 @@
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Appearances</div>
           </div>
           <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center;">
-            <div id="stat-rating" style="font-size:1.6rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.03em;">"”</div>
+            <div id="stat-rating" style="font-size:1.6rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.03em;">—</div>
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Avg Rating</div>
           </div>
         </div>
@@ -179,15 +263,10 @@
           <select id="tm-club" onchange="loadTeamRoster()" style="margin-bottom:12px;">
             <option value="">Select club...</option>
             <option value="hartford-athletic">Hartford Athletic FC</option>
-            <option value="danbury-fc">Danbury FC</option>
-            <option value="new-haven-fc">New Haven FC</option>
-            <option value="westport-fc">Westport FC</option>
-            <option value="greenwich-fc">Greenwich FC</option>
-            <option value="bridgeport-city-sc">Bridgeport City SC</option>
-            <option value="waterbury-wolves">Waterbury Wolves</option>
-            <option value="glastonbury-fc">Glastonbury FC</option>
-            <option value="norwalk-united">Norwalk United</option>
-            <option value="hartford-wanderers">Hartford Wanderers</option>
+            <option value="ct-united-fc">CT United FC</option>
+            <option value="new-haven-united-fc">New Haven United FC</option>
+            <option value="ac-connecticut">AC Connecticut</option>
+            <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
           </select>
         </div>
         <div><label class="field-label">Club Website</label>
@@ -205,7 +284,7 @@
           <div><label class="field-label">Opponent</label><input type="text" id="res-opponent" placeholder="Opponent club name..."></div>
           <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
             <div><label class="field-label">Your Score</label><input type="text" id="res-home" placeholder="0" style="text-align:center;"></div>
-            <div style="font-size:1.2rem;font-weight:800;color:var(--muted);padding-top:20px;">"”</div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--muted);padding-top:20px;">—</div>
             <div><label class="field-label">Their Score</label><input type="text" id="res-away" placeholder="0" style="text-align:center;"></div>
           </div>
           <div><label class="field-label">Date</label><input type="text" id="res-date" placeholder="e.g. Aug 16, 2026"></div>
@@ -253,15 +332,10 @@
           <select id="fan-follow-select" style="margin-bottom:10px;">
             <option value="">Select a club...</option>
             <option value="hartford-athletic">Hartford Athletic FC</option>
-            <option value="danbury-fc">Danbury FC</option>
-            <option value="new-haven-fc">New Haven FC</option>
-            <option value="westport-fc">Westport FC</option>
-            <option value="greenwich-fc">Greenwich FC</option>
-            <option value="bridgeport-city-sc">Bridgeport City SC</option>
-            <option value="waterbury-wolves">Waterbury Wolves</option>
-            <option value="glastonbury-fc">Glastonbury FC</option>
-            <option value="norwalk-united">Norwalk United</option>
-            <option value="hartford-wanderers">Hartford Wanderers</option>
+            <option value="ct-united-fc">CT United FC</option>
+            <option value="new-haven-united-fc">New Haven United FC</option>
+            <option value="ac-connecticut">AC Connecticut</option>
+            <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
           </select>
           <button class="btn-primary" onclick="followClub()" style="width:100%;justify-content:center;">+ Follow Club</button>
         </div>
@@ -357,7 +431,7 @@
   let user = {};
   try { user = JSON.parse(localStorage.getItem('ct_user')||'{}'); } catch(e){}
   if (!user.firstName) {
-    // Not logged in "” redirect to home
+    // Not logged in — redirect to home
     // (leave page accessible but show a "not signed in" banner)
   }
 
@@ -406,7 +480,7 @@
       document.getElementById('stat-goals').textContent   = user.stats.goals||0;
       document.getElementById('stat-assists').textContent = user.stats.assists||0;
       document.getElementById('stat-apps').textContent    = user.stats.apps||0;
-      document.getElementById('stat-rating').textContent  = user.stats.rating||'"”';
+      document.getElementById('stat-rating').textContent  = user.stats.rating||'—';
     }
 
     // Team manager
@@ -535,7 +609,7 @@
       goals:   parseInt(document.getElementById('inp-goals').value)||0,
       assists: parseInt(document.getElementById('inp-assists').value)||0,
       apps:    parseInt(document.getElementById('inp-apps').value)||0,
-      rating:  user.stats?.rating||'"”',
+      rating:  user.stats?.rating||'—',
     };
     saveUser();
     document.getElementById('stat-goals').textContent   = user.stats.goals;
