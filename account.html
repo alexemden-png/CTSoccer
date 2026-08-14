@@ -429,7 +429,30 @@
 <script>
   // ---- State ----
   let user = {};
-  try { user = JSON.parse(localStorage.getItem('ct_user')||'{}'); } catch(e){}
+  try { user = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}'); } catch(e){}
+  
+  // Check if guest - if so, show limited access
+  if (user.isGuest) {
+    // Show guest message and limit access
+    document.body.innerHTML = '';
+    document.body.style.display = 'flex';
+    document.body.style.alignItems = 'center';
+    document.body.style.justifyContent = 'center';
+    document.body.style.minHeight = '100vh';
+    document.body.innerHTML = `
+      <div style="text-align:center;max-width:420px;padding:32px;">
+        <div style="font-size:3rem;margin-bottom:20px;">👤</div>
+        <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:12px;color:#fff;">Guest Mode</h1>
+        <p style="font-size:0.95rem;color:rgba(255,255,255,.6);margin-bottom:24px;">Create an account to manage your profile, follow clubs, and access full features.</p>
+        <div style="display:flex;gap:12px;flex-direction:column;">
+          <a href="register.html" style="background:#2B7CE9;color:#fff;padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700;text-align:center;">Create Account</a>
+          <a href="dashboard.html" style="background:rgba(255,255,255,.1);color:#fff;padding:14px 24px;border-radius:10px;text-decoration:none;font-weight:700;text-align:center;border:1px solid rgba(255,255,255,.1);">Back to Dashboard</a>
+        </div>
+      </div>
+    `;
+    throw new Error('Guest mode');
+  }
+  
   if (!user.firstName) {
     // Not logged in — redirect to home
     // (leave page accessible but show a "not signed in" banner)

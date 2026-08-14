@@ -69,7 +69,7 @@ const CT_CLUBS = [
     description: 'CT United FC is Connecticut\'s first MLS Next Pro club, the third tier of the American soccer pyramid and MLS\'s official player-development league. Founded in 2024 and based in Bridgeport, the club is owned by Connecticut Sports Group and made its debut in March 2026.',
     about: 'CT United FC is building toward a permanent waterfront stadium on a former dog-racing track site in Bridgeport, playing its inaugural home matches at UConn\'s Morrone Stadium and Yale\'s Reese Stadium in the meantime. Head coach Shavar Thomas, a former Jamaican national team captain, leads the club\'s first-team roster and its MLS Next academy program.',
     wins: 10, draws: 2, losses: 9,
-    gf: 42, ga: 43,
+    gf: 40, ga: 37,
     roster: [],
     recentResults: [
       { opponent: 'New England Revolution II', home: true, score: '1-2', result: 'L', date: 'Aug 9, 2026' },
@@ -105,7 +105,7 @@ const CT_CLUBS = [
     description: 'New Haven United FC is a semi-professional club in the NPSL\'s Northeast Region, North Atlantic Conference. Founded in 2025 as the spiritual successor to the Elm City Express, the club plays at Yale\'s Reese Stadium and features players from 14 different countries.',
     about: 'Led by president Jason Price and head coach Kledis Capollari — a former Hartford Athletic assistant and youth development lead — New Haven United reached the NPSL conference final in its debut 2025 season and won the North Atlantic Conference outright in 2026 before falling to eventual national runner-up Bristol Rhythm AFC in the club\'s first-ever National Semifinal appearance.',
     wins: 6, draws: 2, losses: 2,
-    gf: 0, ga: 0,
+    gf: 21, ga: 14,
     roster: [],
     recentResults: [
       { opponent: 'Bristol Rhythm AFC',      home: false, score: '0-2', result: 'L', date: 'Jul 25, 2026' },
@@ -1225,6 +1225,141 @@ function clubWinPct(c) {
   const played = c.wins + c.draws + c.losses;
   if (!played) return null;
   return Math.round((c.wins / played) * 1000) / 10;
+}
+
+// ─── Full league standings ────────────────────────────────────────────────
+// Real, complete conference/division tables (every team, not just CT clubs),
+// sourced from each league's official standings via Wikipedia's structured
+// data templates (Template:2026_<League>_<Conference>_table), cross-checked
+// against ESPN/FoxSports/uslchampionship.com. `type: 'shootout'` leagues
+// (MLS Next Pro) have no draws — tied matches go to a shootout that awards
+// the winner 1 bonus point and the loser 0, tracked in sow/sol.
+const LEAGUE_STANDINGS = {
+  'hartford-athletic': {
+    league: 'USL Championship', conference: 'Eastern Conference',
+    type: 'standard',
+    updated: 'Aug 9, 2026', sourceUrl: 'https://www.uslchampionship.com/league-standings', sourceLabel: 'uslchampionship.com',
+    selfAbbr: 'HFD',
+    rows: [
+      { abbr:'TBR', name:'Tampa Bay Rowdies',          w:12, d:5, l:2,  gf:36, ga:19 },
+      { abbr:'CHS', name:'Charleston Battery',          w:10, d:3, l:6,  gf:38, ga:24 },
+      { abbr:'DET', name:'Detroit City FC',             w:9,  d:4, l:5,  gf:26, ga:17 },
+      { abbr:'LOU', name:'Louisville City FC',          w:8,  d:4, l:7,  gf:33, ga:32 },
+      { abbr:'PGH', name:'Pittsburgh Riverhounds SC',   w:8,  d:3, l:8,  gf:20, ga:20 },
+      { abbr:'RHI', name:'Rhode Island FC',             w:7,  d:4, l:6,  gf:27, ga:19 },
+      { abbr:'MIA', name:'Miami FC',                    w:5,  d:7, l:8,  gf:24, ga:32 },
+      { abbr:'IND', name:'Indy Eleven',                 w:6,  d:4, l:7,  gf:20, ga:21 },
+      { abbr:'HFD', name:'Hartford Athletic',           w:4,  d:9, l:5,  gf:13, ga:17 },
+      { abbr:'LDN', name:'Loudoun United FC',           w:3,  d:9, l:6,  gf:21, ga:30 },
+      { abbr:'BHM', name:'Birmingham Legion FC',        w:3,  d:8, l:6,  gf:18, ga:21 },
+      { abbr:'BRK', name:'Brooklyn FC',                 w:3,  d:4, l:10, gf:17, ga:32 },
+      { abbr:'JAX', name:'Sporting Club Jacksonville',  w:1,  d:5, l:13, gf:23, ga:51 },
+    ],
+  },
+  'ct-united-fc': {
+    league: 'MLS Next Pro', conference: 'Eastern Conference',
+    type: 'shootout',
+    updated: 'Aug 12, 2026', sourceUrl: 'https://www.mlsnextpro.com/standings/2026/conference', sourceLabel: 'mlsnextpro.com',
+    selfAbbr: 'CTU',
+    rows: [
+      { abbr:'CRN', name:'Crown Legacy FC',             div:'SE', w:12, sow:5, sol:2, l:3,  gf:54, ga:30 },
+      { abbr:'CFC', name:'Chattanooga FC',               div:'SE', w:11, sow:4, sol:2, l:5,  gf:41, ga:30 },
+      { abbr:'NE2', name:'New England Revolution II',    div:'NE', w:11, sow:3, sol:3, l:4,  gf:34, ga:24 },
+      { abbr:'CC2', name:'Columbus Crew 2',               div:'NE', w:10, sow:4, sol:1, l:6,  gf:37, ga:33 },
+      { abbr:'NYR', name:'New York Red Bulls II',         div:'NE', w:10, sow:1, sol:3, l:8,  gf:43, ga:37 },
+      { abbr:'OCB', name:'Orlando City B',                div:'SE', w:8,  sow:4, sol:3, l:7,  gf:42, ga:41 },
+      { abbr:'AT2', name:'Atlanta United 2',              div:'SE', w:10, sow:0, sol:4, l:7,  gf:44, ga:34 },
+      { abbr:'CTU', name:'CT United FC',                  div:'NE', w:10, sow:2, sol:0, l:9,  gf:40, ga:37 },
+      { abbr:'NY2', name:'New York City FC II',           div:'NE', w:9,  sow:2, sol:2, l:7,  gf:33, ga:30 },
+      { abbr:'CHI', name:'Chicago Fire FC II',            div:'SE', w:8,  sow:3, sol:3, l:7,  gf:43, ga:34 },
+      { abbr:'PU2', name:'Philadelphia Union II',         div:'NE', w:8,  sow:2, sol:2, l:10, gf:24, ga:29 },
+      { abbr:'HNT', name:'Huntsville City FC',            div:'SE', w:7,  sow:2, sol:4, l:9,  gf:35, ga:42 },
+      { abbr:'TFC', name:'Toronto FC II',                 div:'NE', w:8,  sow:1, sol:2, l:10, gf:35, ga:40 },
+      { abbr:'CAR', name:'Carolina Core FC',              div:'SE', w:5,  sow:3, sol:5, l:10, gf:32, ga:40 },
+      { abbr:'CIN', name:'FC Cincinnati 2',               div:'NE', w:4,  sow:2, sol:0, l:15, gf:22, ga:45 },
+      { abbr:'MIA', name:'Inter Miami CF II',             div:'SE', w:1,  sow:1, sol:3, l:15, gf:16, ga:49 },
+    ],
+  },
+  'new-haven-united-fc': {
+    league: 'NPSL', conference: 'North Atlantic Conference',
+    type: 'standard',
+    updated: 'Season complete', sourceUrl: 'https://www.npsl.com/standings-2026-conference/', sourceLabel: 'npsl.com',
+    selfAbbr: 'NHU',
+    rows: [
+      { abbr:'NHU', name:'New Haven United FC',            w:6, d:2, l:2, gf:21, ga:14 },
+      { abbr:'NYS', name:'New York Shockers',               w:6, d:1, l:3, gf:28, ga:16 },
+      { abbr:'ASC', name:'American Soccer Club New York',   w:4, d:4, l:2, gf:24, ga:16 },
+      { abbr:'ACN', name:'AC Newport',                      w:4, d:2, l:4, gf:25, ga:24 },
+      { abbr:'SCR', name:'Stana Cruz FC',                   w:4, d:2, l:4, gf:16, ga:20 },
+      { abbr:'OSN', name:"OSNER'S FC",                      w:0, d:1, l:9, gf:8,  ga:32 },
+    ],
+  },
+  'usl2-northeast': {
+    league: 'USL League Two', conference: 'Northeast Division',
+    type: 'standard',
+    updated: 'Jul 11, 2026 (season complete)', sourceUrl: 'https://www.uslleaguetwo.com/league-standings', sourceLabel: 'uslleaguetwo.com',
+    rows: [
+      { abbr:'VTG', name:'Vermont Green FC',            w:13, d:1, l:0,  gf:64, ga:12 },
+      { abbr:'NEF', name:'NEFC',                        w:12, d:0, l:2,  gf:32, ga:21 },
+      { abbr:'WMP', name:'Western Mass Pioneers',       w:8,  d:3, l:3,  gf:27, ga:20 },
+      { abbr:'BLR', name:'Black Rock FC',               w:5,  d:6, l:3,  gf:22, ga:17 },
+      { abbr:'ALB', name:'Albany Rush',                 w:6,  d:1, l:7,  gf:22, ga:35 },
+      { abbr:'BOS', name:'Boston Bolts',                w:4,  d:3, l:7,  gf:19, ga:27 },
+      { abbr:'SUP', name:'Seacoast United Phantoms',    w:4,  d:2, l:8,  gf:25, ga:29 },
+      { abbr:'CON', name:'Connecticut Rush',            w:4,  d:2, l:8,  gf:19, ga:26 },
+      { abbr:'ACC', name:'AC Connecticut',              w:3,  d:0, l:11, gf:18, ga:29 },
+      { abbr:'BOC', name:'Boston City FC',              w:0,  d:4, l:10, gf:18, ga:50 },
+    ],
+  },
+};
+LEAGUE_STANDINGS['ac-connecticut']        = { ...LEAGUE_STANDINGS['usl2-northeast'], selfAbbr: 'ACC' };
+LEAGUE_STANDINGS['connecticut-rush-usl2'] = { ...LEAGUE_STANDINGS['usl2-northeast'], selfAbbr: 'CON' };
+
+function standingsRowPts(row, type) {
+  return type === 'shootout' ? row.w * 3 + (row.sow || 0) : row.w * 3 + (row.d || 0);
+}
+function standingsRowPlayed(row, type) {
+  return type === 'shootout' ? row.w + (row.sow||0) + (row.sol||0) + row.l : row.w + (row.d||0) + row.l;
+}
+
+function leagueStandingsHtml(clubId) {
+  const table = LEAGUE_STANDINGS[clubId];
+  if (!table) return '';
+  const rows = [...table.rows].sort((a,b) => standingsRowPts(b, table.type) - standingsRowPts(a, table.type));
+  const isShootout = table.type === 'shootout';
+  const cols = isShootout
+    ? ['GP','W','SOW','SOL','L','GF','GA','GD','PTS']
+    : ['GP','W','D','L','GF','GA','GD','PTS'];
+  const colWidths = isShootout ? '32px 1fr repeat(9,44px)' : '32px 1fr repeat(8,44px)';
+  const headerCells = cols.map(c => `<div style="text-align:center;">${c}</div>`).join('');
+  const bodyRows = rows.map((r, i) => {
+    const gd = r.gf - r.ga;
+    const pts = standingsRowPts(r, table.type);
+    const isSelf = r.abbr === table.selfAbbr;
+    const cells = isShootout
+      ? [standingsRowPlayed(r,table.type), r.w, r.sow||0, r.sol||0, r.l, r.gf, r.ga, (gd>0?'+':'')+gd, pts]
+      : [standingsRowPlayed(r,table.type), r.w, r.d||0, r.l, r.gf, r.ga, (gd>0?'+':'')+gd, pts];
+    return `
+      <div style="display:grid;grid-template-columns:${colWidths};gap:6px;align-items:center;padding:9px 14px;font-size:.78rem;${isSelf?'background:rgba(43,124,233,.14);border-left:3px solid var(--accent-lt,#5BA3F5);':'border-left:3px solid transparent;'}border-bottom:1px solid rgba(255,255,255,.05);">
+        <div style="font-weight:800;color:${i<4?'#5CDD8B':'rgba(255,255,255,.4)'};">${i+1}</div>
+        <div style="font-weight:${isSelf?800:600};color:${isSelf?'#fff':'rgba(255,255,255,.78)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}${isSelf?' <span style="font-size:.62rem;font-weight:800;color:var(--accent-lt,#5BA3F5);text-transform:uppercase;letter-spacing:.05em;">(this club)</span>':''}</div>
+        ${cells.map((v,ci)=>`<div style="text-align:center;color:${ci===cells.length-1?'#fff':'rgba(255,255,255,.6)'};font-weight:${ci===cells.length-1?800:600};">${v}</div>`).join('')}
+      </div>`;
+  }).join('');
+  return `
+    <div style="background:var(--navy-800);border:1px solid var(--border,rgba(255,255,255,.07));border-radius:14px;overflow:hidden;">
+      <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:.9rem;font-weight:800;color:#fff;">${table.league} &mdash; ${table.conference}</div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-top:2px;">Full table, all ${rows.length} teams &middot; Updated ${table.updated}</div>
+        </div>
+        <a href="${table.sourceUrl}" target="_blank" rel="noopener" style="font-size:.72rem;color:var(--accent-lt,#5BA3F5);text-decoration:none;font-weight:600;">Source: ${table.sourceLabel} &rarr;</a>
+      </div>
+      <div style="display:grid;grid-template-columns:${colWidths};gap:6px;padding:8px 14px;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.08);">
+        <div>#</div><div>Club</div>${headerCells}
+      </div>
+      <div>${bodyRows}</div>
+    </div>`;
 }
 
 function tierBadgeHtml(tier) {

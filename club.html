@@ -232,7 +232,7 @@
       let activeTab = 'overview';
       function showTab(name) {
         activeTab = name;
-        ['overview','roster','results','schedule','tryouts'].forEach(t=>{
+        ['overview','roster','results','schedule','standings','tryouts'].forEach(t=>{
           const el = document.getElementById('tab-'+t);
           const btn = document.getElementById('tabBtn-'+t);
           if (el) { el.style.display = t===name?'':'none'; if(t===name){el.classList.remove('fade-in');void el.offsetWidth;el.classList.add('fade-in');} }
@@ -247,6 +247,13 @@
         document.getElementById('contact-modal').style.display='none';
       }
       document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeContactModal(); });
+
+      // Expose to global scope — the innerHTML below wires these up via onclick="" attributes,
+      // which resolve in global scope, but these are declared inside this async IIFE.
+      window.showTab = showTab;
+      window.toggleFollow = toggleFollow;
+      window.openContactModal = openContactModal;
+      window.closeContactModal = closeContactModal;
 
       const ptsLabel = clubPts(club);
       const gdLabel  = (clubGD(club)>0?'+':'')+clubGD(club);
@@ -312,8 +319,8 @@
 
             <!-- Tabs -->
             <div style="display:flex;gap:4px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap;">
-              ${['overview','roster','results','schedule','tryouts'].map(t=>`
-                <button id="tabBtn-${t}" class="tab-btn${t==='overview'?' active':''}" onclick="showTab('${t}')" style="border-radius:8px 8px 0 0;padding:9px 18px;">${t[0].toUpperCase()+t.slice(1)}</button>
+              ${['overview','roster','results','schedule', ...(typeof LEAGUE_STANDINGS !== 'undefined' && LEAGUE_STANDINGS[club.id] ? ['standings'] : []), 'tryouts'].map(t=>`
+                <button id="tabBtn-${t}" class="tab-btn${t==='overview'?' active':''}" onclick="showTab('${t}')" style="border-radius:8px 8px 0 0;padding:9px 18px;">${t==='standings'?'League Table':t[0].toUpperCase()+t.slice(1)}</button>
               `).join('')}
             </div>
           </div>
@@ -456,6 +463,11 @@
                 </div>
               `).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);">No upcoming matches scheduled.</div>'}
             </div>
+          </div>
+
+          <!-- LEAGUE TABLE -->
+          <div id="tab-standings" style="display:none;" class="fade-in">
+            ${(typeof LEAGUE_STANDINGS !== 'undefined' && LEAGUE_STANDINGS[club.id]) ? leagueStandingsHtml(club.id) : ''}
           </div>
 
           <!-- TRYOUTS -->

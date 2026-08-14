@@ -307,9 +307,12 @@
         <span style="font-size:1.05rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
       </a>
 
-      <div class="nav-desktop" style="display:flex;align-items:center;gap:32px;">
+      <div class="nav-desktop" style="display:flex;align-items:center;gap:24px;">
         <a href="#programs"    class="nav-link">Programs</a>
         <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="coaching-clinics.html" class="nav-link">Coaching</a>
+        <a href="news.html" class="nav-link">News</a>
+        <a href="partners.html" class="nav-link">Partners</a>
         <a href="#community"   class="nav-link">Community</a>
         <a href="#contact"     class="nav-link">Contact</a>
       </div>
@@ -331,7 +334,10 @@
     <div id="mobile-menu" style="display:none;background:rgba(13,27,42,.97);border-top:1px solid rgba(255,255,255,.07);">
       <div style="max-width:1180px;margin:0 auto;padding:16px 24px 24px;display:flex;flex-direction:column;gap:2px;">
         <a href="#programs"    class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Programs</a>
-        <a href="#tournaments" class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Tournaments</a>
+        <a href="tournaments.html" class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Tournaments</a>
+        <a href="coaching-clinics.html" class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Coaching Clinics</a>
+        <a href="news.html" class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">News</a>
+        <a href="partners.html" class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Partners</a>
         <a href="#community"   class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Community</a>
         <a href="#contact"     class="nav-link" style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);">Contact</a>
         <a href="#join" class="btn-primary" style="margin-top:14px;justify-content:center;">Register Now</a>
@@ -1010,11 +1016,26 @@
           </div>
         </div>
 
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+          <input type="checkbox" name="staySignedIn" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);">
+          <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Stay signed in</span>
+        </label>
+
         <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:.975rem;margin-top:4px;">
           Create My Account
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
         </button>
       </form>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.35);text-transform:uppercase;font-weight:700;">Or</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+      </div>
+
+      <button onclick="continueAsGuest()" class="btn-outline" style="width:100%;justify-content:center;padding:12px;font-size:.9rem;margin-top:16px;">
+        Continue as Guest
+      </button>
 
       <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.25);margin:18px 0 0;">Already a member? <a href="login.html" style="color:var(--accent);text-decoration:none;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sign in</a></p>
     </div>
@@ -1124,16 +1145,37 @@
       const email     = inputs[2].value.trim();
       const password  = inputs[3].value;
       const role      = e.target.querySelector('input[name="role"]:checked').value;
+      const staySignedIn = e.target.querySelector('input[name="staySignedIn"]').checked;
       const user = {
         firstName, lastName, email, password, role,
+        isGuest: false,
         joined: new Date().toISOString(),
         followedClubs: [],
         notifications: true,
         stats: { goals:0, assists:0, appearances:0, rating:' - ' }
       };
       localStorage.setItem('ctsoccer_user', JSON.stringify(user));
+      localStorage.setItem('ctsoccer_staySignedIn', staySignedIn ? 'true' : 'false');
       window.location.href = 'dashboard.html';
     });
+
+    function continueAsGuest() {
+      const guest = {
+        firstName: 'Guest',
+        lastName: 'User',
+        email: 'guest@ctsoccer.local',
+        role: 'fan',
+        isGuest: true,
+        joined: new Date().toISOString(),
+        followedClubs: [],
+        notifications: false,
+        stats: { goals:0, assists:0, appearances:0, rating:' - ' }
+      };
+      localStorage.setItem('ctsoccer_user', JSON.stringify(guest));
+      localStorage.setItem('ctsoccer_staySignedIn', 'false');
+      closeModal();
+      window.location.href = 'dashboard.html';
+    }
   </script>
 
   <!-- Soccer pitch canvas background for hero -->

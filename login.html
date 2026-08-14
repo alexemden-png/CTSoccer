@@ -212,6 +212,11 @@
         <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
       </div>
 
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+        <input type="checkbox" id="staySignedIn" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);">
+        <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Stay signed in</span>
+      </label>
+
       <button type="submit" class="btn-primary" style="margin-top:4px;">
         Sign In
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
@@ -224,21 +229,44 @@
     </p>
 
     <p style="text-align:center;margin-top:10px;">
-      <a href="dashboard.html" style="font-size:.72rem;color:rgba(255,255,255,.2);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Continue as guest →</a>
+      <a href="#" onclick="continueAsGuest(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.2);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Continue as guest →</a>
     </p>
   </div>
 
   <script>
-    // Check if already logged in
-    const existing = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
-    if (existing && existing.firstName) {
+    function continueAsGuest() {
+      const guest = {
+        firstName: 'Guest',
+        lastName: 'User',
+        email: 'guest@ctsoccer.local',
+        role: 'fan',
+        isGuest: true,
+        joined: new Date().toISOString(),
+        followedClubs: [],
+        notifications: false,
+        stats: { goals:0, assists:0, appearances:0, rating:' - ' }
+      };
+      localStorage.setItem('ctsoccer_user', JSON.stringify(guest));
+      localStorage.setItem('ctsoccer_staySignedIn', 'false');
       window.location.href = 'dashboard.html';
+    }
+
+    // Check if already logged in or should auto-login
+    const existing = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+    const staySignedIn = localStorage.getItem('ctsoccer_staySignedIn') === 'true';
+    
+    if (existing && existing.firstName && staySignedIn) {
+      window.location.href = 'dashboard.html';
+    } else if (existing && existing.firstName && !staySignedIn) {
+      // User exists but stay signed in is off, clear the session
+      localStorage.removeItem('ctsoccer_user');
     }
 
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const email    = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
+      const staySignedIn = document.getElementById('staySignedIn').checked;
       const errorEl  = document.getElementById('error-msg');
 
       // Load stored user
@@ -246,6 +274,7 @@
 
       if (user && user.email && user.email.toLowerCase() === email && user.password === password) {
         errorEl.style.display = 'none';
+        localStorage.setItem('ctsoccer_staySignedIn', staySignedIn ? 'true' : 'false');
         window.location.href = 'dashboard.html';
       } else if (user && user.email && user.email.toLowerCase() === email) {
         // Email matched but wrong password
