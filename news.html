@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>News & Events — CT Soccer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.38);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 24px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .hero { padding: 80px 24px 50px; max-width: 1180px; margin: 0 auto; position: relative; }
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .filter-btn { font-family: 'Montserrat', Arial, sans-serif; font-size: .78rem; font-weight: 700; padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: rgba(255,255,255,.55); cursor: pointer; transition: all .18s; }
+    .filter-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.08); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .n-card { background: var(--navy-800); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 28px 32px; display: flex; gap: 22px; transition: border-color .2s, transform .2s; }
+    .n-card:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+    .n-card.featured { grid-column: 1 / -1; }
+    .n-avatar { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .9rem; flex-shrink: 0; }
+    .badge { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 5px; display: inline-block; }
+    .badge-result { background: rgba(92,221,139,.12); color: #5CDD8B; border: 1px solid rgba(92,221,139,.2); }
+    .badge-milestone { background: rgba(43,124,233,.15); color: var(--accent-lt); border: 1px solid rgba(43,124,233,.2); }
+    .badge-event { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+    .badge-site { background: rgba(168,85,247,.14); color: #c084fc; border: 1px solid rgba(168,85,247,.22); }
+
+    .mobile-bottom-nav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; transition: all .25s cubic-bezier(.16,1,.3,1); }
+    .mobile-bottom-item.active { background: linear-gradient(135deg, rgba(43,124,233,.18) 0%, rgba(43,124,233,.08) 100%); color: #7AC9FF; box-shadow: 0 8px 16px rgba(43,124,233,.2); }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+      .n-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item active" href="news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="coaching-clinics.html" class="nav-link">Coaching</a>
+        <a href="news.html" class="nav-link" style="color:#fff;">News</a>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <div style="border-bottom:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 800px 400px at 60% 50%,rgba(43,124,233,.1) 0%,transparent 70%);pointer-events:none;"></div>
+    <div class="hero">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <a href="index.html" style="font-size:.8rem;color:var(--muted);text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Home</a>
+        <span style="color:rgba(255,255,255,.2);">/</span>
+        <span style="font-size:.8rem;color:rgba(255,255,255,.6);">News & Events</span>
+      </div>
+      <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px;">
+        Connecticut Soccer<br><span style="color:var(--accent-lt);">News & Updates</span>
+      </h1>
+      <p style="font-size:1rem;line-height:1.75;color:var(--muted);max-width:600px;">
+        What's happening across Connecticut's real professional and semi-pro clubs this season, plus updates from the CT Soccer platform itself.
+      </p>
+    </div>
+  </div>
+
+  <div style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;">
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" onclick="filterNews('all',this)">All</button>
+      <button class="filter-btn" onclick="filterNews('result',this)">Match Results</button>
+      <button class="filter-btn" onclick="filterNews('milestone',this)">Season Milestones</button>
+      <button class="filter-btn" onclick="filterNews('site',this)">Platform Updates</button>
+    </div>
+    <div id="news-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      Match results and standings update automatically from TheSportsDB for Hartford Athletic, AC Connecticut, and CT Rush. See each club's page for the latest.
+    </p>
+  </div>
+
+  <script src="clubs-data.js"></script>
+  <script>
+    // Real, verified season storylines for CT's professional/semi-pro clubs (see each club page for live data).
+    const NEWS = [
+      {
+        id: 'ctu-debut',
+        category: 'milestone',
+        badge: 'Milestone', badgeClass: 'badge-milestone',
+        date: 'Mar 1, 2026',
+        clubId: 'ct-united-fc',
+        title: 'CT United FC opens inaugural season with a 3–1 road win over FC Cincinnati 2',
+        summary: 'Connecticut\'s first-ever MLS Next Pro club made history in its debut match, the first step in a season that has since seen the club climb to a winning record.',
+      },
+      {
+        id: 'nhu-conference',
+        category: 'milestone',
+        badge: 'Milestone', badgeClass: 'badge-milestone',
+        date: 'Jul 19, 2026',
+        clubId: 'new-haven-united-fc',
+        title: 'New Haven United FC wins the NPSL North Atlantic Conference outright',
+        summary: 'In just its second season, New Haven United finished 1st in the North Atlantic Conference before advancing to the NPSL National Semifinal — the deepest playoff run by a Connecticut NPSL club.',
+      },
+      {
+        id: 'hfd-usl2',
+        category: 'result',
+        badge: 'Match Result', badgeClass: 'badge-result',
+        date: 'Aug 9, 2026',
+        clubId: 'hartford-athletic',
+        title: 'Hartford Athletic draw 1–1 with Indy Eleven',
+        summary: 'Jordan Scarlett\'s second-half equalizer salvaged a point on the road, part of a stretch that has seen Hartford draw four of its last six USL Championship matches.',
+      },
+      {
+        id: 'ctu-streak',
+        category: 'result',
+        badge: 'Match Result', badgeClass: 'badge-result',
+        date: 'Aug 1, 2026',
+        clubId: 'ct-united-fc',
+        title: 'CT United FC beats Orlando City B 4–2, fourth win in five matches',
+        summary: 'A four-goal outing continued CT United\'s strong summer stretch in MLS Next Pro, pushing the club\'s win percentage well above .500 for the season.',
+      },
+      {
+        id: 'usl2-season-wrap',
+        category: 'milestone',
+        badge: 'Season Wrap', badgeClass: 'badge-milestone',
+        date: 'Jul 12, 2026',
+        clubId: 'ac-connecticut',
+        title: 'USL League Two regular season wraps up for AC Connecticut and CT Rush',
+        summary: 'Both Connecticut clubs closed out the Northeast Division regular season — CT Rush finished 8th, AC Connecticut 9th. CT Rush\'s debut USL2 season is now complete.',
+      },
+      {
+        id: 'site-live-data',
+        category: 'site',
+        badge: 'Platform Update', badgeClass: 'badge-site',
+        date: 'Aug 13, 2026',
+        clubId: null,
+        title: 'Live results now tracking for Hartford Athletic, AC Connecticut, and CT Rush',
+        summary: 'CT Soccer now pulls real results and upcoming fixtures automatically for all three USL-affiliated clubs, refreshing every five minutes.',
+      },
+      {
+        id: 'site-coaching-launch',
+        category: 'site',
+        badge: 'Platform Update', badgeClass: 'badge-site',
+        date: 'Aug 14, 2026',
+        clubId: null,
+        title: 'New: Coaching Clinics directory with real CJSA/US Soccer course pricing',
+        summary: 'Browse every Grassroots-through-B-License course CJSA and US Soccer offer in Connecticut, filterable by tier and ranked by value.',
+      },
+    ];
+
+    let activeFilter = 'all';
+    function filterNews(f, btn) {
+      activeFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderNews();
+    }
+
+    function renderNews() {
+      const list = NEWS.filter(n => activeFilter === 'all' || n.category === activeFilter);
+      const container = document.getElementById('news-list');
+      if (!list.length) {
+        container.innerHTML = '<div style="padding:48px;text-align:center;color:rgba(255,255,255,.38);">No stories in this category yet.</div>';
+        return;
+      }
+      container.innerHTML = list.map(n => {
+        const club = n.clubId && typeof getClubById === 'function' ? getClubById(n.clubId) : null;
+        const avatar = club
+          ? `<div class="n-avatar" style="background:${club.primary}22;border:1.5px solid ${club.primary}55;color:${club.primary};">${club.abbr}</div>`
+          : `<div class="n-avatar" style="background:rgba(168,85,247,.14);border:1.5px solid rgba(168,85,247,.35);color:#c084fc;">CT</div>`;
+        const linkWrap = (inner) => club ? `<a href="club.html?id=${club.id}" style="text-decoration:none;color:inherit;">${inner}</a>` : inner;
+        return `
+          <div class="n-card">
+            ${avatar}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                <span class="badge ${n.badgeClass}">${n.badge}</span>
+                <span style="font-size:.75rem;color:rgba(255,255,255,.35);">${n.date}</span>
+                ${club ? `<span style="font-size:.75rem;color:var(--accent-lt);font-weight:700;">${club.name}</span>` : ''}
+              </div>
+              ${linkWrap(`<h2 style="font-size:1.1rem;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:8px;">${n.title}</h2>`)}
+              <p style="font-size:.875rem;line-height:1.7;color:rgba(255,255,255,.55);margin:0;max-width:760px;">${n.summary}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderNews();
+  </script>
+</body>
+</html>
