@@ -314,10 +314,11 @@
         <a href="#contact"     class="nav-link">Contact</a>
       </div>
 
-      <div style="display:flex;align-items:center;gap:10px;">
-        <a href="login.html" class="nav-link nav-desktop" style="font-size:.85rem;">Sign In</a>
+      <div style="display:flex;align-items:center;gap:10px;" id="nav-auth-container">
+        <a href="login.html" class="nav-link nav-desktop" style="font-size:.85rem;" id="nav-signin">Sign In</a>
         <a href="#join" class="btn-primary" style="padding:9px 18px;font-size:.85rem;" id="nav-cta-mobile">Register Now</a>
-        <a href="#join" class="btn-primary nav-desktop" style="padding:9px 18px;font-size:.85rem;display:inline-flex;">Register Now</a>
+        <a href="#join" class="btn-primary nav-desktop" style="padding:9px 18px;font-size:.85rem;display:inline-flex;" id="nav-register">Register Now</a>
+        <a href="tournaments.html" class="btn-primary" style="padding:9px 18px;font-size:.85rem;display:none;" id="nav-tournaments">Tournaments</a>
         <button id="menu-btn"
                 style="display:none;padding:8px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer;"
                 aria-label="Toggle menu">
@@ -337,6 +338,31 @@
       </div>
     </div>
   </nav>
+
+  <!-- Auth State Manager -->
+  <script>
+    function updateNavbarAuth() {
+      const user = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+      const signinBtn = document.getElementById('nav-signin');
+      const registerBtn = document.getElementById('nav-register');
+      const mobileCtaBtn = document.getElementById('nav-cta-mobile');
+      const tournamentsBtn = document.getElementById('nav-tournaments');
+      
+      if (user) {
+        if (signinBtn) signinBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (mobileCtaBtn) mobileCtaBtn.style.display = 'none';
+        if (tournamentsBtn) tournamentsBtn.style.display = 'inline-flex';
+      } else {
+        if (signinBtn) signinBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-flex';
+        if (mobileCtaBtn) mobileCtaBtn.style.display = 'inline-flex';
+        if (tournamentsBtn) tournamentsBtn.style.display = 'none';
+      }
+    }
+    updateNavbarAuth();
+    window.addEventListener('storage', updateNavbarAuth);
+  </script>
 
 
   <!-- HERO -->

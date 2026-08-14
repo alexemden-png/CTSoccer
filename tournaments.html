@@ -241,15 +241,38 @@
         </div>
         <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
       </a>
-      <div style="display:flex;align-items:center;gap:28px;">
+      <div style="display:flex;align-items:center;gap:28px;" id="nav-auth-container">
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="dashboard.html" class="nav-link">Clubs</a>
         <a href="tournaments.html" class="nav-link" style="color:#fff;">Tournaments</a>
-        <a href="login.html" class="nav-link">Sign In</a>
-        <a href="index.html#join" class="btn-primary">Register</a>
+        <a href="login.html" class="nav-link" id="nav-signin">Sign In</a>
+        <a href="index.html#join" class="btn-primary" id="nav-register">Register</a>
+        <a href="account.html" class="btn-primary" style="display:none;" id="nav-tournaments-btn">My Tournaments</a>
       </div>
     </div>
   </nav>
+
+  <!-- Auth State Manager -->
+  <script>
+    function updateNavbarAuth() {
+      const user = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+      const signinBtn = document.getElementById('nav-signin');
+      const registerBtn = document.getElementById('nav-register');
+      const tournamentsBtn = document.getElementById('nav-tournaments-btn');
+      
+      if (user) {
+        if (signinBtn) signinBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (tournamentsBtn) tournamentsBtn.style.display = 'inline-flex';
+      } else {
+        if (signinBtn) signinBtn.style.display = 'inline-block';
+        if (registerBtn) registerBtn.style.display = 'inline-flex';
+        if (tournamentsBtn) tournamentsBtn.style.display = 'none';
+      }
+    }
+    updateNavbarAuth();
+    window.addEventListener('storage', updateNavbarAuth);
+  </script>
 
   <!-- HERO -->
   <div style="border-bottom:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;">
