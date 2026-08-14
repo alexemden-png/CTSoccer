@@ -68,13 +68,13 @@ const CT_CLUBS = [
     instagram: '@ctunitedfc',
     description: 'CT United FC is Connecticut\'s first MLS Next Pro club, the third tier of the American soccer pyramid and MLS\'s official player-development league. Founded in 2024 and based in Bridgeport, the club is owned by Connecticut Sports Group and made its debut in March 2026.',
     about: 'CT United FC is building toward a permanent waterfront stadium on a former dog-racing track site in Bridgeport, playing its inaugural home matches at UConn\'s Morrone Stadium and Yale\'s Reese Stadium in the meantime. Head coach Shavar Thomas, a former Jamaican national team captain, leads the club\'s first-team roster and its MLS Next academy program.',
-    wins: 7, draws: 1, losses: 10,
-    gf: 35, ga: 38,
+    wins: 10, draws: 2, losses: 9,
+    gf: 42, ga: 43,
     roster: [],
     recentResults: [
-      { opponent: 'New York Red Bulls II', home: true, score: '2-1', result: 'W', date: 'Jul 19, 2026' },
-      { opponent: 'Toronto FC II',         home: true, score: '3-2', result: 'W', date: 'Jul 12, 2026' },
-      { opponent: 'Carolina Core FC',      home: true, score: '3-1', result: 'W', date: 'Jul 5, 2026' },
+      { opponent: 'New England Revolution II', home: true, score: '1-2', result: 'L', date: 'Aug 9, 2026' },
+      { opponent: 'Orlando City B',            home: true, score: '4-2', result: 'W', date: 'Aug 1, 2026' },
+      { opponent: 'Columbus Crew 2',           home: true, score: '2-1', result: 'W', date: 'Jul 26, 2026' },
     ],
     upcoming: [],
     socialLinks: { facebook: true, instagram: true, twitter: true, youtube: false },
@@ -100,11 +100,12 @@ const CT_CLUBS = [
     website: 'newhavenunited.com',
     instagram: '@NewhavenunitedFC', twitter: '@nhunitedfc',
     description: 'New Haven United FC is a semi-professional club in the NPSL\'s Northeast Region, North Atlantic Conference. Founded in 2025 as the spiritual successor to the Elm City Express, the club plays at Yale\'s Reese Stadium and features players from 14 different countries.',
-    about: 'Led by president Jason Price and head coach Kledis Capollari — a former Hartford Athletic assistant and youth development lead — New Haven United reached the NPSL conference final in its debut 2025 season and won the North Atlantic Conference outright in 2026, advancing to the national semifinal.',
+    about: 'Led by president Jason Price and head coach Kledis Capollari — a former Hartford Athletic assistant and youth development lead — New Haven United reached the NPSL conference final in its debut 2025 season and won the North Atlantic Conference outright in 2026 before falling to eventual national runner-up Bristol Rhythm AFC in the club\'s first-ever National Semifinal appearance.',
     wins: 6, draws: 2, losses: 2,
     gf: 0, ga: 0,
     roster: [],
     recentResults: [
+      { opponent: 'Bristol Rhythm AFC',      home: false, score: '0-2', result: 'L', date: 'Jul 25, 2026' },
       { opponent: 'West Chester United SC', home: false, score: '4-2', result: 'W', date: 'Jul 19, 2026' },
     ],
     upcoming: [],
@@ -1215,6 +1216,12 @@ function getClubById(id) {
 
 function clubPts(c) { return c.wins * 3 + c.draws; }
 function clubGD(c)  { return c.gf - c.ga; }
+// Win % = wins / games played. Returns null when no games are on record yet (nothing to divide).
+function clubWinPct(c) {
+  const played = c.wins + c.draws + c.losses;
+  if (!played) return null;
+  return Math.round((c.wins / played) * 1000) / 10;
+}
 
 function tierBadgeHtml(tier) {
   if (tier === 'Professional')        return '<span style="background:rgba(245,168,0,.14);color:#F5A800;border:1px solid rgba(245,168,0,.3);font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:6px;">Pro</span>';

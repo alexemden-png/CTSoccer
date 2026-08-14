@@ -111,7 +111,7 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
     .match-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;transition:background .15s;}
     .match-row:hover{background:rgba(255,255,255,.06);}
-    .data-row{display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 68px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.855rem;transition:background .15s;}
+    .data-row{display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 60px 68px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.855rem;transition:background .15s;}
     .data-row:hover{background:rgba(255,255,255,.03);}
     .data-row:last-child{border-bottom:none;}
     .progress-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;}
@@ -368,8 +368,8 @@
           <button class="tab-btn" onclick="showStandings('youth',this)">Youth Clubs</button>
         </div>
         <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
-          <div id="standings-header" style="display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 68px;gap:8px;padding:11px 20px;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.26);border-bottom:1px solid var(--border);">
-            <div>#</div><div>Club</div><div style="text-align:center;">W</div><div style="text-align:center;">D</div><div style="text-align:center;">L</div><div style="text-align:center;">GD</div><div style="text-align:right;">Pts</div>
+          <div id="standings-header" style="display:grid;grid-template-columns:32px 1fr 52px 52px 52px 52px 60px 68px;gap:8px;padding:11px 20px;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.26);border-bottom:1px solid var(--border);">
+            <div>#</div><div>Club</div><div style="text-align:center;">W</div><div style="text-align:center;">D</div><div style="text-align:center;">L</div><div style="text-align:center;">GD</div><div style="text-align:center;">Win%</div><div style="text-align:right;">Pts</div>
           </div>
           <div id="standings-body"></div>
         </div>
@@ -410,6 +410,11 @@
             <div>Club Name</div><div>City</div><div>Website</div><div></div>
           </div>
           <div id="dir-body"></div>
+        </div>
+
+        <!-- CJSA CLUB CONTACT MODAL -->
+        <div id="dir-contact-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;" onclick="if(event.target.id==='dir-contact-modal')closeDirModal()">
+          <div id="dir-contact-modal-body" style="background:var(--navy-800);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:440px;width:100%;position:relative;"></div>
         </div>
         <div style="margin-top:12px;font-size:.75rem;color:rgba(255,255,255,.25);text-align:center;">Source: Connecticut Junior Soccer Association (cjsa.org). Clubs marked with a star have full profiles on this platform.</div>
       </section>
@@ -491,6 +496,10 @@
            <div style="background:rgba(255,255,255,.045);border-radius:8px;padding:9px;text-align:center;">
              <div style="font-size:.88rem;font-weight:800;color:${clubGD(c)>=0?'#5BA3FF':'#ff7070'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
              <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">GD</div>
+           </div>
+           <div style="background:rgba(92,221,139,.08);border:1px solid rgba(92,221,139,.2);border-radius:8px;padding:9px;text-align:center;">
+             <div style="font-size:.88rem;font-weight:800;color:#5CDD8B;">${clubWinPct(c)}%</div>
+             <div style="font-size:.6rem;color:var(--muted);margin-top:1px;">Win %</div>
            </div>`;
       const liveBadge = c._espnLive ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.3);padding:3px 7px;border-radius:5px;vertical-align:middle;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>Live</span>` : '';
       return `<a class="club-card" style="--club-c:${c.primary};--club-glow:${c.primary}2a;--club-wash:${c.primary}1c;" href="club.html?id=${c.id}">
@@ -505,7 +514,7 @@
           ${tierBadgeHtml(c.tier)}
         </div>
         <div style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:12px;">${c.leagueShort} &bull; ${c.stadium}</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;">${statsHtml}</div>
+        <div style="display:grid;grid-template-columns:repeat(${isYouth?1:4},1fr);gap:7px;margin-bottom:12px;">${statsHtml}</div>
         <div style="font-size:.72rem;color:rgba(255,255,255,.28);">${isYouth?'Youth Club':'Coach: '+c.coach} &nbsp;&bull;&nbsp; Est. ${c.founded}</div>
       </a>`;
     }
@@ -608,6 +617,7 @@
           <div style="text-align:center;font-weight:600;color:rgba(255,255,255,.75);">${c.draws}</div>
           <div style="text-align:center;font-weight:600;color:rgba(255,255,255,.75);">${c.losses}</div>
           <div style="text-align:center;font-weight:600;color:${clubGD(c)>0?'#5CDD8B':clubGD(c)<0?'#ff7070':'var(--muted)'};">${clubGD(c)>0?'+':''}${clubGD(c)}</div>
+          <div style="text-align:center;font-weight:600;color:#5CDD8B;">${clubWinPct(c)}%</div>
           <div style="text-align:right;font-weight:800;font-size:.95rem;color:${i===0?'var(--accent-lt)':'#fff'};">${clubPts(c)}</div>
         </a>
       `).join('') || `<div style="padding:32px;text-align:center;color:var(--muted);font-size:.875rem;">No clubs in this league yet.</div>`;
@@ -666,22 +676,66 @@
       if (name==='directory')  filterDirectory();
     }
 
+    let _dirFilteredList = [];
+
     function filterDirectory() {
       const q = (document.getElementById('dir-search')?.value||'').toLowerCase();
       if (typeof CJSA_DIRECTORY === 'undefined') return;
       const list = q ? CJSA_DIRECTORY.filter(c=>c.name.toLowerCase().includes(q)||c.city.toLowerCase().includes(q)) : CJSA_DIRECTORY;
+      _dirFilteredList = list;
       const el = document.getElementById('dir-body');
       if (!el) return;
-      el.innerHTML = list.map(c=>{
+      el.innerHTML = list.map((c,i)=>{
         const hasProfile = !!c.edpClubId;
-        return `<div style="display:grid;grid-template-columns:1fr 160px 1fr auto;gap:12px;align-items:center;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:.855rem;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
-          <div style="font-weight:700;color:#fff;">${c.name}${hasProfile?'<span title="Full profile available" style="margin-left:6px;font-size:.65rem;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Profile</span>':''}</div>
+        return `<div onclick="openDirModal(${i})" style="cursor:pointer;display:grid;grid-template-columns:1fr 160px 1fr auto;gap:12px;align-items:center;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:.855rem;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
+          <div style="font-weight:700;color:#fff;">${c.name}${hasProfile?'<span title="Full profile available" style="margin-left:6px;font-size:.65rem;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Profile</span>':''}${c.email?'<span title="Contact email on file" style="margin-left:6px;font-size:.65rem;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Email</span>':''}</div>
           <div style="color:var(--muted);font-size:.8rem;">${c.city}, CT</div>
-          <div><a href="${c.website}" target="_blank" rel="noopener" style="color:var(--accent-lt);text-decoration:none;font-size:.78rem;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${c.website.replace('https://','').replace('http://','').replace(/\/$/,'')}</a></div>
-          <div>${hasProfile?`<a href="club.html?id=${c.edpClubId}" style="font-size:.75rem;font-weight:700;color:var(--accent-lt);text-decoration:none;padding:5px 10px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);border-radius:7px;">View &rarr;</a>`:`<a href="${c.website}" target="_blank" rel="noopener" style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.4);text-decoration:none;padding:5px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:7px;">Website &rarr;</a>`}</div>
+          <div><a href="${c.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--accent-lt);text-decoration:none;font-size:.78rem;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${c.website.replace('https://','').replace('http://','').replace(/\/$/,'')}</a></div>
+          <div><span style="font-size:.75rem;font-weight:700;color:var(--accent-lt);padding:5px 10px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);border-radius:7px;">Details &rarr;</span></div>
         </div>`;
       }).join('') || '<div style="padding:32px;text-align:center;color:var(--muted);">No clubs match your search.</div>';
     }
+
+    function openDirModal(i) {
+      const c = _dirFilteredList[i];
+      if (!c) return;
+      const hasProfile = !!c.edpClubId;
+      const websiteClean = c.website.replace('https://','').replace('http://','').replace(/\/$/,'');
+      document.getElementById('dir-contact-modal-body').innerHTML = `
+        <button onclick="closeDirModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.07);border:none;width:30px;height:30px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+        <div style="font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:2px;padding-right:30px;">${c.name}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:20px;">${c.city}, CT ${c.notes ? '&bull; ' + c.notes : ''}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a href="${c.website}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;text-decoration:none;">
+            <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Website</div><div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${websiteClean}</div></div>
+          </a>
+          ${c.email ? `
+          <a href="mailto:${c.email}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.25);border-radius:12px;text-decoration:none;">
+            <svg width="16" height="16" fill="none" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Email</div><div style="font-size:.85rem;font-weight:700;color:var(--accent-lt);">${c.email}</div></div>
+          </a>` : ''}
+          ${c.phone ? `
+          <a href="tel:${c.phone.replace(/\D/g,'')}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;text-decoration:none;">
+            <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.55 3.18 2 2 0 0 1 3.54 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5a16 16 0 0 0 6.59 6.59l1.06-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Phone</div><div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${c.phone}</div></div>
+          </a>` : ''}
+          ${c.address ? `
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;">
+            <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Location</div><div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${c.address}</div></div>
+          </div>` : ''}
+          ${hasProfile ? `
+          <a href="club.html?id=${c.edpClubId}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--accent);border-radius:12px;text-decoration:none;color:#fff;font-weight:700;font-size:.85rem;">View Full CT Soccer Profile &rarr;</a>` : ''}
+          ${!c.email && !c.phone && !c.address ? `<div style="font-size:.78rem;color:var(--muted);text-align:center;padding:6px 0;">No additional contact info on file yet — visit the website above.</div>` : ''}
+        </div>
+      `;
+      document.getElementById('dir-contact-modal').style.display = 'flex';
+    }
+    function closeDirModal() {
+      document.getElementById('dir-contact-modal').style.display = 'none';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDirModal(); });
 
     function handleGlobalSearch(val) {
       if (!val.trim()) return;

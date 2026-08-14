@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Club — CT Soccer</title>
+  <title>Club
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -250,6 +250,7 @@
 
       const ptsLabel = clubPts(club);
       const gdLabel  = (clubGD(club)>0?'+':'')+clubGD(club);
+      const winPct   = clubWinPct(club);
 
       document.getElementById('page-content').innerHTML = `
         <!-- HERO -->
@@ -301,6 +302,11 @@
                   <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:${clubGD(club)>=0?'#5CDD8B':'#ff7070'};">${gdLabel}</div>
                   <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">GD</div>
                 </div>
+                ${winPct !== null ? `
+                <div style="background:rgba(92,221,139,.08);border:1px solid rgba(92,221,139,.22);border-radius:12px;padding:14px 18px;text-align:center;min-width:72px;">
+                  <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:#5CDD8B;">${winPct}%</div>
+                  <div style="font-size:.62rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">Win %</div>
+                </div>` : ''}
               </div>
             </div>
 
