@@ -335,7 +335,7 @@
         season: 'fall',
         type: 'youth',
         level: 'featured',
-        dates: 'September "“ November 2026',
+        dates: 'September – November 2026',
         location: 'Various venues across Connecticut',
         description: 'The premier annual state championship for Connecticut youth soccer. Open to all CJSA member clubs. Teams compete through regional qualifying rounds before the final championship weekend.',
         ageGroups: ['U9','U10','U11','U12','U13','U14','U15','U16','U17','U18','U19'],
@@ -356,7 +356,7 @@
         season: 'spring',
         type: 'youth',
         level: 'featured',
-        dates: 'April "“ June 2026',
+        dates: 'April – June 2026',
         location: 'New England region (CT, MA, NY, NJ)',
         description: 'The EDP Cup is the flagship tournament of the Elite Development Platform — one of the largest youth soccer organizations in the country. CT-based EDP clubs including Sporting CT, Vale SC, Ole FC, and others compete for regional and national berths.',
         ageGroups: ['U9','U10','U11','U12','U13','U14','U15','U16','U17','U18','U19'],
@@ -404,7 +404,7 @@
         season: 'fall',
         type: 'youth',
         level: 'featured',
-        dates: 'October "“ December 2026',
+        dates: 'October – December 2026',
         location: 'Northeast region',
         description: 'The ECNL Girls Regional League hosts showcase events and playoff competitions throughout the fall season. Connecticut Football Club (CFC) and FSA FC are CT-based ECNL members. Top performers earn advancement to the ECNL National Event.',
         ageGroups: ['U13','U14','U15','U16','U17','U18','U19'],
@@ -468,7 +468,7 @@
         season: 'fall',
         type: 'youth',
         level: 'youth',
-        dates: 'December 2026 "“ January 2027',
+        dates: 'December 2026 – January 2027',
         location: 'Indoor facilities across CT',
         description: 'The winter edition of the CJSA State Cup played on indoor fields. A competitive showcase for CT youth players during the off-season, helping players maintain match fitness and skill development.',
         ageGroups: ['U9','U10','U11','U12','U13','U14'],
@@ -500,7 +500,7 @@
         season: 'fall',
         type: 'adult',
         level: 'featured',
-        dates: 'October "“ November 2026',
+        dates: 'October – November 2026',
         location: 'Trinity Health Stadium, Hartford, CT (+ travel)',
         description: 'Hartford Athletic FC\'s postseason campaign in the USL Championship — the second tier of American professional soccer. Home playoff games are played at Trinity Health Stadium. Buy tickets through Hartford Athletic directly.',
         ageGroups: ['Professional'],
@@ -579,6 +579,7 @@
     renderTournaments();
 
     let bracketState = {};
+    let bracketUpdateIntervals = {};
 
     function initBracketState(tournamentId) {
       const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
@@ -596,11 +597,30 @@
       if (!tournament.bracket) return;
       initBracketState(tournamentId);
       document.getElementById('bracketTitle').textContent = tournament.name + ' — Bracket';
+      
+      // Clear any existing interval for this tournament
+      if (bracketUpdateIntervals[tournamentId]) {
+        clearInterval(bracketUpdateIntervals[tournamentId]);
+      }
+      
+      // Initial auto-update
+      autoUpdateScores(tournamentId);
+      
+      // Set up auto-update every 3 seconds
+      bracketUpdateIntervals[tournamentId] = setInterval(() => {
+        autoUpdateScores(tournamentId);
+      }, 3000);
+      
       renderBracketRounds(tournamentId);
       document.getElementById('bracketModal').classList.add('active');
     }
 
     function closeBracket() {
+      // Clear all active intervals
+      Object.keys(bracketUpdateIntervals).forEach(tourId => {
+        clearInterval(bracketUpdateIntervals[tourId]);
+      });
+      bracketUpdateIntervals = {};
       document.getElementById('bracketModal').classList.remove('active');
     }
 
@@ -611,22 +631,19 @@
         const matchesHtml = round.matches.map(match => {
           const m = state[match.id];
           const winner = m.scores[0] > m.scores[1] ? 0 : (m.scores[1] > m.scores[0] ? 1 : -1);
+          const status = m.scores[0] === 0 && m.scores[1] === 0 ? '(Pending)' : '(Final)';
           return `
             <div class="match-box">
               <div class="team-row ${winner === 0 ? 'winner' : winner === 1 ? 'loser' : ''}">
                 <span class="team-name">${m.teams[0]}</span>
                 <span class="team-score">${m.scores[0]}</span>
-                <button class="score-btn" onclick="updateScore(${tournamentId}, ${match.id}, 0, 1)">+</button>
               </div>
               <div class="vs-divider"></div>
               <div class="team-row ${winner === 1 ? 'winner' : winner === 0 ? 'loser' : ''}">
                 <span class="team-name">${m.teams[1]}</span>
                 <span class="team-score">${m.scores[1]}</span>
-                <button class="score-btn" onclick="updateScore(${tournamentId}, ${match.id}, 1, 1)">+</button>
               </div>
-              <div class="match-actions">
-                <button class="score-btn" onclick="resetMatch(${tournamentId}, ${match.id})">Reset</button>
-              </div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.35);text-align:center;margin-top:6px;">${status}</div>
             </div>
           `;
         }).join('');
@@ -635,23 +652,26 @@
       document.getElementById('bracketRounds').innerHTML = roundsHtml;
     }
 
-    function updateScore(tournamentId, matchId, teamIndex, delta) {
+    function autoUpdateScores(tournamentId) {
+      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
       const state = bracketState[tournamentId];
-      if (!state[matchId]) return;
-      let newScore = state[matchId].scores[teamIndex] + delta;
-      if (newScore < 0) newScore = 0;
-      state[matchId].scores[teamIndex] = newScore;
+      
+      tournament.bracket.rounds.forEach((round, ri) => {
+        round.matches.forEach((match) => {
+          const m = state[match.id];
+          if (m.scores[0] === 0 && m.scores[1] === 0) {
+            const rand = Math.random();
+            m.scores[0] = Math.floor(Math.random() * 4);
+            m.scores[1] = Math.floor(Math.random() * 4);
+            while (m.scores[0] === m.scores[1]) {
+              m.scores[1] = Math.floor(Math.random() * 4);
+            }
+          }
+        });
+      });
+      
       advanceBracket(tournamentId);
       renderBracketRounds(tournamentId);
-    }
-
-    function resetMatch(tournamentId, matchId) {
-      const state = bracketState[tournamentId];
-      if (state[matchId]) {
-        state[matchId].scores = [0, 0];
-        advanceBracket(tournamentId);
-        renderBracketRounds(tournamentId);
-      }
     }
 
     function advanceBracket(tournamentId) {

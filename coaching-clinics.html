@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Coaching Clinics — CT Soccer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --silver:   #C0C8D4;
+      --muted:    rgba(255,255,255,.38);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 24px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .hero { padding: 80px 24px 50px; max-width: 1180px; margin: 0 auto; position: relative; }
+
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .filter-btn { font-family: 'Montserrat', Arial, sans-serif; font-size: .78rem; font-weight: 700; padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: rgba(255,255,255,.55); cursor: pointer; transition: all .18s; }
+    .filter-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.08); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .sort-select { font-family: 'Montserrat', Arial, sans-serif; font-size: .78rem; font-weight: 700; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: var(--navy-700); color: #fff; cursor: pointer; }
+
+    .c-card { background: var(--navy-800); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 26px 30px; display: grid; grid-template-columns: 1fr 200px; gap: 20px; transition: border-color .2s, transform .2s; position: relative; overflow: hidden; }
+    .c-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+    .c-card:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+
+    .tier-grassroots::before { background: linear-gradient(to bottom, #5CDD8B, #2ecc71); }
+    .tier-d::before { background: linear-gradient(to bottom, #5BA3F5, #2B7CE9); }
+    .tier-c::before { background: linear-gradient(to bottom, #f59e0b, #d97706); }
+    .tier-b::before { background: linear-gradient(to bottom, #c084fc, #a855f7); }
+
+    .badge { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 9px; border-radius: 5px; display: inline-block; }
+    .badge-grassroots { background: rgba(92,221,139,.12); color: #5CDD8B; border: 1px solid rgba(92,221,139,.2); }
+    .badge-d { background: rgba(43,124,233,.15); color: var(--accent-lt); border: 1px solid rgba(43,124,233,.2); }
+    .badge-c { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+    .badge-b { background: rgba(168,85,247,.14); color: #c084fc; border: 1px solid rgba(168,85,247,.22); }
+
+    .deal-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; padding: 16px 12px; text-align: center; gap: 2px; }
+    .deal-great { background: rgba(46,204,113,.14); border: 1px solid rgba(46,204,113,.35); }
+    .deal-good  { background: rgba(92,221,139,.1);  border: 1px solid rgba(92,221,139,.25); }
+    .deal-fair  { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.28); }
+    .deal-premium { background: rgba(255,112,112,.1); border: 1px solid rgba(255,112,112,.28); }
+    .deal-na    { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+
+    @media (max-width: 720px) {
+      .c-card { grid-template-columns: 1fr; }
+    }
+
+    .mobile-bottom-nav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; transition: all .25s cubic-bezier(.16,1,.3,1); }
+    .mobile-bottom-item:active { transform: scale(0.92); }
+    .mobile-bottom-item.active { background: linear-gradient(135deg, rgba(43,124,233,.18) 0%, rgba(43,124,233,.08) 100%); color: #7AC9FF; box-shadow: 0 8px 16px rgba(43,124,233,.2); }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item active" href="coaching-clinics.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Clinics
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="dashboard.html" class="nav-link">Clubs</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="coaching-clinics.html" class="nav-link" style="color:#fff;">Coaching</a>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div style="border-bottom:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 800px 400px at 60% 50%,rgba(92,221,139,.08) 0%,transparent 70%);pointer-events:none;"></div>
+    <div class="hero">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <a href="index.html" style="font-size:.8rem;color:var(--muted);text-decoration:none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Home</a>
+        <span style="color:rgba(255,255,255,.2);">/</span>
+        <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Coaching Clinics</span>
+      </div>
+      <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px;">
+        Coaching Education<br><span style="color:#5CDD8B;">& Clinics</span>
+      </h1>
+      <p style="font-size:1rem;line-height:1.75;color:var(--muted);max-width:640px;margin-bottom:8px;">
+        Real US Soccer and Connecticut Junior Soccer Association (CJSA) coaching license courses — from free introductory modules through the B License. Filter by skill tier or sort by price.
+      </p>
+      <p style="font-size:.8rem;line-height:1.6;color:rgba(255,255,255,.3);max-width:640px;">
+        Prices and formats reflect real 2026 CJSA/US Soccer offerings. Exact dates rotate — always confirm on the US Soccer Learning Center before registering.
+      </p>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div style="max-width:1180px;margin:0 auto;padding:40px 24px 80px;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:8px;">
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterClinics('all',this)">All Tiers</button>
+        <button class="filter-btn" onclick="filterClinics('grassroots',this)">Grassroots</button>
+        <button class="filter-btn" onclick="filterClinics('d',this)">D License</button>
+        <button class="filter-btn" onclick="filterClinics('c',this)">C License</button>
+        <button class="filter-btn" onclick="filterClinics('b',this)">B License</button>
+      </div>
+      <select class="sort-select" id="sort-select" onchange="renderClinics()">
+        <option value="value">Sort: Best Value First</option>
+        <option value="price-asc">Sort: Price (Low to High)</option>
+        <option value="price-desc">Sort: Price (High to Low)</option>
+      </select>
+    </div>
+
+    <div style="background:rgba(92,221,139,.05);border:1px solid rgba(92,221,139,.15);border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:.78rem;line-height:1.6;color:rgba(255,255,255,.55);">
+      <strong style="color:#5CDD8B;">How the Value Score works:</strong> like a ticket deal-score, it's not just the price — it's price divided by instructional hours, ranked against every other course on this page. Cheapest-per-hour courses score as a <strong style="color:#2ecc71;">Great Deal</strong>; priciest-per-hour score as <strong style="color:#ff7070;">Premium</strong>. It says nothing about a course's quality — a B License is worth far more than a Grassroots module regardless of score.
+    </div>
+
+    <div id="clinic-list" style="display:flex;flex-direction:column;gap:16px;"></div>
+
+  </div>
+
+  <!-- FOOTER STRIP -->
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      Course info sourced from CJSA (cjsa.org/coaching) and the US Soccer Learning Center. Registration for every course happens on learning.ussoccer.com — CT Soccer does not process coaching registrations.
+    </p>
+  </div>
+
+  <script>
+    // Real 2026 CJSA / US Soccer coaching course catalog.
+    const CLINICS = [
+      {
+        id: 'intro-grassroots',
+        name: 'Introduction to Grassroots Coaching',
+        org: 'US Soccer (Online)',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 0,
+        priceLabel: 'Free',
+        hours: 0.33,
+        format: 'Self-paced online, ~20 minutes',
+        location: 'Online — US Soccer Learning Center',
+        dates: 'Available anytime',
+        description: 'The required first step before any small-sided Grassroots course. Covers the four Grassroots game models (4v4, 7v7, 9v9, 11v11) and the coaching philosophy behind them.',
+        prereq: 'None',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'grassroots-4v4',
+        name: 'US Soccer Grassroots 4v4 Course',
+        org: 'CJSA',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 25,
+        hours: 4,
+        format: 'In-person, single day',
+        location: 'Farmington, CT',
+        dates: 'Multiple sessions — see CJSA calendar',
+        description: 'Hands-on training for coaches of the youngest players (typically U6-U8), focused on the 4v4 small-sided game model.',
+        prereq: 'Introduction to Grassroots Coaching (online)',
+        registerUrl: 'https://www.cjsa.org/coaching/',
+      },
+      {
+        id: 'grassroots-7v7',
+        name: 'US Soccer Grassroots 7v7 Course',
+        org: 'CJSA',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 25,
+        hours: 4,
+        format: 'In-person, single day',
+        location: 'Guilford, CT',
+        dates: 'Multiple sessions — see CJSA calendar',
+        description: 'Covers coaching U9-U10 players in the 7v7 game model, building on 4v4 fundamentals with expanded tactical concepts.',
+        prereq: 'Introduction to Grassroots Coaching (online)',
+        registerUrl: 'https://www.cjsa.org/coaching/',
+      },
+      {
+        id: 'grassroots-9v9',
+        name: 'US Soccer Grassroots 9v9 Course',
+        org: 'CJSA',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 25,
+        hours: 5,
+        format: 'In-person, single day',
+        location: 'Simsbury, CT',
+        dates: 'Multiple sessions — see CJSA calendar',
+        description: 'For coaches of U11-U12 players transitioning toward the full-sided game, with an emphasis on possession and team shape.',
+        prereq: 'Introduction to Grassroots Coaching (online)',
+        registerUrl: 'https://www.cjsa.org/coaching/',
+      },
+      {
+        id: 'grassroots-11v11-bristol',
+        name: 'US Soccer Grassroots 11v11 Course',
+        org: 'CJSA',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 25,
+        hours: 6,
+        format: 'In-person, single day',
+        location: 'Bristol, CT',
+        dates: '2026 season — see CJSA calendar',
+        description: 'The final Grassroots module, covering the full 11v11 game for coaches working with U13+ players.',
+        prereq: 'Introduction to Grassroots Coaching (online)',
+        registerUrl: 'https://www.cjsa.org/coaching/',
+      },
+      {
+        id: 'grassroots-11v11-middletown',
+        name: 'US Soccer Grassroots 11v11 Course',
+        org: 'CJSA',
+        tier: 'grassroots',
+        tierLabel: 'Grassroots',
+        price: 25,
+        hours: 6,
+        format: 'In-person, single day',
+        location: 'Middletown, CT',
+        dates: '2026 season — see CJSA calendar',
+        description: 'A second 2026 sitting of the 11v11 Grassroots module, hosted at CJSA\'s Middletown venue.',
+        prereq: 'Introduction to Grassroots Coaching (online)',
+        registerUrl: 'https://www.cjsa.org/coaching/',
+      },
+      {
+        id: 'd-license-middletown-1',
+        name: 'US Soccer D License',
+        org: 'CJSA',
+        tier: 'd',
+        tierLabel: 'D License',
+        price: 425,
+        hours: 30,
+        format: 'In-person, weekly sessions over ~8 weeks',
+        location: 'Middletown, CT',
+        dates: 'May 12 – Jul 7, 2026',
+        description: 'The entry point into US Soccer\'s formal licensing pathway — a hands-on, field-based course covering practice planning, game-realistic training, and player development principles.',
+        prereq: 'All four Grassroots modules',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'd-license-middletown-2',
+        name: 'US Soccer D License',
+        org: 'CJSA',
+        tier: 'd',
+        tierLabel: 'D License',
+        price: 425,
+        hours: 30,
+        format: 'In-person, weekly sessions over ~8 weeks',
+        location: 'Middletown, CT',
+        dates: 'Jul 2 – Aug 25, 2026',
+        description: 'A second 2026 sitting of the D License at CJSA\'s Middletown venue, for coaches who can\'t make the spring cohort.',
+        prereq: 'All four Grassroots modules',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'd-license-montville',
+        name: 'US Soccer D License',
+        org: 'CJSA',
+        tier: 'd',
+        tierLabel: 'D License',
+        price: 425,
+        hours: 30,
+        format: 'In-person, weekly sessions over ~8-10 weeks',
+        location: 'Montville, CT',
+        dates: '2026 season — see CJSA calendar',
+        description: 'D License cohort serving eastern Connecticut coaches, hosted in Montville.',
+        prereq: 'All four Grassroots modules',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'd-license-stamford',
+        name: 'US Soccer D License',
+        org: 'CJSA',
+        tier: 'd',
+        tierLabel: 'D License',
+        price: 425,
+        hours: 30,
+        format: 'In-person, weekly sessions over ~8-10 weeks',
+        location: 'Stamford, CT',
+        dates: '2026 season — see CJSA calendar',
+        description: 'D License cohort serving Fairfield County coaches, hosted in Stamford.',
+        prereq: 'All four Grassroots modules',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'c-license',
+        name: 'US Soccer C License',
+        org: 'US Soccer / CJSA',
+        tier: 'c',
+        tierLabel: 'C License',
+        price: 400,
+        hours: 60,
+        format: 'Multiple weekend modules over several months',
+        location: 'Various CT venues',
+        dates: 'See US Soccer Learning Center for the current cohort',
+        description: 'A significant step up from the D License — deeper tactical periodization, leadership, and player-development coursework aimed at coaches working with competitive teams.',
+        prereq: 'US Soccer D License',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+      {
+        id: 'b-license',
+        name: 'US Soccer B License',
+        org: 'US Soccer',
+        tier: 'b',
+        tierLabel: 'B License',
+        price: null,
+        priceLabel: '$1,300–$3,000',
+        hours: 80,
+        format: 'Multi-module course over several months, regional cohorts',
+        location: 'Regional (Northeast cohorts run periodically)',
+        dates: 'See US Soccer Learning Center for the current cohort',
+        description: 'The advanced pre-professional license, for coaches directing club or high-level competitive programs. Price varies significantly by hosting organization and region.',
+        prereq: 'US Soccer C License',
+        registerUrl: 'https://learning.ussoccer.com',
+      },
+    ];
+
+    function computeValueScores() {
+      const scored = CLINICS.filter(c => c.price !== null && c.hours > 0);
+      scored.forEach(c => c.perHour = c.price / c.hours);
+      const sorted = [...scored].sort((a,b) => a.perHour - b.perHour);
+      sorted.forEach((c, i) => {
+        c.percentile = sorted.length > 1 ? i / (sorted.length - 1) : 0;
+      });
+    }
+    computeValueScores();
+
+    function dealBadge(c) {
+      if (c.price === null) return { label: 'Contact for Pricing', cls: 'deal-na', color: 'rgba(255,255,255,.5)' };
+      if (c.percentile <= 0.25) return { label: 'Great Deal', cls: 'deal-great', color: '#2ecc71' };
+      if (c.percentile <= 0.5)  return { label: 'Good Deal',  cls: 'deal-good',  color: '#5CDD8B' };
+      if (c.percentile <= 0.75) return { label: 'Fair Price', cls: 'deal-fair',  color: '#fbbf24' };
+      return { label: 'Premium', cls: 'deal-premium', color: '#ff7070' };
+    }
+
+    const TIER_BADGE = { grassroots: 'badge-grassroots', d: 'badge-d', c: 'badge-c', b: 'badge-b' };
+
+    let activeFilter = 'all';
+
+    function filterClinics(filter, btn) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderClinics();
+    }
+
+    function renderClinics() {
+      let list = CLINICS.filter(c => activeFilter === 'all' || c.tier === activeFilter);
+
+      const sortMode = document.getElementById('sort-select').value;
+      if (sortMode === 'price-asc') {
+        list = [...list].sort((a,b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+      } else if (sortMode === 'price-desc') {
+        list = [...list].sort((a,b) => (b.price ?? -1) - (a.price ?? -1));
+      } else {
+        list = [...list].sort((a,b) => (a.percentile ?? 1) - (b.percentile ?? 1));
+      }
+
+      const container = document.getElementById('clinic-list');
+      if (!list.length) {
+        container.innerHTML = '<div style="padding:48px;text-align:center;color:rgba(255,255,255,.38);">No courses match this filter.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(c => {
+        const deal = dealBadge(c);
+        const priceDisplay = c.priceLabel ? c.priceLabel : (c.price === 0 ? 'Free' : `$${c.price}`);
+        const perHourNote = (c.price !== null && c.hours) ? `$${c.perHour.toFixed(2)}/hr &middot; ~${c.hours} hrs total` : `~${c.hours} hrs total`;
+        return `
+          <div class="c-card tier-${c.tier}">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+                <span class="badge ${TIER_BADGE[c.tier]}">${c.tierLabel}</span>
+                <span style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);border-radius:5px;padding:3px 9px;border:1px solid rgba(255,255,255,.08);">${c.org}</span>
+              </div>
+              <h2 style="font-size:1.2rem;font-weight:800;letter-spacing:-.03em;color:#fff;margin-bottom:10px;">${c.name}</h2>
+              <p style="font-size:.875rem;line-height:1.72;color:rgba(255,255,255,.58);margin-bottom:16px;max-width:620px;">${c.description}</p>
+              <div style="display:flex;gap:20px;margin-bottom:10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="10" height="9" rx="1.5"/><line x1="6" y1="1" x2="6" y2="5"/><line x1="8" y1="1" x2="8" y2="5"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+                  <span style="font-size:.8rem;color:rgba(255,255,255,.5);">${c.dates}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"><path d="M6.5 1C4.015 1 2 3.015 2 5.5c0 3.375 4.5 7.5 4.5 7.5s4.5-4.125 4.5-7.5C11 3.015 8.985 1 6.5 1z"/><circle cx="6.5" cy="5.5" r="1.5"/></svg>
+                  <span style="font-size:.8rem;color:rgba(255,255,255,.5);">${c.location}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="5.5"/><polyline points="6.5,3.5 6.5,6.5 9,8"/></svg>
+                  <span style="font-size:.8rem;color:rgba(255,255,255,.5);">${c.format}</span>
+                </div>
+              </div>
+              <div style="font-size:.76rem;color:rgba(255,255,255,.32);">Prerequisite: ${c.prereq}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div class="deal-pill ${deal.cls}">
+                <div style="font-size:1.4rem;font-weight:800;color:#fff;">${priceDisplay}</div>
+                <div style="font-size:.68rem;color:${deal.color};font-weight:800;letter-spacing:.04em;text-transform:uppercase;">${deal.label}</div>
+                <div style="font-size:.66rem;color:rgba(255,255,255,.35);margin-top:2px;">${perHourNote}</div>
+              </div>
+              <a href="${c.registerUrl}" target="_blank" rel="noopener" class="btn-primary" style="justify-content:center;">Register &rarr;</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderClinics();
+  </script>
+</body>
+</html>
