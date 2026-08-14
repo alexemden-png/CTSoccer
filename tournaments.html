@@ -688,7 +688,10 @@
           const nextMatchIdx = Math.floor(idx / 2);
           const teamSlot = idx % 2;
           if (nextRound[nextMatchIdx]) {
-            nextRound[nextMatchIdx].teams[teamSlot] = winner;
+            const nextMatch = state[nextRound[nextMatchIdx].id];
+            if (nextMatch) {
+              nextMatch.teams[teamSlot] = winner;
+            }
           }
         });
       }
