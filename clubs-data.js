@@ -1213,8 +1213,46 @@ const CT_EDP_EXTRA = [
 // Combined array for pages that need all clubs
 const ALL_CLUBS = [...CT_CLUBS, ...CT_YOUTH_CLUBS, ...CT_YOUTH_EXTRA, ...CT_EDP_CLUBS, ...CT_EDP_EXTRA];
 
+// Builds a lightweight-but-real profile for a CJSA directory club that has no
+// full entry in ALL_CLUBS. Uses only real fields (name, city, website) —
+// everything else is an honest, clearly-generic placeholder, not fabricated detail.
+function cjsaFallbackClub(entry) {
+  const initials = entry.name.replace(/\(.*?\)/g, '').match(/[A-Z0-9]/g) || ['C','T'];
+  return {
+    id: entry.id,
+    name: entry.name,
+    city: entry.city, state: 'CT',
+    league: 'CJSA (Connecticut Junior Soccer Association)',
+    leagueShort: 'CJSA',
+    tier: 'Youth', tierLevel: 5, type: 'youth',
+    ageGroups: [],
+    founded: null, firstSeason: null,
+    stadium: 'See club website for home fields', stadiumAddress: entry.city + ', CT',
+    capacity: null,
+    primary: '#2B7CE9', secondary: '#FFFFFF', colorName: 'Blue & White',
+    abbr: initials.slice(0, 3).join(''),
+    coach: 'Director of Coaching',
+    website: (entry.website || '').replace(/^https?:\/\//, '').replace(/\/$/, ''),
+    contactUrl: entry.website || '',
+    contactEmail: entry.email || '',
+    contactPhone: entry.phone || '',
+    description: `${entry.name} is a member club of the Connecticut Junior Soccer Association, serving youth players in ${entry.city}, CT.`,
+    about: `${entry.name} isn't yet fully profiled on CT Soccer beyond its CJSA directory listing. Visit the club's own website for program details, age groups, and tryout information.`,
+    wins: 0, draws: 0, losses: 0, gf: 0, ga: 0,
+    roster: [], recentResults: [], upcoming: [], tournaments: [],
+    socialLinks: { facebook: false, instagram: false, twitter: false, youtube: false },
+    isDirectoryOnly: true,
+  };
+}
+
 function getClubById(id) {
-  return ALL_CLUBS.find(c => c.id === id) || null;
+  const found = ALL_CLUBS.find(c => c.id === id);
+  if (found) return found;
+  if (typeof CJSA_DIRECTORY !== 'undefined') {
+    const entry = CJSA_DIRECTORY.find(c => c.id === id);
+    if (entry) return cjsaFallbackClub(entry);
+  }
+  return null;
 }
 
 function clubPts(c) { return c.wins * 3 + c.draws; }

@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Account</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     input[type="text"],input[type="email"],input[type="password"],select,textarea{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;font-size:.875rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;width:100%;transition:border-color .2s;}
@@ -142,6 +145,7 @@
   <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   <span style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">My Account</span>
   <div style="flex:1;"></div>
+  <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-right:8px;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
   <a href="dashboard.html" class="btn-outline" style="font-size:.78rem;padding:7px 14px;">Dashboard</a>
 </nav>
 
@@ -149,9 +153,15 @@
 
   <!-- PROFILE HEADER -->
   <div class="card" style="display:flex;align-items:center;gap:22px;margin-bottom:22px;flex-wrap:wrap;">
-    <div id="avatar-large" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">?</div>
+    <div style="position:relative;flex-shrink:0;">
+      <div id="avatar-large" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;">?</div>
+      <button onclick="openPhotoModal()" title="Change photo" style="position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--accent);border:2px solid var(--navy-800);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+    </div>
     <div style="flex:1;min-width:180px;">
       <div id="display-name" style="font-size:1.25rem;font-weight:800;letter-spacing:-.025em;color:#fff;">My Account</div>
+      <div id="display-username" style="font-size:.8rem;color:var(--accent-lt);margin-top:2px;font-weight:600;"></div>
       <div id="display-email" style="font-size:.82rem;color:var(--muted);margin-top:3px;"></div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
         <span id="role-badge" style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:6px;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);">Member</span>
@@ -385,6 +395,14 @@
             <div><label class="field-label">First Name</label><input type="text" id="s-first" placeholder="First name"></div>
             <div><label class="field-label">Last Name</label><input type="text" id="s-last" placeholder="Last name"></div>
           </div>
+          <div>
+            <label class="field-label">Username</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);font-size:.875rem;pointer-events:none;">@</span>
+              <input type="text" id="s-username" placeholder="username" style="padding-left:26px;" oninput="checkUsernameAvailability()" maxlength="20">
+            </div>
+            <div id="username-status" style="font-size:.72rem;margin-top:5px;min-height:14px;"></div>
+          </div>
           <div><label class="field-label">Email Address</label><input type="email" id="s-email" placeholder="you@example.com"></div>
           <div><label class="field-label">Location (CT Town)</label><input type="text" id="s-location" placeholder="e.g. Hartford, CT"></div>
           <div><label class="field-label">Bio</label><textarea id="s-bio" placeholder="Tell us about yourself..."></textarea></div>
@@ -411,6 +429,15 @@
           </div>
         </div>
 
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:.85rem;font-weight:800;color:#fff;">Two-Factor Authentication</div>
+            <span id="tfa-badge" style="font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);">Disabled</span>
+          </div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:14px;">Add an extra layer of security — after your password, you'll need a code from an authenticator app to sign in.</div>
+          <div id="tfa-actions"></div>
+        </div>
+
         <div class="card" style="border-color:rgba(220,53,69,.2);">
           <div style="font-size:.85rem;font-weight:800;color:#ff7070;margin-bottom:10px;">Danger Zone</div>
           <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-bottom:12px;">Logging out will end your session. Deleting your account is permanent and cannot be undone.</div>
@@ -419,6 +446,90 @@
             <button class="btn-danger" style="opacity:.6;" onclick="if(confirm('Delete your account? This cannot be undone.')) deleteAccount()">Delete Account</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PHOTO MODAL ===== -->
+  <div id="photo-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+    <div class="card" style="max-width:420px;width:100%;position:relative;">
+      <button onclick="closePhotoModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;width:28px;height:28px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1rem;cursor:pointer;">&times;</button>
+      <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Profile Photo</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:18px;">Take a new photo or upload one from your device.</div>
+
+      <div id="photo-modal-idle">
+        <div style="display:flex;justify-content:center;margin-bottom:18px;">
+          <div id="photo-preview" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;color:#fff;overflow:hidden;">?</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <button class="btn-primary" onclick="startCamera()" style="width:100%;justify-content:center;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Take Photo
+          </button>
+          <button class="btn-outline" onclick="document.getElementById('photo-file-input').click()" style="width:100%;justify-content:center;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload from Device
+          </button>
+          <input type="file" id="photo-file-input" accept="image/*" style="display:none;" onchange="handlePhotoFile(this.files[0])">
+          <button class="btn-outline" style="width:100%;justify-content:center;border-color:rgba(220,53,69,.25);color:#ff7070;" onclick="removePhoto()" id="photo-remove-btn">Remove Photo</button>
+        </div>
+        <div id="camera-error" style="font-size:.75rem;color:#ff7070;margin-top:10px;text-align:center;"></div>
+      </div>
+
+      <div id="photo-modal-camera" style="display:none;">
+        <div style="border-radius:14px;overflow:hidden;background:#000;margin-bottom:14px;position:relative;aspect-ratio:1/1;">
+          <video id="camera-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+        </div>
+        <div style="display:flex;gap:9px;">
+          <button class="btn-outline" onclick="stopCamera()" style="flex:1;justify-content:center;">Cancel</button>
+          <button class="btn-primary" onclick="capturePhoto()" style="flex:1;justify-content:center;">Capture</button>
+        </div>
+      </div>
+
+      <div id="photo-modal-review" style="display:none;">
+        <div style="display:flex;justify-content:center;margin-bottom:18px;">
+          <img id="photo-review-img" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.1);">
+        </div>
+        <div style="display:flex;gap:9px;">
+          <button class="btn-outline" onclick="retakePhoto()" style="flex:1;justify-content:center;">Retake</button>
+          <button class="btn-primary" onclick="savePhoto()" style="flex:1;justify-content:center;">Use This Photo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2FA MODAL ===== -->
+  <div id="tfa-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+    <div class="card" style="max-width:440px;width:100%;position:relative;">
+      <button onclick="closeTfaModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;width:28px;height:28px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1rem;cursor:pointer;">&times;</button>
+
+      <div id="tfa-step-setup">
+        <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Set Up Two-Factor Authentication</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Add this key to an authenticator app (Google Authenticator, Authy, 1Password, etc.), then enter the 6-digit code it generates.</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px;">Setup Key</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <code id="tfa-secret" style="font-size:.95rem;font-weight:700;color:var(--accent-lt);letter-spacing:.08em;flex:1;word-break:break-all;">----</code>
+            <button onclick="copyTfaSecret()" style="background:rgba(255,255,255,.07);border:none;border-radius:7px;padding:6px 10px;color:rgba(255,255,255,.6);cursor:pointer;font-size:.7rem;font-weight:700;">Copy</button>
+          </div>
+        </div>
+        <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.75rem;color:rgba(255,255,255,.55);line-height:1.6;">
+          <strong style="color:#F5A800;">Demo mode:</strong> this site has no backend to send real codes. Your current code is <strong id="tfa-demo-code" style="color:#fff;"></strong> — enter it below to simulate a real authenticator app.
+        </div>
+        <label class="field-label">6-Digit Code</label>
+        <input type="text" id="tfa-code-input" placeholder="000000" maxlength="6" inputmode="numeric" style="text-align:center;letter-spacing:.3em;font-size:1.1rem;font-weight:700;margin-bottom:8px;">
+        <div id="tfa-error" style="font-size:.75rem;color:#ff7070;margin-bottom:10px;min-height:14px;"></div>
+        <button class="btn-primary" onclick="confirmTfaCode()" style="width:100%;justify-content:center;">Verify & Enable</button>
+      </div>
+
+      <div id="tfa-step-backup" style="display:none;">
+        <div style="font-size:.95rem;font-weight:800;color:#5CDD8B;margin-bottom:4px;">&#10003; Two-Factor Authentication Enabled</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Save these backup codes somewhere safe. Each one can be used once to sign in if you lose access to your authenticator app.</div>
+        <div id="tfa-backup-codes" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px;margin-bottom:16px;font-family:monospace;font-size:.85rem;color:#fff;"></div>
+        <button class="btn-primary" onclick="closeTfaModal()" style="width:100%;justify-content:center;">Done</button>
+      </div>
+    </div>
+  </div>
       </div>
     </div>
   </div>
@@ -472,10 +583,12 @@
 
   // ---- Boot ----
   function boot() {
-    const initials = [user.firstName, user.lastName].filter(Boolean).map(n=>n[0]).join('').toUpperCase() || '?';
-    document.getElementById('avatar-large').textContent = initials;
+    renderAvatar();
     document.getElementById('display-name').textContent  = user.firstName ? `${user.firstName} ${user.lastName||''}`.trim() : 'Guest';
+    document.getElementById('display-username').textContent = user.username ? '@'+user.username : '';
     document.getElementById('display-email').textContent = user.email || '';
+    if (document.getElementById('s-username')) document.getElementById('s-username').value = user.username || '';
+    renderTfaCard();
     document.getElementById('role-badge').textContent    = user.role ? (user.role[0].toUpperCase()+user.role.slice(1)) : 'Member';
     if (user.joined) {
       const d = new Date(user.joined);
@@ -566,14 +679,238 @@
 
   // ---- Profile ----
   function saveProfile() {
+    const username = document.getElementById('s-username').value.trim();
+    if (username && !/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(username)) {
+      toast('Username must be 3-20 characters, start with a letter, and use only letters, numbers, or underscores');
+      return;
+    }
     user.firstName = document.getElementById('s-first').value.trim();
     user.lastName  = document.getElementById('s-last').value.trim();
+    user.username  = username;
     user.email     = document.getElementById('s-email').value.trim();
     user.location  = document.getElementById('s-location').value.trim();
     user.bio       = document.getElementById('s-bio').value.trim();
     saveUser();
     boot();
     toast('Profile saved!');
+  }
+
+  function checkUsernameAvailability() {
+    const el = document.getElementById('username-status');
+    const val = document.getElementById('s-username').value.trim();
+    if (!val) { el.textContent = ''; return; }
+    if (!/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(val)) {
+      el.innerHTML = '<span style="color:#ff7070;">3-20 characters, start with a letter, letters/numbers/underscores only</span>';
+      return;
+    }
+    el.innerHTML = '<span style="color:#5CDD8B;">&#10003; Looks good</span>';
+  }
+
+  // ---- Profile Photo ----
+  let cameraStream = null;
+  let pendingPhotoDataUrl = null;
+
+  function renderAvatar() {
+    const el = document.getElementById('avatar-large');
+    const initials = [user.firstName, user.lastName].filter(Boolean).map(n=>n[0]).join('').toUpperCase() || '?';
+    if (user.avatar) {
+      el.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="Profile photo">`;
+    } else {
+      el.textContent = initials;
+    }
+    const removeBtn = document.getElementById('photo-remove-btn');
+    if (removeBtn) removeBtn.style.display = user.avatar ? '' : 'none';
+    const preview = document.getElementById('photo-preview');
+    if (preview) {
+      if (user.avatar) preview.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
+      else preview.textContent = initials;
+    }
+  }
+
+  function openPhotoModal() {
+    document.getElementById('photo-modal-idle').style.display = '';
+    document.getElementById('photo-modal-camera').style.display = 'none';
+    document.getElementById('photo-modal-review').style.display = 'none';
+    document.getElementById('camera-error').textContent = '';
+    renderAvatar();
+    document.getElementById('photo-modal').style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    stopCamera();
+    document.getElementById('photo-modal').style.display = 'none';
+  }
+
+  async function startCamera() {
+    const errEl = document.getElementById('camera-error');
+    errEl.textContent = '';
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      document.getElementById('camera-video').srcObject = cameraStream;
+      document.getElementById('photo-modal-idle').style.display = 'none';
+      document.getElementById('photo-modal-camera').style.display = '';
+    } catch (e) {
+      errEl.textContent = 'Could not access camera: ' + (e.message || 'permission denied');
+    }
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    document.getElementById('photo-modal-camera').style.display = 'none';
+    document.getElementById('photo-modal-idle').style.display = '';
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('camera-video');
+    const canvas = document.createElement('canvas');
+    const size = Math.min(video.videoWidth, video.videoHeight);
+    canvas.width = 320; canvas.height = 320;
+    const ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width, 0); ctx.scale(-1, 1); // un-mirror to match what others see
+    ctx.drawImage(video, (video.videoWidth-size)/2, (video.videoHeight-size)/2, size, size, 0, 0, 320, 320);
+    pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    stopCamera();
+    showPhotoReview();
+  }
+
+  function handlePhotoFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Please choose an image file'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = Math.min(img.width, img.height);
+        canvas.width = 320; canvas.height = 320;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 320, 320);
+        pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        showPhotoReview();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showPhotoReview() {
+    document.getElementById('photo-modal-idle').style.display = 'none';
+    document.getElementById('photo-modal-camera').style.display = 'none';
+    document.getElementById('photo-modal-review').style.display = '';
+    document.getElementById('photo-review-img').src = pendingPhotoDataUrl;
+  }
+
+  function retakePhoto() {
+    pendingPhotoDataUrl = null;
+    document.getElementById('photo-modal-review').style.display = 'none';
+    document.getElementById('photo-modal-idle').style.display = '';
+  }
+
+  function savePhoto() {
+    if (!pendingPhotoDataUrl) return;
+    user.avatar = pendingPhotoDataUrl;
+    saveUser();
+    pendingPhotoDataUrl = null;
+    renderAvatar();
+    closePhotoModal();
+    toast('Profile photo updated!');
+  }
+
+  function removePhoto() {
+    delete user.avatar;
+    saveUser();
+    renderAvatar();
+    toast('Profile photo removed');
+  }
+
+  // ---- Two-Factor Authentication ----
+  function randomBase32(len) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let out = '';
+    for (let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
+  }
+  function randomDigits(len) {
+    let out = '';
+    for (let i=0;i<len;i++) out += Math.floor(Math.random()*10);
+    return out;
+  }
+
+  function renderTfaCard() {
+    const badge = document.getElementById('tfa-badge');
+    const actions = document.getElementById('tfa-actions');
+    if (!badge || !actions) return;
+    const enabled = !!(user.twoFactor && user.twoFactor.enabled);
+    badge.textContent = enabled ? 'Enabled' : 'Disabled';
+    badge.style.background = enabled ? 'rgba(92,221,139,.12)' : 'rgba(255,255,255,.08)';
+    badge.style.color = enabled ? '#5CDD8B' : 'rgba(255,255,255,.4)';
+    badge.style.borderColor = enabled ? 'rgba(92,221,139,.3)' : 'rgba(255,255,255,.12)';
+    if (enabled) {
+      actions.innerHTML = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-outline" onclick="viewBackupCodes()" style="flex:1;justify-content:center;">View Backup Codes</button>
+          <button class="btn-danger" onclick="disableTfa()" style="flex:1;justify-content:center;">Disable 2FA</button>
+        </div>`;
+    } else {
+      actions.innerHTML = `<button class="btn-primary" onclick="openTfaModal()" style="width:100%;justify-content:center;">Enable 2FA</button>`;
+    }
+  }
+
+  let tfaPendingSecret = null, tfaPendingCode = null;
+
+  function openTfaModal() {
+    tfaPendingSecret = randomBase32(16);
+    tfaPendingCode = randomDigits(6);
+    document.getElementById('tfa-secret').textContent = tfaPendingSecret.match(/.{1,4}/g).join(' ');
+    document.getElementById('tfa-demo-code').textContent = tfaPendingCode;
+    document.getElementById('tfa-code-input').value = '';
+    document.getElementById('tfa-error').textContent = '';
+    document.getElementById('tfa-step-setup').style.display = '';
+    document.getElementById('tfa-step-backup').style.display = 'none';
+    document.getElementById('tfa-modal').style.display = 'flex';
+  }
+
+  function closeTfaModal() {
+    document.getElementById('tfa-modal').style.display = 'none';
+    renderTfaCard();
+  }
+
+  function copyTfaSecret() {
+    navigator.clipboard?.writeText(tfaPendingSecret).then(()=>toast('Secret copied'));
+  }
+
+  function confirmTfaCode() {
+    const entered = document.getElementById('tfa-code-input').value.trim();
+    if (entered !== tfaPendingCode) {
+      document.getElementById('tfa-error').textContent = 'Incorrect code. Check the demo code above and try again.';
+      return;
+    }
+    const backupCodes = Array.from({length:8}, () => randomDigits(4)+'-'+randomDigits(4));
+    user.twoFactor = { enabled: true, secret: tfaPendingSecret, backupCodes, enabledAt: new Date().toISOString() };
+    saveUser();
+    document.getElementById('tfa-backup-codes').innerHTML = backupCodes.map(c=>`<div>${c}</div>`).join('');
+    document.getElementById('tfa-step-setup').style.display = 'none';
+    document.getElementById('tfa-step-backup').style.display = '';
+    toast('Two-factor authentication enabled!');
+  }
+
+  function viewBackupCodes() {
+    if (!user.twoFactor?.backupCodes) return;
+    document.getElementById('tfa-backup-codes').innerHTML = user.twoFactor.backupCodes.map(c=>`<div>${c}</div>`).join('');
+    document.getElementById('tfa-step-setup').style.display = 'none';
+    document.getElementById('tfa-step-backup').style.display = '';
+    document.getElementById('tfa-modal').style.display = 'flex';
+  }
+
+  function disableTfa() {
+    if (!confirm('Disable two-factor authentication? Your account will be less secure.')) return;
+    user.twoFactor = { enabled: false };
+    saveUser();
+    renderTfaCard();
+    toast('Two-factor authentication disabled');
   }
 
   function renderRoleSelector() {
@@ -607,12 +944,12 @@
   }
 
   function logout() {
-    localStorage.removeItem('ct_user');
+    localStorage.removeItem('ctsoccer_user');
     window.location.href = 'index.html';
   }
 
   function deleteAccount() {
-    localStorage.removeItem('ct_user');
+    localStorage.removeItem('ctsoccer_user');
     window.location.href = 'index.html';
   }
 
@@ -853,7 +1190,7 @@
 
   // ---- Util ----
   function saveUser() {
-    localStorage.setItem('ct_user', JSON.stringify(user));
+    localStorage.setItem('ctsoccer_user', JSON.stringify(user));
   }
 
   boot();

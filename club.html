@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Club — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     .tab-btn{padding:9px 20px;border-radius:9px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
@@ -126,12 +129,14 @@
     <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     <span id="nav-club-name" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</span>
     <div style="flex:1;"></div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-right:8px;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
     <a href="account.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">My Account</a>
   </nav>
 
   <div id="page-content"></div>
 
   <script src="clubs-data.js"></script>
+  <script src="cjsa-directory.js"></script>
   <script>
     const params  = new URLSearchParams(location.search);
     const clubId  = params.get('id');
@@ -192,13 +197,13 @@
 
       let followed = false;
       try {
-        const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+        const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
         followed = (u.followedClubs||[]).includes(club.id);
       } catch(e) {}
 
       function toggleFollow() {
         try {
-          const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+          const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
           if (!u.followedClubs) u.followedClubs = [];
           if (followed) {
             u.followedClubs = u.followedClubs.filter(x=>x!==club.id);
@@ -207,7 +212,7 @@
             u.followedClubs.push(club.id);
             followed = true;
           }
-          localStorage.setItem('ct_user', JSON.stringify(u));
+          localStorage.setItem('ctsoccer_user', JSON.stringify(u));
           updateFollowBtn();
         } catch(e){}
       }
@@ -274,7 +279,7 @@
                   ${tierBadgeHtml(club.tier)}
                   ${club._live ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.3);padding:3px 9px;border-radius:6px;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>Live</span>` : ''}
                 </div>
-                <div style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:14px;">${club.league} &bull; ${club.city}, CT &bull; Founded ${club.founded} &bull; ${club.stadium}</div>
+                <div style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:14px;">${club.league} &bull; ${club.city}, CT${club.founded ? ` &bull; Founded ${club.founded}` : ''} &bull; ${club.stadium}</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                   <button id="follow-btn" class="${followed?'btn-outline btn-followed':'btn-outline'}" onclick="toggleFollow()" style="font-size:.82rem;padding:8px 16px;">
                     ${followed ? 'Following &#10004;' : '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Follow Club'}
@@ -365,11 +370,11 @@
                       ['First Season', club.firstSeason],
                       ['League', club.league],
                       ['Stadium', club.stadium],
-                      ['Capacity', club.capacity.toLocaleString()],
+                      ['Capacity', club.capacity ? club.capacity.toLocaleString() : null],
                       ['Head Coach', club.coach],
                       ['Colors', club.colorName],
                       ['City', club.city + ', CT'],
-                    ].map(([k,v])=>`
+                    ].filter(([k,v])=>v).map(([k,v])=>`
                       <div style="display:flex;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.04);">
                         <div style="font-size:.75rem;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">${k}</div>
                         <div style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.8);text-align:right;">${v}</div>
@@ -391,7 +396,7 @@
                   <div style="font-size:.82rem;font-weight:800;color:#fff;margin-bottom:12px;">Stadium</div>
                   <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${club.stadium}</div>
                   <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:4px;line-height:1.55;">${club.stadiumAddress}</div>
-                  <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:6px;">Capacity: ${club.capacity.toLocaleString()}</div>
+                  ${club.capacity ? `<div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:6px;">Capacity: ${club.capacity.toLocaleString()}</div>` : ''}
                   <a href="https://maps.google.com/?q=${encodeURIComponent(club.stadiumAddress)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:var(--accent-lt);text-decoration:none;margin-top:10px;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                     <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     View on Maps

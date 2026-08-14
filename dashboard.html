@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;height:100%;overflow-x:hidden;}
     input[type="search"],select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px 14px;font-size:.875rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;transition:border-color .2s;}
@@ -225,6 +228,7 @@
           <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="global-search" type="search" placeholder="Search clubs..." style="padding-left:33px;width:190px;" oninput="handleGlobalSearch(this.value)">
         </div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
         <a href="account.html" class="btn-sm" style="padding:7px 14px;font-size:.78rem;">My Account</a>
       </div>
     </header>
@@ -702,9 +706,9 @@
       const el = document.getElementById('dir-body');
       if (!el) return;
       el.innerHTML = list.map((c,i)=>{
-        const hasProfile = !!c.edpClubId;
+        const hasRichProfile = !!c.edpClubId;
         return `<div onclick="openDirModal(${i})" style="cursor:pointer;display:grid;grid-template-columns:1fr 160px 1fr auto;gap:12px;align-items:center;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:.855rem;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background=''">
-          <div style="font-weight:700;color:#fff;">${c.name}${hasProfile?'<span title="Full profile available" style="margin-left:6px;font-size:.65rem;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Profile</span>':''}${c.email?'<span title="Contact email on file" style="margin-left:6px;font-size:.65rem;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Email</span>':''}</div>
+          <div style="font-weight:700;color:#fff;">${c.name}${hasRichProfile?'<span title="Full profile with results and roster" style="margin-left:6px;font-size:.65rem;background:rgba(43,124,233,.15);color:var(--accent-lt);border:1px solid rgba(43,124,233,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Full Profile</span>':''}${c.email?'<span title="Contact email on file" style="margin-left:6px;font-size:.65rem;background:rgba(92,221,139,.12);color:#5CDD8B;border:1px solid rgba(92,221,139,.25);padding:2px 6px;border-radius:4px;vertical-align:middle;">Email</span>':''}</div>
           <div style="color:var(--muted);font-size:.8rem;">${c.city}, CT</div>
           <div><a href="${c.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--accent-lt);text-decoration:none;font-size:.78rem;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${c.website.replace('https://','').replace('http://','').replace(/\/$/,'')}</a></div>
           <div><span style="font-size:.75rem;font-weight:700;color:var(--accent-lt);padding:5px 10px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);border-radius:7px;">Details &rarr;</span></div>
@@ -715,7 +719,7 @@
     function openDirModal(i) {
       const c = _dirFilteredList[i];
       if (!c) return;
-      const hasProfile = !!c.edpClubId;
+      const hasRichProfile = !!c.edpClubId;
       const websiteClean = c.website.replace('https://','').replace('http://','').replace(/\/$/,'');
       document.getElementById('dir-contact-modal-body').innerHTML = `
         <button onclick="closeDirModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.07);border:none;width:30px;height:30px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
@@ -741,8 +745,7 @@
             <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Location</div><div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${c.address}</div></div>
           </div>` : ''}
-          ${hasProfile ? `
-          <a href="club.html?id=${c.edpClubId}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--accent);border-radius:12px;text-decoration:none;color:#fff;font-weight:700;font-size:.85rem;">View Full CT Soccer Profile &rarr;</a>` : ''}
+          <a href="club.html?id=${c.id}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--accent);border-radius:12px;text-decoration:none;color:#fff;font-weight:700;font-size:.85rem;">${hasRichProfile ? 'View Full CT Soccer Profile' : 'View Club Profile'} &rarr;</a>
           ${!c.email && !c.phone && !c.address ? `<div style="font-size:.78rem;color:var(--muted);text-align:center;padding:6px 0;">No additional contact info on file yet — visit the website above.</div>` : ''}
         </div>
       `;
@@ -765,7 +768,7 @@
     // Load user info
     (function() {
       try {
-        const u = JSON.parse(localStorage.getItem('ct_user')||'{}');
+        const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
         if (u.firstName) {
           document.getElementById('user-name').textContent = u.firstName + ' ' + u.lastName;
           document.getElementById('user-role').textContent = u.role ? (u.role[0].toUpperCase()+u.role.slice(1)) : 'Member';

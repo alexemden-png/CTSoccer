@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="theme.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tournaments</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -16,6 +17,8 @@
       --silver:   #C0C8D4;
       --muted:    rgba(255,255,255,.38);
     }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
 
@@ -245,6 +248,7 @@
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="dashboard.html" class="nav-link">Clubs</a>
         <a href="tournaments.html" class="nav-link" style="color:#fff;">Tournaments</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
         <a href="login.html" class="nav-link" id="nav-signin">Sign In</a>
         <a href="index.html#join" class="btn-primary" id="nav-register">Register</a>
         <a href="account.html" class="btn-primary" style="display:none;" id="nav-tournaments-btn">My Tournaments</a>
