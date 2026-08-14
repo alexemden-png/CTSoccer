@@ -171,6 +171,30 @@
       box-shadow: 0 8px 16px rgba(43,124,233,0.2);
     }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
+
+    .bracket-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.7); align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }
+    .bracket-modal.active { display: flex; }
+    .bracket-content { background: var(--navy-800); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 28px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .bracket-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .bracket-header h2 { font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; }
+    .bracket-close { background: none; border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6); cursor: pointer; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .bracket-close:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .bracket-rounds { display: flex; gap: 20px; overflow-x: auto; padding: 8px 0; align-items: flex-start; }
+    .bracket-round { display: flex; flex-direction: column; gap: 12px; min-width: 200px; }
+    .round-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.4); padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .match-box { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px; transition: all .2s; }
+    .match-box:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
+    .team-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; transition: all .15s; }
+    .team-row:hover { color: var(--accent-lt); }
+    .team-row.winner { color: var(--accent-lt); font-weight: 600; }
+    .team-row.loser { color: rgba(255,255,255,.3); }
+    .team-name { flex: 1; font-size: .825rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .team-score { background: rgba(0,174,91,.2); border: 1px solid rgba(0,174,91,.3); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: .7rem; font-weight: 700; min-width: 28px; text-align: center; }
+    .vs-divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); margin: 2px 0; }
+    .match-actions { display: flex; gap: 6px; margin-top: 8px; font-size: .7rem; }
+    .score-btn { flex: 1; background: rgba(43,124,233,.2); border: 1px solid rgba(43,124,233,.3); color: #fff; padding: 4px 0; border-radius: 5px; cursor: pointer; transition: all .15s; font-weight: 600; }
+    .score-btn:hover { background: rgba(43,124,233,.4); }
+
     @media (max-width: 640px) {
       body { padding-bottom: 88px; }
       .t-card { grid-template-columns: 1fr; }
@@ -182,6 +206,9 @@
       .filter-bar, #tournament-list { padding-left: 0; padding-right: 0; }
       .t-card { padding: 18px 16px; }
       .mobile-bottom-nav { display: flex !important; }
+      .bracket-content { padding: 16px; }
+      .bracket-rounds { gap: 12px; }
+      .bracket-round { min-width: 160px; }
     }
   </style>
 </head>
@@ -265,6 +292,17 @@
     </p>
   </div>
 
+  <!-- Bracket Modal -->
+  <div id="bracketModal" class="bracket-modal">
+    <div class="bracket-content">
+      <div class="bracket-header">
+        <h2 id="bracketTitle">Tournament Bracket</h2>
+        <button class="bracket-close" onclick="closeBracket()">×</button>
+      </div>
+      <div id="bracketRounds" class="bracket-rounds"></div>
+    </div>
+  </div>
+
   <script>
     const TOURNAMENTS = [
       {
@@ -281,8 +319,13 @@
         registrationUrl: 'https://cjsa.org',
         infoUrl: 'https://cjsa.org',
         badgeLabel: 'CJSA Official',
-        badgeClass: 'badge-blue',
-      },
+        badgeClass: 'badge-blue',        bracket: {
+          rounds: [
+            { name: 'Round 1', matches: [{id: 1, teams: ['Beachside SC', 'Yale FC'], scores: [0, 0]}, {id: 2, teams: ['Vale SC', 'Ole FC'], scores: [0, 0]}, {id: 3, teams: ['Ginga FC', 'Sporting CT'], scores: [0, 0]}, {id: 4, teams: ['FSA FC', 'CFC U19'], scores: [0, 0]}] },
+            { name: 'Semifinals', matches: [{id: 5, teams: ['TBD', 'TBD'], scores: [0, 0]}, {id: 6, teams: ['TBD', 'TBD'], scores: [0, 0]}] },
+            { name: 'Final', matches: [{id: 7, teams: ['TBD', 'TBD'], scores: [0, 0]}] }
+          ]
+        }      },
       {
         id: 'edp-cup',
         name: 'EDP Cup',
@@ -503,6 +546,7 @@
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
               </a>
               <a href="${t.infoUrl}" target="_blank" rel="noopener" class="info-btn">More Info</a>
+              ${t.bracket ? `<button onclick="viewBracket('${t.id}')" style="background:rgba(0,174,91,.2);border:1px solid rgba(0,174,91,.3);color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(0,174,91,.35)'" onmouseout="this.style.background='rgba(0,174,91,.2)'">View Bracket</button>` : ''}
             </div>
           </div>
         `;
@@ -510,6 +554,106 @@
     }
 
     renderTournaments();
+
+    let bracketState = {};
+
+    function initBracketState(tournamentId) {
+      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
+      if (!tournament.bracket || bracketState[tournamentId]) return;
+      bracketState[tournamentId] = {};
+      tournament.bracket.rounds.forEach((round, ri) => {
+        round.matches.forEach((match, mi) => {
+          bracketState[tournamentId][match.id] = JSON.parse(JSON.stringify(match));
+        });
+      });
+    }
+
+    function viewBracket(tournamentId) {
+      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
+      if (!tournament.bracket) return;
+      initBracketState(tournamentId);
+      document.getElementById('bracketTitle').textContent = tournament.name + ' — Bracket';
+      renderBracketRounds(tournamentId);
+      document.getElementById('bracketModal').classList.add('active');
+    }
+
+    function closeBracket() {
+      document.getElementById('bracketModal').classList.remove('active');
+    }
+
+    function renderBracketRounds(tournamentId) {
+      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
+      const state = bracketState[tournamentId];
+      const roundsHtml = tournament.bracket.rounds.map((round, ri) => {
+        const matchesHtml = round.matches.map(match => {
+          const m = state[match.id];
+          const winner = m.scores[0] > m.scores[1] ? 0 : (m.scores[1] > m.scores[0] ? 1 : -1);
+          return `
+            <div class="match-box">
+              <div class="team-row ${winner === 0 ? 'winner' : winner === 1 ? 'loser' : ''}">
+                <span class="team-name">${m.teams[0]}</span>
+                <span class="team-score">${m.scores[0]}</span>
+                <button class="score-btn" onclick="updateScore(${tournamentId}, ${match.id}, 0, 1)">+</button>
+              </div>
+              <div class="vs-divider"></div>
+              <div class="team-row ${winner === 1 ? 'winner' : winner === 0 ? 'loser' : ''}">
+                <span class="team-name">${m.teams[1]}</span>
+                <span class="team-score">${m.scores[1]}</span>
+                <button class="score-btn" onclick="updateScore(${tournamentId}, ${match.id}, 1, 1)">+</button>
+              </div>
+              <div class="match-actions">
+                <button class="score-btn" onclick="resetMatch(${tournamentId}, ${match.id})">Reset</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        return `<div class="bracket-round"><div class="round-label">${round.name}</div>${matchesHtml}</div>`;
+      }).join('');
+      document.getElementById('bracketRounds').innerHTML = roundsHtml;
+    }
+
+    function updateScore(tournamentId, matchId, teamIndex, delta) {
+      const state = bracketState[tournamentId];
+      if (!state[matchId]) return;
+      let newScore = state[matchId].scores[teamIndex] + delta;
+      if (newScore < 0) newScore = 0;
+      state[matchId].scores[teamIndex] = newScore;
+      advanceBracket(tournamentId);
+      renderBracketRounds(tournamentId);
+    }
+
+    function resetMatch(tournamentId, matchId) {
+      const state = bracketState[tournamentId];
+      if (state[matchId]) {
+        state[matchId].scores = [0, 0];
+        advanceBracket(tournamentId);
+        renderBracketRounds(tournamentId);
+      }
+    }
+
+    function advanceBracket(tournamentId) {
+      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
+      const state = bracketState[tournamentId];
+      const rounds = tournament.bracket.rounds;
+      for (let i = 0; i < rounds.length - 1; i++) {
+        const currentRound = rounds[i].matches;
+        const nextRound = rounds[i + 1].matches;
+        currentRound.forEach((match, idx) => {
+          const m = state[match.id];
+          if (m.scores[0] === 0 && m.scores[1] === 0) return;
+          const winner = m.scores[0] > m.scores[1] ? m.teams[0] : m.teams[1];
+          const nextMatchIdx = Math.floor(idx / 2);
+          const teamSlot = idx % 2;
+          if (nextRound[nextMatchIdx]) {
+            nextRound[nextMatchIdx].teams[teamSlot] = winner;
+          }
+        });
+      }
+    }
+
+    document.getElementById('bracketModal').addEventListener('click', (e) => {
+      if (e.target.id === 'bracketModal') closeBracket();
+    });
   </script>
 </body>
 </html>

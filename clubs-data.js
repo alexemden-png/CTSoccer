@@ -76,7 +76,10 @@ const CT_CLUBS = [
       { opponent: 'Orlando City B',            home: true, score: '4-2', result: 'W', date: 'Aug 1, 2026' },
       { opponent: 'Columbus Crew 2',           home: true, score: '2-1', result: 'W', date: 'Jul 26, 2026' },
     ],
-    upcoming: [],
+    upcoming: [
+      { opponent: 'FC Cincinnati 2',   home: false, date: 'Aug 16, 2026', time: '6:00 PM' },
+      { opponent: 'Crown Legacy FC',   home: false, date: 'Aug 19, 2026', time: '7:00 PM' },
+    ],
     socialLinks: { facebook: true, instagram: true, twitter: true, youtube: false },
   },
   {
@@ -1216,6 +1219,7 @@ function getClubById(id) {
 
 function clubPts(c) { return c.wins * 3 + c.draws; }
 function clubGD(c)  { return c.gf - c.ga; }
+function clubPlayed(c) { return c.wins + c.draws + c.losses; }
 // Win % = wins / games played. Returns null when no games are on record yet (nothing to divide).
 function clubWinPct(c) {
   const played = c.wins + c.draws + c.losses;
