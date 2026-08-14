@@ -112,6 +112,7 @@
         <a href="dashboard.html" class="nav-link">Clubs</a>
         <a href="tournaments.html" class="nav-link">Tournaments</a>
         <a href="coaching-clinics.html" class="nav-link" style="color:#fff;">Coaching</a>
+        <a href="assistant.html" class="nav-link">Assistant</a>
         <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
         <a href="account.html" class="btn-primary">My Account</a>
       </div>
@@ -448,6 +449,16 @@
       }).join('');
     }
 
+    // Deep-link support: coaching-clinics.html?tier=d
+    (function initFromUrl() {
+      const tier = new URLSearchParams(location.search).get('tier');
+      if (tier && TIER_BADGE[tier]) {
+        activeFilter = tier;
+        const btn = [...document.querySelectorAll('.filter-btn')].find(b => b.getAttribute('onclick')?.includes(`'${tier}'`));
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+      }
+    })();
     renderClinics();
   </script>
 </body>

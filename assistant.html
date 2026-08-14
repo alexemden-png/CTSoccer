@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soccer Assistant — CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .msg-in{animation:fadeIn .3s cubic-bezier(.16,1,.3,1) both;}
+    .qr-btn{font-family:'Montserrat',Arial,sans-serif;font-size:.82rem;font-weight:700;padding:9px 16px;border-radius:20px;border:1.5px solid rgba(43,124,233,.35);background:rgba(43,124,233,.1);color:var(--accent-lt);cursor:pointer;transition:all .15s;}
+    .qr-btn:hover{background:rgba(43,124,233,.22);border-color:rgba(43,124,233,.6);}
+    .rec-card{background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s;}
+    .rec-card:hover{border-color:rgba(43,124,233,.4);transform:translateY(-2px);}
+    @keyframes typingDot{0%,60%,100%{opacity:.25;}30%{opacity:1;}}
+    .typing-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-lt);display:inline-block;animation:typingDot 1.2s infinite;}
+    .typing-dot:nth-child(2){animation-delay:.15s;}
+    .typing-dot:nth-child(3){animation-delay:.3s;}
+  </style>
+</head>
+<body>
+
+  <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Soccer Assistant</span>
+    <div style="flex:1;"></div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-right:8px;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="dashboard.html" class="btn-outline" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);">Dashboard</a>
+  </nav>
+
+  <div id="gate" style="max-width:460px;margin:100px auto;text-align:center;padding:0 24px;display:none;">
+    <div style="font-size:2.6rem;margin-bottom:14px;">&#129309;</div>
+    <div style="font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:10px;">Sign in to use the Soccer Assistant</div>
+    <div style="color:var(--muted);margin-bottom:26px;line-height:1.6;">Get personalized club and coaching-course recommendations based on your age, goals, and location — free for signed-in members.</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Sign In</a>
+      <a href="register.html" style="background:rgba(255,255,255,.08);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,.12);">Create Account</a>
+    </div>
+  </div>
+
+  <div id="app" style="max-width:720px;margin:0 auto;padding:28px 20px 140px;display:none;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:6px;">Find your fit</div>
+      <div style="font-size:.85rem;color:var(--muted);">Answers are matched against the real clubs and coaching courses on this site — nothing here is invented on the fly.</div>
+    </div>
+    <div id="chat" style="display:flex;flex-direction:column;gap:14px;"></div>
+    <div id="typing" style="display:none;align-items:center;gap:10px;margin-top:14px;">
+      <div style="width:30px;height:30px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#9917;</div>
+      <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:12px 16px;"><span class="typing-dot"></span> <span class="typing-dot"></span> <span class="typing-dot"></span></div>
+    </div>
+  </div>
+
+  <script src="clubs-data.js"></script>
+  <script>
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('ctsoccer_user') || '{}'); } catch(e) {}
+
+    // ---- Real reference data for coaching recommendations (mirrors coaching-clinics.html) ----
+    const COURSES = [
+      { id:'intro-grassroots', name:'Introduction to Grassroots Coaching', tier:'grassroots', price:'Free', ageBand:['U6-U8','U9-U10','U11-U12','U13+'], note:"Required first step before any Grassroots module — 20 minutes, online." },
+      { id:'grassroots-4v4', name:'US Soccer Grassroots 4v4 Course', tier:'grassroots', price:'$25', ageBand:['U6-U8'], note:'Covers coaching the youngest players in the 4v4 game model.' },
+      { id:'grassroots-7v7', name:'US Soccer Grassroots 7v7 Course', tier:'grassroots', price:'$25', ageBand:['U9-U10'], note:'Builds on 4v4 fundamentals for U9-U10 coaches.' },
+      { id:'grassroots-9v9', name:'US Soccer Grassroots 9v9 Course', tier:'grassroots', price:'$25', ageBand:['U11-U12'], note:'For coaches transitioning players toward the full-sided game.' },
+      { id:'grassroots-11v11', name:'US Soccer Grassroots 11v11 Course', tier:'grassroots', price:'$25', ageBand:['U13+'], note:'The full 11v11 game for U13+ coaches.' },
+      { id:'d-license', name:'US Soccer D License', tier:'d', price:'$425', ageBand:['U6-U8','U9-U10','U11-U12','U13+'], note:"The next step once you've completed the Grassroots modules — practice planning and game-realistic training." },
+      { id:'c-license', name:'US Soccer C License', tier:'c', price:'$400', ageBand:['U6-U8','U9-U10','U11-U12','U13+'], note:'For experienced coaches ready to work with competitive teams.' },
+    ];
+
+    function classifyYouthLevel(club) {
+      const l = club.league || '';
+      if (/MLS NEXT|ECNL/i.test(l)) return 'elite';
+      if (/EDP/i.test(l)) return 'competitive';
+      return 'recreational';
+    }
+
+    const AGE_BANDS = { 'U9-U11': ['U9','U10','U11'], 'U12-U14': ['U12','U13','U14'], 'U15-U19': ['U15','U16','U17','U18','U19'] };
+
+    function recommendClubs(a) {
+      let pool, usedFallback = false;
+      if (a.playerType === 'youth') {
+        pool = ALL_CLUBS.filter(c => c.type === 'youth' && (c.ageGroups||[]).some(x => (AGE_BANDS[a.age]||[]).includes(x)));
+        const leveled = pool.filter(c => classifyYouthLevel(c) === a.level);
+        if (leveled.length) pool = leveled; else usedFallback = true;
+      } else {
+        pool = CT_CLUBS.filter(c => a.adultLevel === 'pro' ? c.tier === 'Professional' : c.tier !== 'Professional');
+      }
+      if (a.location) {
+        const loc = a.location.toLowerCase().trim();
+        const exact = pool.filter(c => c.city.toLowerCase().includes(loc) || loc.includes(c.city.toLowerCase()));
+        if (exact.length) pool = [...exact, ...pool.filter(c => !exact.includes(c))];
+      }
+      return { list: pool.slice(0, 5), usedFallback };
+    }
+
+    function recommendCourses(a) {
+      const ageCourse = COURSES.find(c => c.tier === 'grassroots' && c.id !== 'intro-grassroots' && c.ageBand.includes(a.coachAge));
+      let picks = [];
+      if (a.coachExp === 'never') {
+        picks = [COURSES.find(c => c.id === 'intro-grassroots'), ageCourse];
+      } else if (a.coachExp === 'some') {
+        picks = [ageCourse, COURSES.find(c => c.id === 'd-license')];
+      } else {
+        picks = [COURSES.find(c => c.id === 'd-license'), COURSES.find(c => c.id === 'c-license')];
+      }
+      return picks.filter(Boolean);
+    }
+
+    // ---- Chat engine ----
+    const chatEl = document.getElementById('chat');
+    const answers = {};
+    let flow = null; // 'club' | 'coach' | null
+
+    function scrollDown() { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
+
+    function botMsg(text) {
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      div.innerHTML = `
+        <div style="width:30px;height:30px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">&#9917;</div>
+        <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:12px 16px;max-width:80%;font-size:.9rem;line-height:1.6;color:rgba(255,255,255,.88);">${text}</div>
+      `;
+      chatEl.appendChild(div);
+      scrollDown();
+    }
+
+    function userMsg(text) {
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.style.cssText = 'display:flex;justify-content:flex-end;';
+      div.innerHTML = `<div style="background:var(--accent);color:#fff;border-radius:14px;padding:10px 16px;max-width:70%;font-size:.88rem;font-weight:600;">${text}</div>`;
+      chatEl.appendChild(div);
+      scrollDown();
+    }
+
+    function quickReplies(options) {
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;padding-left:40px;';
+      div.id = 'active-replies';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'qr-btn';
+        btn.textContent = opt.label;
+        btn.onclick = () => selectReply(opt);
+        div.appendChild(btn);
+      });
+      chatEl.appendChild(div);
+      scrollDown();
+    }
+
+    function textInputReply(placeholder, onSubmit, skippable) {
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.id = 'active-replies';
+      div.style.cssText = 'display:flex;gap:8px;padding-left:40px;flex-wrap:wrap;';
+      div.innerHTML = `
+        <input id="chat-text-input" type="text" placeholder="${placeholder}" style="flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:9px 16px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.85rem;outline:none;">
+        <button class="qr-btn" id="chat-text-submit">Go</button>
+        ${skippable ? '<button class="qr-btn" id="chat-text-skip" style="border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);">Skip</button>' : ''}
+      `;
+      chatEl.appendChild(div);
+      const input = div.querySelector('#chat-text-input');
+      input.focus();
+      const submit = () => { const v = input.value.trim(); if (v) onSubmit(v); };
+      div.querySelector('#chat-text-submit').onclick = submit;
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      const skipBtn = div.querySelector('#chat-text-skip');
+      if (skipBtn) skipBtn.onclick = () => onSubmit('');
+      scrollDown();
+    }
+
+    function clearActiveReplies() {
+      const el = document.getElementById('active-replies');
+      if (el) el.remove();
+    }
+
+    function think(next) {
+      clearActiveReplies();
+      document.getElementById('typing').style.display = 'flex';
+      scrollDown();
+      setTimeout(() => { document.getElementById('typing').style.display = 'none'; next(); }, 550);
+    }
+
+    function selectReply(opt) {
+      userMsg(opt.label);
+      opt.onSelect();
+    }
+
+    function boot() {
+      botMsg(`Hi ${user.firstName}! I'm the CT Soccer Assistant. I match you against the real clubs and coaching courses already on this site — what can I help with?`);
+      quickReplies([
+        { label: 'Find me a club', onSelect: () => think(() => startClubFlow(afterClub)) },
+        { label: 'Find me a coaching course', onSelect: () => think(() => startCoachFlow(afterCoach)) },
+        { label: 'Both', onSelect: () => think(() => startClubFlow(() => startCoachFlow(finalDone))) },
+      ]);
+    }
+
+    function afterClub() { finalDone(); }
+    function afterCoach() { finalDone(); }
+    function finalDone() {
+      think(() => {
+        botMsg("Want to try different answers?");
+        quickReplies([{ label: 'Start Over', onSelect: () => { location.reload(); } }]);
+      });
+    }
+
+    // ---- Club flow ----
+    function startClubFlow(onComplete) {
+      botMsg('Are you looking for a youth program or an adult/senior club?');
+      quickReplies([
+        { label: 'Youth Player', onSelect: () => { answers.playerType = 'youth'; think(() => askAge(onComplete)); } },
+        { label: 'Adult Player', onSelect: () => { answers.playerType = 'adult'; think(() => askAdultLevel(onComplete)); } },
+      ]);
+    }
+
+    function askAge(onComplete) {
+      botMsg('What age group?');
+      quickReplies(Object.keys(AGE_BANDS).map(band => ({
+        label: band, onSelect: () => { answers.age = band; think(() => askYouthLevel(onComplete)); }
+      })));
+    }
+
+    function askYouthLevel(onComplete) {
+      botMsg('How competitive are you looking to play?');
+      quickReplies([
+        { label: 'Recreational / house league', onSelect: () => { answers.level = 'recreational'; think(() => askLocation(onComplete)); } },
+        { label: 'Competitive travel (EDP)', onSelect: () => { answers.level = 'competitive'; think(() => askLocation(onComplete)); } },
+        { label: 'Elite (ECNL / MLS Next)', onSelect: () => { answers.level = 'elite'; think(() => askLocation(onComplete)); } },
+      ]);
+    }
+
+    function askAdultLevel(onComplete) {
+      botMsg('What kind of adult club interests you?');
+      quickReplies([
+        { label: 'Amateur / Semi-Pro', onSelect: () => { answers.adultLevel = 'amateur'; think(() => askLocation(onComplete)); } },
+        { label: 'Follow a Professional Club', onSelect: () => { answers.adultLevel = 'pro'; think(() => askLocation(onComplete)); } },
+      ]);
+    }
+
+    function askLocation(onComplete) {
+      botMsg("What CT town are you in or near? I'll prioritize nearby clubs (or hit Skip to see the best matches statewide).");
+      textInputReply('e.g. Hartford', (val) => {
+        userMsg(val || '(skipped)');
+        answers.location = val;
+        think(() => showClubResults(onComplete));
+      }, true);
+    }
+
+    function showClubResults(onComplete) {
+      const { list, usedFallback } = recommendClubs(answers);
+      if (!list.length) {
+        botMsg("I couldn't find a real match for that combination on the site yet — try the full <a href='dashboard.html?section=clubs' style='color:var(--accent-lt);'>Club Directory</a> instead.");
+        onComplete();
+        return;
+      }
+      botMsg(usedFallback
+        ? `No clubs at exactly that competitiveness level matched your age group, so here are the closest real options by age group instead:`
+        : `Here's what I'd recommend, based on real clubs in the site's directory:`);
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.style.cssText = 'display:flex;flex-direction:column;gap:10px;padding-left:40px;';
+      div.innerHTML = list.map(clubRecCardHtml).join('');
+      chatEl.appendChild(div);
+      scrollDown();
+      onComplete();
+    }
+
+    function clubRecCardHtml(c) {
+      const sub = c.type === 'youth' ? `${c.leagueShort} &middot; ${(c.ageGroups||[]).slice(0,4).join(', ')}${(c.ageGroups||[]).length>4?'…':''}` : `${c.leagueShort} &middot; ${c.league}`;
+      return `
+        <a href="club.html?id=${c.id}" class="rec-card">
+          <div style="width:44px;height:44px;border-radius:10px;background:${c.primary}22;border:1.5px solid ${c.primary}55;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:${c.primary};flex-shrink:0;">${c.abbr}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.9rem;font-weight:800;color:#fff;">${c.name}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; ${sub}</div>
+          </div>
+          <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>`;
+    }
+
+    // ---- Coaching flow ----
+    function startCoachFlow(onComplete) {
+      botMsg('Have you coached before?');
+      quickReplies([
+        { label: 'Never coached', onSelect: () => { answers.coachExp = 'never'; think(() => askCoachAge(onComplete)); } },
+        { label: 'A season or two', onSelect: () => { answers.coachExp = 'some'; think(() => askCoachAge(onComplete)); } },
+        { label: 'Several years — ready to level up', onSelect: () => { answers.coachExp = 'experienced'; think(() => askCoachAge(onComplete)); } },
+      ]);
+    }
+
+    function askCoachAge(onComplete) {
+      botMsg('What age group do you want to coach?');
+      quickReplies(['U6-U8','U9-U10','U11-U12','U13+'].map(band => ({
+        label: band, onSelect: () => { answers.coachAge = band; think(() => showCoachResults(onComplete)); }
+      })));
+    }
+
+    function showCoachResults(onComplete) {
+      const picks = recommendCourses(answers);
+      if (!picks.length) {
+        botMsg("Check the full <a href='coaching-clinics.html' style='color:var(--accent-lt);'>Coaching Clinics</a> page for current course listings.");
+        onComplete();
+        return;
+      }
+      botMsg('Based on real CJSA / US Soccer course offerings, here\'s your path:');
+      const div = document.createElement('div');
+      div.className = 'msg-in';
+      div.style.cssText = 'display:flex;flex-direction:column;gap:10px;padding-left:40px;';
+      div.innerHTML = picks.map((c,i) => `
+        <a href="coaching-clinics.html?tier=${c.tier}" class="rec-card">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(43,124,233,.15);border:1px solid rgba(43,124,233,.3);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--accent-lt);flex-shrink:0;">${i+1}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.9rem;font-weight:800;color:#fff;">${c.name}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${c.price} &middot; ${c.note||''}</div>
+          </div>
+          <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>`).join('');
+      chatEl.appendChild(div);
+      scrollDown();
+      onComplete();
+    }
+
+    // ---- Init (runs last, after all functions above are defined) ----
+    if (!user.firstName || user.isGuest) {
+      document.getElementById('gate').style.display = 'block';
+    } else {
+      document.getElementById('app').style.display = 'block';
+      boot();
+    }
+  </script>
+</body>
+</html>
