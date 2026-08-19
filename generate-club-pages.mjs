@@ -149,6 +149,7 @@ function pageHtml(club) {
 <head>
   <meta charset="UTF-8">
   <script src="../theme.js"></script>
+  <script src="../cookie-consent.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <meta name="description" content="${esc(description)}">
