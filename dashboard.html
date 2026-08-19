@@ -37,12 +37,12 @@
     .qf-btn.active{background:rgba(43,124,233,.2);border-color:rgba(43,124,233,.4);color:var(--accent-lt);}
     .qf-btn:not(.active):hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.8);}
     @media (max-width: 860px) {
-      body { display: block; height: auto; overflow-x: hidden; }
-      aside { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      body { display: block !important; height: auto !important; overflow-x: hidden; overflow-y: visible !important; }
+      aside { width: 100% !important; height: auto !important; border-right: none; border-bottom: 1px solid var(--border); }
       aside nav { padding: 8px 10px 12px; }
-      main { overflow: visible; }
-      header { padding: 0 16px; height: auto; min-height: 56px; flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
-      #global-search { width: 100%; min-width: 0; }
+      main { overflow-y: visible !important; }
+      header { padding: 0 16px !important; height: auto !important; min-height: 56px; flex-wrap: wrap; gap: 8px; padding-top: 10px !important; padding-bottom: 10px !important; }
+      #global-search { width: 100% !important; min-width: 0; }
       header > div:last-child { width: 100%; }
       .fade-in { animation: none; }
     }
@@ -68,6 +68,7 @@
       .mobile-bottom-nav {
         display: flex !important;
       }
+      .sidebar-account-card { display: none; }
     }
     .mobile-bottom-nav {
       position: fixed;
@@ -203,7 +204,7 @@
       </a>
     </nav>
 
-    <div style="padding:12px 10px;border-top:1px solid var(--border);">
+    <div class="sidebar-account-card" style="padding:12px 10px;border-top:1px solid var(--border);">
       <a href="account.html" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);text-decoration:none;transition:background .18s;" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
         <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-lt));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;font-weight:800;color:#fff;">?</div>
         <div style="overflow:hidden;">
