@@ -8,6 +8,8 @@
   <title>News & Events — CT Soccer</title>
   <meta name="description" content="Season storylines and auto-updating match results for Connecticut's real professional and semi-pro soccer clubs, plus CT Soccer platform updates.">
   <link rel="canonical" href="https://ctsoccerhub.com/news.html">
+  <link rel="alternate" type="application/rss+xml" title="CT Soccer News" href="feed.xml">
+  <script src="share.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID after approval -->
@@ -133,6 +135,10 @@
         <span style="width:6px;height:6px;border-radius:50%;background:#5CDD8B;box-shadow:0 0 0 3px rgba(92,221,139,.15);"></span>
         Live — auto-updating
       </span>
+      <a href="feed.xml" title="Subscribe via RSS" style="display:flex;align-items:center;gap:6px;margin-left:auto;padding:8px 4px;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.4);text-decoration:none;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='rgba(255,255,255,.4)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+        RSS
+      </a>
     </div>
     <div id="news-list" style="display:flex;flex-direction:column;gap:16px;"></div>
   </div>
@@ -265,8 +271,11 @@
           ? `<div class="n-avatar" style="background:${club.primary}22;border:1.5px solid ${club.primary}55;color:${club.primary};">${club.abbr}</div>`
           : `<div class="n-avatar" style="background:rgba(168,85,247,.14);border:1.5px solid rgba(168,85,247,.35);color:#c084fc;">CT</div>`;
         const linkWrap = (inner) => club ? `<a href="club.html?id=${club.id}" style="text-decoration:none;color:inherit;">${inner}</a>` : inner;
+        const shareUrl = `https://ctsoccerhub.com/news.html#story-${n.id}`;
+        const shareTitle = encodeURIComponent(n.title);
+        const shareUrlEnc = encodeURIComponent(shareUrl);
         const card = `
-          <div class="n-card">
+          <div class="n-card" id="story-${n.id}" style="scroll-margin-top:84px;">
             ${avatar}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
@@ -276,7 +285,19 @@
                 ${club ? `<span style="font-size:.75rem;color:var(--accent-lt);font-weight:700;">${club.name}</span>` : ''}
               </div>
               ${linkWrap(`<h2 style="font-size:1.1rem;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:8px;">${n.title}</h2>`)}
-              <p style="font-size:.875rem;line-height:1.7;color:rgba(255,255,255,.55);margin:0;max-width:760px;">${n.summary}</p>
+              <p style="font-size:.875rem;line-height:1.7;color:rgba(255,255,255,.55);margin:0 0 12px;max-width:760px;">${n.summary}</p>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-right:2px;">Share</span>
+                <a href="https://twitter.com/intent/tweet?url=${shareUrlEnc}&text=${shareTitle}" target="_blank" rel="noopener" aria-label="Share on X" style="width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255,255,255,.6)"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${shareUrlEnc}" target="_blank" rel="noopener" aria-label="Share on Facebook" style="width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255,255,255,.6)"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                <button type="button" data-url="${shareUrl}" onclick="ctCopyLink(this)" aria-label="Copy link" style="width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -295,6 +316,14 @@
     renderNews();
     loadLiveNews(); // non-blocking, runs in background
     setInterval(loadLiveNews, 5 * 60 * 1000); // keep polling so new results appear without a page reload
+
+    // Stories render dynamically after page load, so the browser's native
+    // #anchor scroll (which only looks at what exists at load time) misses
+    // them — scroll to a shared story link manually once it's in the DOM.
+    if (location.hash.startsWith('#story-')) {
+      const target = document.querySelector(location.hash);
+      if (target) target.scrollIntoView({ block: 'start' });
+    }
   </script>
 </body>
 </html>

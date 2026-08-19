@@ -612,6 +612,49 @@
 
     renderTournaments();
 
+    // Structured data (schema.org SportsEvent) for each listed tournament, so
+    // Google can show richer results. Dates on this page are human-readable
+    // ranges ("September – November 2026"), not ISO — parse a best-effort
+    // startDate/endDate from any month name(s) + year(s) found; skip dates
+    // entirely for ranges with no parseable month (e.g. "Summer 2026").
+    (function injectTournamentsJsonLd() {
+      const MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+      function isoDateRange(str) {
+        const months = [...str.matchAll(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/gi)].map(m => m[1].toLowerCase());
+        const years = [...str.matchAll(/\b(20\d{2})\b/g)].map(m => m[1]);
+        if (!months.length || !years.length) return null;
+        const startIdx = MONTHS.indexOf(months[0]);
+        const endIdx = MONTHS.indexOf(months[months.length - 1]);
+        const startYear = years[0];
+        const endYear = years[years.length - 1];
+        const lastDay = new Date(Number(endYear), endIdx + 1, 0).getDate();
+        return {
+          startDate: `${startYear}-${String(startIdx + 1).padStart(2, '0')}-01`,
+          endDate: `${endYear}-${String(endIdx + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+        };
+      }
+      const events = TOURNAMENTS.map(t => {
+        const range = isoDateRange(t.dates || '');
+        const event = {
+          '@type': 'SportsEvent',
+          name: t.name,
+          description: t.description,
+          url: 'https://ctsoccerhub.com/tournaments.html',
+          sport: 'Soccer',
+          location: { '@type': 'Place', name: t.location },
+          organizer: { '@type': 'Organization', name: t.org },
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        };
+        if (range) { event.startDate = range.startDate; event.endDate = range.endDate; }
+        return event;
+      });
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': events });
+      document.head.appendChild(script);
+    })();
+
     let bracketState = {};
     let bracketUpdateIntervals = {};
 
