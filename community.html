@@ -130,6 +130,12 @@
     const gateBody = document.getElementById('gate-body');
     const gateActions = document.getElementById('gate-actions');
 
+    // Must be declared before the gating block below, since its "else" branch
+    // calls boot() -> loadFeed() synchronously, which reads activeTab.
+    let selectedFile = null;
+    let followingSet = null;
+    let activeTab = 'everyone';
+
     if (!user.firstName || user.isGuest) {
       document.getElementById('gate').style.display = 'block';
     } else if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
@@ -149,10 +155,6 @@
       document.getElementById('composer-coming-soon').style.display = storageOn ? 'none' : 'block';
       boot();
     }
-
-    let selectedFile = null;
-    let followingSet = null;
-    let activeTab = 'everyone';
 
     document.getElementById('file-input').addEventListener('change', (e) => {
       const file = e.target.files[0];
