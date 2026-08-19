@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Register</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -98,6 +99,8 @@
     }
     .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
     .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    .btn-primary:disabled:hover { opacity: .4; transform: none; }
     .role-opt {
       background: rgba(255,255,255,.05);
       border: 1.5px solid rgba(255,255,255,.1);
@@ -261,14 +264,17 @@
 
       <div id="error-msg" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:11px 14px;font-size:.82rem;color:#fca5a5;"></div>
 
-      <button type="submit" class="btn-primary" style="margin-top:4px;">
+      <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;">
+        <input type="checkbox" id="agree-terms" required style="width:16px;height:16px;margin-top:2px;cursor:pointer;accent-color:var(--accent);flex-shrink:0;">
+        <span style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.6;">
+          I agree to the <a href="terms-of-service.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,.7);text-decoration:underline;">Terms of Service</a> and <a href="privacy-policy.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,.7);text-decoration:underline;">Privacy Policy</a>.
+        </span>
+      </label>
+
+      <button type="submit" class="btn-primary" style="margin-top:4px;" id="create-account-btn" disabled>
         Create My Account
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
       </button>
-
-      <p style="text-align:center;font-size:.72rem;color:rgba(255,255,255,.28);line-height:1.6;">
-        By creating an account, you agree to our <a href="terms-of-service.html" style="color:rgba(255,255,255,.45);text-decoration:underline;">Terms of Service</a> and <a href="privacy-policy.html" style="color:rgba(255,255,255,.45);text-decoration:underline;">Privacy Policy</a>.
-      </p>
     </form>
 
     <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
@@ -279,8 +285,14 @@
 
   <script>
     // Already logged in → skip to dashboard
-    const existing = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+    const existing = ctsoccerGetUser();
     if (existing && existing.firstName) window.location.href = 'dashboard.html';
+
+    const agreeCheckbox = document.getElementById('agree-terms');
+    const createBtn = document.getElementById('create-account-btn');
+    agreeCheckbox.addEventListener('change', () => {
+      createBtn.disabled = !agreeCheckbox.checked;
+    });
 
     function selectRole(value, el) {
       document.querySelectorAll('.role-opt').forEach(o => {
@@ -302,6 +314,12 @@
       const role      = document.querySelector('input[name="role"]:checked').value;
       const errorEl   = document.getElementById('error-msg');
       const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      if (!agreeCheckbox.checked) {
+        errorEl.textContent = 'Please agree to the Terms of Service and Privacy Policy to continue.';
+        errorEl.style.display = 'block';
+        return;
+      }
 
       if (password.length < 8) {
         errorEl.textContent = 'Password must be at least 8 characters.';
@@ -339,7 +357,7 @@
         }
       }
 
-      localStorage.setItem('ctsoccer_user', JSON.stringify(user));
+      ctsoccerSetUser(user, true);
       window.location.href = 'dashboard.html';
     });
   </script>

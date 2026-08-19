@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Account</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -540,7 +541,7 @@
 <script>
   // ---- State ----
   let user = {};
-  try { user = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}'); } catch(e){}
+  try { user = ctsoccerGetUser() || {}; } catch(e){}
   
   // Check if guest - if so, show limited access
   if (user.isGuest) {
@@ -944,12 +945,12 @@
   }
 
   function logout() {
-    localStorage.removeItem('ctsoccer_user');
+    ctsoccerClearUser();
     window.location.href = 'index.html';
   }
 
   function deleteAccount() {
-    localStorage.removeItem('ctsoccer_user');
+    ctsoccerClearUser();
     window.location.href = 'index.html';
   }
 
@@ -1190,7 +1191,7 @@
 
   // ---- Util ----
   function saveUser() {
-    localStorage.setItem('ctsoccer_user', JSON.stringify(user));
+    ctsoccerUpdateUser(user);
   }
 
   boot();

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Community — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -112,7 +113,7 @@
 
   <script>
     let user = {};
-    try { user = JSON.parse(localStorage.getItem('ctsoccer_user') || '{}'); } catch(e) {}
+    try { user = ctsoccerGetUser() || {}; } catch(e) {}
 
     const gateTitle = document.getElementById('gate-title');
     const gateBody = document.getElementById('gate-body');

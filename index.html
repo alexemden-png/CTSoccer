@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -70,6 +71,11 @@
     .nav-inner {
       max-width: 1180px; margin: 0 auto; padding: 0 24px;
       height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 28px;
+    }
+    /* Below this, the 10-link row is too wide to force Sign In / Register Now onto one
+       line without pushing them off-screen — let them wrap there instead. */
+    @media (min-width: 1300px) {
+      #nav-signin, #nav-register { white-space: nowrap; }
     }
     .nav-link {
       font-size: .875rem; font-weight: 500; color: rgba(255,255,255,.6);
@@ -360,7 +366,7 @@
   <!-- Auth State Manager -->
   <script>
     function updateNavbarAuth() {
-      const user = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+      const user = ctsoccerGetUser();
       const signinBtn = document.getElementById('nav-signin');
       const registerBtn = document.getElementById('nav-register');
       const mobileCtaBtn = document.getElementById('nav-cta-mobile');
@@ -1179,8 +1185,7 @@
         notifications: true,
         stats: { goals:0, assists:0, appearances:0, rating:' - ' }
       };
-      localStorage.setItem('ctsoccer_user', JSON.stringify(user));
-      localStorage.setItem('ctsoccer_staySignedIn', staySignedIn ? 'true' : 'false');
+      ctsoccerSetUser(user, staySignedIn);
       window.location.href = 'dashboard.html';
     });
 
@@ -1196,8 +1201,7 @@
         notifications: false,
         stats: { goals:0, assists:0, appearances:0, rating:' - ' }
       };
-      localStorage.setItem('ctsoccer_user', JSON.stringify(guest));
-      localStorage.setItem('ctsoccer_staySignedIn', 'false');
+      ctsoccerSetUser(guest, false);
       closeModal();
       window.location.href = 'dashboard.html';
     }

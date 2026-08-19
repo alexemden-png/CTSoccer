@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soccer Assistant — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -72,7 +73,7 @@
   <script src="clubs-data.js"></script>
   <script>
     let user = {};
-    try { user = JSON.parse(localStorage.getItem('ctsoccer_user') || '{}'); } catch(e) {}
+    try { user = ctsoccerGetUser() || {}; } catch(e) {}
 
     // ---- Real reference data for coaching recommendations (mirrors coaching-clinics.html) ----
     const COURSES = [

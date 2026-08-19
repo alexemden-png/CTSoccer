@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -795,7 +796,7 @@
     // Load user info
     (function() {
       try {
-        const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
+        const u = ctsoccerGetUser() || {};
         if (u.firstName) {
           document.getElementById('user-name').textContent = u.firstName + ' ' + u.lastName;
           document.getElementById('user-role').textContent = u.role ? (u.role[0].toUpperCase()+u.role.slice(1)) : 'Member';

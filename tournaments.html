@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tournaments</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -266,7 +267,7 @@
   <!-- Auth State Manager -->
   <script>
     function updateNavbarAuth() {
-      const user = JSON.parse(localStorage.getItem('ctsoccer_user') || 'null');
+      const user = ctsoccerGetUser();
       const signinBtn = document.getElementById('nav-signin');
       const registerBtn = document.getElementById('nav-register');
       const tournamentsBtn = document.getElementById('nav-tournaments-btn');

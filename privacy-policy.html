@@ -135,16 +135,23 @@
     <section id="collect">
       <h2>1. Information We Collect</h2>
       <h3>Account &amp; profile information</h3>
-      <p>When you register or edit your profile, we (via Firebase Authentication and Firestore) store information you provide directly, such as:</p>
+      <p>
+        When you register or edit your profile, CT Soccer collects the information you provide directly. Right now,
+        this information — your registration details, profile details, and player or team manager details — is
+        stored <strong>locally in your own browser</strong>, using its built-in storage (localStorage), rather than
+        on a server we operate. That means it stays on your device by default and isn't something we can access,
+        view, or retrieve remotely. If we move to server-based account storage in the future, we'll update this
+        Privacy Policy before that change takes effect. The information stored this way includes:
+      </p>
       <ul>
-        <li><strong>Registration details</strong> — first and last name, email address, and password (your password is handled by Firebase Authentication and is never stored by us in plain text).</li>
+        <li><strong>Registration details</strong> — first and last name, email address, and password, stored locally in your browser as described above.</li>
         <li><strong>Profile details</strong> — username, bio, CT town/location, profile photo, and your selected role (Player, Team Manager, or Fan).</li>
         <li><strong>Player details</strong> — position, jersey number, preferred foot, and stats you enter (goals, assists, appearances), plus the club you follow or play for.</li>
         <li><strong>Team manager details</strong> — managing club, club website, contact email, roster entries, and match results you submit.</li>
         <li><strong>Security settings</strong> — whether you've enabled two-factor authentication (we store the authenticator setup state, not your authenticator app's codes).</li>
       </ul>
       <h3>Content you post</h3>
-      <p>The Community feed lets you upload photos or videos and write captions. These are stored via Firebase Cloud Storage and Firestore and are visible to other users according to the feed's visibility settings.</p>
+      <p>The Community feed is designed to let you upload photos or videos and write captions. That feature requires a backend connection that isn't active yet (see Section 4), so as of this writing Community isn't available and no post content is currently being collected or stored. When it goes live, we'll describe here where and how that content is stored.</p>
       <h3>Automatically collected information</h3>
       <p>Like most websites, we and our third-party providers automatically receive some technical information when you visit — browser type, device type, general region (from IP address), pages viewed, and referring pages. We use this in aggregate to understand site usage; we don't use it to identify you individually outside of the ad-serving purposes described in Section 3.</p>
       <h3>Cookies &amp; local storage</h3>
@@ -185,7 +192,7 @@
       <h2>4. Third-Party Services</h2>
       <p>We rely on the following third parties to operate CT Soccer. Each processes data under its own privacy policy:</p>
       <ul>
-        <li><strong>Google Firebase</strong> (Authentication, Firestore database, Cloud Storage) — stores your account, profile, and Community content. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase's privacy policy</a>.</li>
+        <li><strong>Google Firebase</strong> — CT Soccer's codebase includes Firebase integration (Authentication, Firestore database, Cloud Storage) built in for future use, but it is <strong>not currently active</strong>. No account or profile data is presently sent to Firebase — see Section 1 for how that information is actually stored today. If and when we activate Firebase, we'll update this policy accordingly. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase's privacy policy</a> for reference.</li>
         <li><strong>Google AdSense</strong> — serves ads and sets cookies as described in Section 3. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
         <li><strong>Google Fonts &amp; Tailwind CSS (jsDelivr/CDN)</strong> — loaded from Google's and other CDN servers to render page styling and typography; these requests can expose your IP address to the host, like any web request.</li>
         <li><strong>TheSportsDB</strong> — a public sports-data API we use to pull real match results and fixtures for Hartford Athletic, AC Connecticut, and CT Rush. We only send match/team lookups to this API — no personal or account information is shared with it.</li>
@@ -205,9 +212,9 @@
 
     <section id="retention">
       <h2>6. Data Retention &amp; Security</h2>
-      <p>We retain your account and profile information for as long as your account is active, or as needed to provide you the service. If you delete your account (available in Account Settings), we delete your profile data and remove your Community content within 30 days, except where we're required to retain it by law.</p>
-      <p>We rely on Firebase's security infrastructure to protect your data, but no method of transmission or storage is 100% secure, and we can't guarantee absolute security.</p>
-      <p>Our service providers, including Firebase and Google, may process and store your information on servers located outside your country of residence, including in the United States. By using the Service, you consent to this kind of international transfer of your information.</p>
+      <p>Because your account and profile information is currently stored locally in your browser (see Section 1) rather than on a server, it persists there for as long as your account is active, or until you delete your account or clear your browser's local storage. Deleting your account (available in Account Settings) removes your profile data from your browser within 30 days — in practice, immediately.</p>
+      <p>We rely on standard browser security to protect locally stored data, but no method of storage is 100% secure, and we can't guarantee absolute security. Once Firebase is active (see Section 4), we'll additionally rely on Firebase's server-side security infrastructure and update this section accordingly.</p>
+      <p>Google AdSense, which is active today, may process data on servers located outside your country of residence as part of how it serves ads. If and when we activate Firebase (see Section 4), our use of it would likewise involve processing and storing data on Firebase/Google servers outside your country of residence, including in the United States. By using the Service, you consent to this kind of international transfer where applicable.</p>
     </section>
 
     <section id="children">
@@ -227,7 +234,7 @@
       <ul>
         <li><strong>Access &amp; update</strong> — review and edit your profile information anytime from <a href="account.html">Account Settings</a>.</li>
         <li><strong>Delete your account</strong> — use the "Delete Account" option in Account Settings to permanently remove your profile and associated data.</li>
-        <li><strong>Delete individual posts</strong> — remove your own Community posts at any time.</li>
+        <li><strong>Delete individual posts</strong> — once Community is live (see Section 1), you'll be able to remove your own posts at any time.</li>
         <li><strong>Ad personalization</strong> — opt out via the links in Section 3.</li>
         <li><strong>Cookies</strong> — control or clear cookies and local storage through your browser settings.</li>
       </ul>

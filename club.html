@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
+  <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Club — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -202,13 +203,13 @@
 
       let followed = false;
       try {
-        const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
+        const u = ctsoccerGetUser() || {};
         followed = (u.followedClubs||[]).includes(club.id);
       } catch(e) {}
 
       function toggleFollow() {
         try {
-          const u = JSON.parse(localStorage.getItem('ctsoccer_user')||'{}');
+          const u = ctsoccerGetUser() || {};
           if (!u.followedClubs) u.followedClubs = [];
           if (followed) {
             u.followedClubs = u.followedClubs.filter(x=>x!==club.id);
@@ -217,7 +218,7 @@
             u.followedClubs.push(club.id);
             followed = true;
           }
-          localStorage.setItem('ctsoccer_user', JSON.stringify(u));
+          ctsoccerUpdateUser(u);
           updateFollowBtn();
         } catch(e){}
       }
