@@ -5,6 +5,10 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Account — CT Soccer</title>
   <meta name="description" content="Manage your CT Soccer profile, followed clubs, and team roster.">
@@ -310,7 +314,7 @@
           </div>
           <div><label class="field-label">Date</label><input type="text" id="res-date" placeholder="e.g. Aug 16, 2026"></div>
           <div><label class="field-label">Venue</label><input type="text" id="res-venue" placeholder="Stadium / Field name"></div>
-          <button class="btn-primary" onclick="submitResult()" style="width:100%;justify-content:center;">Submit Result</button>
+          <button class="btn-primary" id="submit-result-btn" onclick="submitResult()" style="width:100%;justify-content:center;">Submit Result</button>
         </div>
       </div>
     </div>
@@ -433,8 +437,8 @@
         <div class="card">
           <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Change Password</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div><label class="field-label">Current Password</label><input type="password" placeholder="Current password"></div>
-            <div><label class="field-label">New Password</label><input type="password" placeholder="New password"></div>
+            <div><label class="field-label">Current Password</label><input type="password" id="current-pw" placeholder="Current password"></div>
+            <div><label class="field-label">New Password</label><input type="password" id="new-pw" placeholder="New password"></div>
             <div><label class="field-label">Confirm New Password</label><input type="password" id="confirm-pw" placeholder="Confirm new password"></div>
             <button class="btn-primary" onclick="changePassword()" style="width:100%;justify-content:center;">Update Password</button>
           </div>
@@ -948,18 +952,53 @@
     toast('Role updated to ' + role[0].toUpperCase()+role.slice(1));
   }
 
-  function changePassword() {
-    const pw = document.getElementById('confirm-pw').value;
-    if (pw.length < 8) { toast('Password must be at least 8 characters'); return; }
-    toast('Password updated!');
+  async function changePassword() {
+    const currentPw = document.getElementById('current-pw').value;
+    const newPw = document.getElementById('new-pw').value;
+    const confirmPw = document.getElementById('confirm-pw').value;
+    if (newPw.length < 8) { toast('New password must be at least 8 characters'); return; }
+    if (newPw !== confirmPw) { toast('New password and confirmation don\'t match'); return; }
+
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && fbAuth.currentUser) {
+      if (!currentPw) { toast('Enter your current password to confirm this change'); return; }
+      try {
+        const cred = firebase.auth.EmailAuthProvider.credential(fbAuth.currentUser.email, currentPw);
+        await fbAuth.currentUser.reauthenticateWithCredential(cred);
+        await fbAuth.currentUser.updatePassword(newPw);
+        toast('Password updated!');
+      } catch (err) {
+        toast(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
+          ? 'Current password is incorrect.'
+          : 'Could not update password: ' + err.message);
+        return;
+      }
+    } else {
+      toast('Password updated!');
+    }
+    document.getElementById('current-pw').value = '';
+    document.getElementById('new-pw').value = '';
+    document.getElementById('confirm-pw').value = '';
   }
 
   function logout() {
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && fbAuth.currentUser) {
+      fbAuth.signOut().catch(() => {});
+    }
     ctsoccerClearUser();
     window.location.href = 'index.html';
   }
 
-  function deleteAccount() {
+  async function deleteAccount() {
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
+      try { await db.collection('users').doc(user.firebaseUid).delete(); } catch (e) {}
+      try { await fbAuth.currentUser.delete(); }
+      catch (err) {
+        if (err.code === 'auth/requires-recent-login') {
+          toast('For security, please sign out and back in, then delete your account again.');
+          return;
+        }
+      }
+    }
     ctsoccerClearUser();
     window.location.href = 'index.html';
   }
@@ -1095,15 +1134,39 @@
     toast('Player removed');
   }
 
-  function submitResult() {
+  async function submitResult() {
     const opp   = document.getElementById('res-opponent').value.trim();
     const home  = document.getElementById('res-home').value;
     const away  = document.getElementById('res-away').value;
     const date  = document.getElementById('res-date').value.trim();
     const venue = document.getElementById('res-venue').value.trim();
     if (!opp||home===''||away==='') { toast('Fill in opponent and scores'); return; }
+    const clubId = user.teamInfo && user.teamInfo.club;
+    if (!clubId) { toast('Select your managing club above first'); return; }
     const result = parseInt(home)>parseInt(away)?'W':parseInt(home)<parseInt(away)?'L':'D';
-    toast(`Result submitted: ${result} ${home}&ndash;${away} vs ${opp}`);
+
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
+      const btn = document.getElementById('submit-result-btn');
+      if (btn) btn.disabled = true;
+      try {
+        await db.collection('matchResults').add({
+          clubId, opponent: opp,
+          homeScore: parseInt(home), awayScore: parseInt(away),
+          result, date: date || null, venue: venue || null,
+          submittedBy: user.firebaseUid,
+          submittedByName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Team Manager',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        toast(`Result submitted: ${result} ${home}–${away} vs ${opp} — now visible on the club page`);
+      } catch (err) {
+        toast('Could not submit result: ' + err.message);
+        if (btn) btn.disabled = false;
+        return;
+      }
+      if (btn) btn.disabled = false;
+    } else {
+      toast(`Result submitted: ${result} ${home}–${away} vs ${opp}`);
+    }
     document.getElementById('res-opponent').value='';
     document.getElementById('res-home').value='';
     document.getElementById('res-away').value='';
@@ -1202,9 +1265,30 @@
   // ---- Util ----
   function saveUser() {
     ctsoccerUpdateUser(user);
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
+      const { password, ...profileData } = user; // never write the password field to Firestore
+      db.collection('users').doc(user.firebaseUid).set(profileData, { merge: true })
+        .catch(err => console.warn('[Firestore] profile sync failed:', err.message));
+    }
   }
 
-  boot();
+  // Pull the latest profile from Firestore before rendering, so edits made on
+  // another device/browser show up here too — not just what's cached locally.
+  async function bootWithFirestoreSync() {
+    if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
+      try {
+        const doc = await db.collection('users').doc(user.firebaseUid).get();
+        if (doc.exists) {
+          user = { ...user, ...doc.data(), firebaseUid: user.firebaseUid };
+          ctsoccerUpdateUser(user);
+        }
+      } catch (err) {
+        console.warn('[Firestore] could not refresh profile:', err.message);
+      }
+    }
+    boot();
+  }
+  bootWithFirestoreSync();
 </script>
 </body>
 </html>

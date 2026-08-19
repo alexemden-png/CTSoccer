@@ -9,28 +9,51 @@ Console → Build → Firestore Database → Rules tab → replace contents → 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // A "Team Manager" is any signed-in user whose own profile self-declares
+    // role == 'coach' and teamInfo.club == clubId. There is no separate
+    // verification/approval step in this app — any user can set this on their
+    // own account settings page. This rule only enforces "you claimed to
+    // manage this club", not identity-verified club ownership.
+    function isTeamManagerOf(clubId) {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamInfo.club == clubId;
+    }
+
     match /users/{uid} {
-      allow read: if true;
-      allow create: if request.auth != null && request.auth.uid == uid;
-      allow update: if request.auth != null && request.auth.uid == uid;
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid;
       allow delete: if false;
     }
     match /follows/{followId} {
-      allow read: if true;
-      allow create: if request.auth != null
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
         && request.auth.uid == request.resource.data.followerUid;
-      allow delete: if request.auth != null
+      allow delete: if isSignedIn()
         && request.auth.uid == resource.data.followerUid;
       allow update: if false;
     }
     match /posts/{postId} {
-      allow read: if true;
-      allow create: if request.auth != null
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
         && request.auth.uid == request.resource.data.uid
         && request.resource.data.mediaType in ['image', 'video']
         && request.resource.data.caption.size() < 500;
       allow update: if false;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+    match /matchResults/{resultId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.submittedBy == request.auth.uid
+        && isTeamManagerOf(request.resource.data.clubId);
+      allow update: if isTeamManagerOf(resource.data.clubId);
+      allow delete: if isTeamManagerOf(resource.data.clubId);
     }
   }
 }

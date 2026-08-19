@@ -357,6 +357,7 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
           user.firebaseUid = cred.user.uid;
+          delete user.password; // Firebase Auth handles credentials now — no need to keep a local copy.
         } catch (err) {
           submitBtn.disabled = false;
           errorEl.textContent = err.code === 'auth/email-already-in-use'

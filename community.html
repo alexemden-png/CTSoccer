@@ -74,7 +74,7 @@
 
   <div id="app" style="max-width:600px;margin:0 auto;padding:28px 20px 80px;display:none;">
 
-    <div class="post-card" style="padding:18px;margin-bottom:24px;">
+    <div id="composer-card" class="post-card" style="padding:18px;margin-bottom:24px;display:none;">
       <div id="file-drop" class="file-drop" onclick="document.getElementById('file-input').click()">
         <div style="font-size:1.6rem;margin-bottom:6px;">&#128247;</div>
         <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.75);">Click to choose a photo or video</div>
@@ -91,6 +91,12 @@
         <div id="upload-status" style="font-size:.75rem;color:var(--muted);"></div>
         <button id="post-btn" class="btn-primary" onclick="submitPost()" disabled>Post</button>
       </div>
+    </div>
+
+    <div id="composer-coming-soon" class="post-card" style="padding:22px 18px;margin-bottom:24px;text-align:center;display:none;">
+      <div style="font-size:1.5rem;margin-bottom:8px;">&#128247;</div>
+      <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.75);">Photo &amp; video uploads coming soon</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">We're setting up media storage — check back soon to start sharing.</div>
     </div>
 
     <div class="post-card" style="padding:18px;margin-bottom:24px;text-align:center;">
@@ -136,6 +142,9 @@
       gateActions.innerHTML = '<a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Go to Sign In</a>';
     } else {
       document.getElementById('app').style.display = 'block';
+      const storageOn = typeof STORAGE_ENABLED !== 'undefined' && STORAGE_ENABLED;
+      document.getElementById('composer-card').style.display = storageOn ? 'block' : 'none';
+      document.getElementById('composer-coming-soon').style.display = storageOn ? 'none' : 'block';
       boot();
     }
 

@@ -326,6 +326,7 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               }, { merge: true });
               localMatch.firebaseUid = cred.user.uid;
+              delete localMatch.password; // Firebase Auth handles credentials now — no need to keep a local copy.
               finishLogin(localMatch);
               return;
             } catch (e2) { /* fall through to error handling below */ }

@@ -6,6 +6,10 @@
   <script src="share.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Club — CT Soccer</title>
   <meta name="description" content="Browse real Connecticut soccer club profiles — league, roster, results, and standings.">
@@ -205,6 +209,34 @@
         }
       }
 
+      // Match results submitted by this club's Team Manager, from Firestore —
+      // visible to any signed-in visitor, not just the manager's own browser.
+      // Requires being signed in per the site's read rules, so this silently
+      // no-ops for signed-out visitors rather than showing an error.
+      if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && !club.isDirectoryOnly) {
+        try {
+          const snap = await db.collection('matchResults')
+            .where('clubId', '==', club.id)
+            .orderBy('createdAt', 'desc')
+            .limit(10)
+            .get();
+          const managerResults = snap.docs.map(doc => {
+            const d = doc.data();
+            return {
+              opponent: d.opponent,
+              home: true,
+              score: `${d.homeScore}-${d.awayScore}`,
+              result: d.result,
+              date: d.date || (d.createdAt ? d.createdAt.toDate().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : ''),
+              manager: true,
+            };
+          });
+          if (managerResults.length) club.recentResults = [...managerResults, ...(club.recentResults || [])];
+        } catch (err) {
+          console.info('[Firestore] match results unavailable:', err.message);
+        }
+      }
+
       let followed = false;
       try {
         const u = ctsoccerGetUser() || {};
@@ -376,7 +408,7 @@
                         <span style="width:24px;height:24px;border-radius:6px;background:${r.result==='W'?'rgba(92,221,139,.15)':r.result==='L'?'rgba(255,112,112,.15)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.3)':r.result==='L'?'rgba(255,112,112,.3)':'rgba(245,168,0,.25)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.68rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
                         <div style="flex:1;min-width:0;">
                           <div style="font-size:.85rem;font-weight:700;color:#fff;">${r.home===false ? r.opponent : club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.home===false ? club.name : r.opponent}</div>
-                          <div style="font-size:.7rem;color:rgba(255,255,255,.28);margin-top:2px;">${r.date}</div>
+                          <div style="font-size:.7rem;color:rgba(255,255,255,.28);margin-top:2px;">${r.date}${r.manager ? ' &middot; <span style="color:var(--accent-lt);">Submitted by team manager</span>' : ''}</div>
                         </div>
                         <div style="font-size:1rem;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:.02em;flex-shrink:0;">${r.score}</div>
                       </div>
@@ -466,7 +498,7 @@
                   <span style="width:32px;height:32px;border-radius:8px;background:${r.result==='W'?'rgba(92,221,139,.14)':r.result==='L'?'rgba(255,112,112,.14)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.28)':r.result==='L'?'rgba(255,112,112,.28)':'rgba(245,168,0,.22)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
                   <div style="flex:1;min-width:0;">
                     <div style="font-size:.9rem;font-weight:700;color:#fff;">${club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.opponent}</div>
-                    <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${r.date} &middot; ${r.home===false?'Away':'Home'}</div>
+                    <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${r.date} &middot; ${r.home===false?'Away':'Home'}${r.manager ? ' &middot; <span style="color:var(--accent-lt);">Submitted by team manager</span>' : ''}</div>
                   </div>
                   <div style="font-size:1.3rem;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.02em;flex-shrink:0;background:rgba(255,255,255,.06);border-radius:8px;padding:6px 16px;">${r.score}</div>
                 </div>
