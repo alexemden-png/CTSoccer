@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
@@ -326,6 +327,17 @@
                 joined: localMatch.joined || new Date().toISOString(),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               }, { merge: true });
+              // Restricted-field mirror the People directory reads — never includes email.
+              // Best-effort: never let this block the legacy-account migration.
+              const legacyClub = localMatch.role === 'coach'
+                ? (localMatch.teamInfo && localMatch.teamInfo.club) || null
+                : (localMatch.playerInfo && localMatch.playerInfo.club) || null;
+              db.collection('publicProfiles').doc(cred.user.uid).set({
+                firstName: localMatch.firstName, lastName: localMatch.lastName,
+                role: localMatch.role || 'fan', username: localMatch.username || null,
+                club: legacyClub, avatar: localMatch.avatar || null,
+                followerCount: 0, followingCount: 0,
+              }, { merge: true }).catch(err => console.warn('[Firestore] public profile create failed:', err.message));
               localMatch.firebaseUid = cred.user.uid;
               delete localMatch.password; // Firebase Auth handles credentials now — no need to keep a local copy.
               finishLogin(localMatch);

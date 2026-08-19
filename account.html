@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
@@ -27,6 +28,9 @@
     select option{background:var(--navy-800);}
     textarea{resize:vertical;min-height:80px;}
     label.field-label{font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.32);display:block;margin-bottom:6px;}
+    .club-picker{position:relative;}
+    .club-picker-results{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:240px;overflow-y:auto;background:var(--navy-700);border:1px solid rgba(255,255,255,.14);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.45);z-index:60;}
+    .club-picker-option:hover,.club-picker-option.active{background:rgba(43,124,233,.14);}
     .tab-btn{padding:9px 22px;border-radius:9px;font-size:.83rem;font-weight:700;cursor:pointer;border:none;font-family:'Montserrat',Arial,sans-serif;transition:background .18s,color .18s;}
     .tab-btn.active{background:var(--accent);color:#fff;}
     .tab-btn:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);}
@@ -217,14 +221,11 @@
             <select id="p-foot"><option value="">Select...</option><option>Right</option><option>Left</option><option>Both</option></select>
           </div>
           <div><label class="field-label">Club / Team</label>
-            <select id="p-club">
-              <option value="">No club selected</option>
-              <option value="hartford-athletic">Hartford Athletic FC</option>
-              <option value="ct-united-fc">CT United FC</option>
-              <option value="new-haven-united-fc">New Haven United FC</option>
-              <option value="ac-connecticut">AC Connecticut</option>
-              <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
-            </select>
+            <div class="club-picker">
+              <input type="text" id="p-club-search" placeholder="Search for your club..." autocomplete="off">
+              <input type="hidden" id="p-club">
+              <div class="club-picker-results" id="p-club-results"></div>
+            </div>
           </div>
           <button class="btn-primary" onclick="savePlayerInfo()" style="width:100%;justify-content:center;">Save Player Info</button>
         </div>
@@ -287,14 +288,11 @@
       <div class="card">
         <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">My Club</div>
         <div><label class="field-label">Managing Club</label>
-          <select id="tm-club" onchange="loadTeamRoster()" style="margin-bottom:12px;">
-            <option value="">Select club...</option>
-            <option value="hartford-athletic">Hartford Athletic FC</option>
-            <option value="ct-united-fc">CT United FC</option>
-            <option value="new-haven-united-fc">New Haven United FC</option>
-            <option value="ac-connecticut">AC Connecticut</option>
-            <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
-          </select>
+          <div class="club-picker" style="margin-bottom:12px;">
+            <input type="text" id="tm-club-search" placeholder="Search for your club..." autocomplete="off">
+            <input type="hidden" id="tm-club">
+            <div class="club-picker-results" id="tm-club-results"></div>
+          </div>
         </div>
         <div><label class="field-label">Club Website</label>
           <input type="text" id="tm-website" placeholder="yourclub.com" style="margin-bottom:12px;">
@@ -356,14 +354,11 @@
         <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:12px;">Clubs you follow get their match updates first.</div>
         <div id="fan-followed-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
         <div><label class="field-label">Follow a Club</label>
-          <select id="fan-follow-select" style="margin-bottom:10px;">
-            <option value="">Select a club...</option>
-            <option value="hartford-athletic">Hartford Athletic FC</option>
-            <option value="ct-united-fc">CT United FC</option>
-            <option value="new-haven-united-fc">New Haven United FC</option>
-            <option value="ac-connecticut">AC Connecticut</option>
-            <option value="connecticut-rush-usl2">CT Rush (USL2)</option>
-          </select>
+          <div class="club-picker" style="margin-bottom:10px;">
+            <input type="text" id="fan-follow-search" placeholder="Search for a club..." autocomplete="off">
+            <input type="hidden" id="fan-follow-select">
+            <div class="club-picker-results" id="fan-follow-results"></div>
+          </div>
           <button class="btn-primary" onclick="followClub()" style="width:100%;justify-content:center;">+ Follow Club</button>
         </div>
       </div>
@@ -554,6 +549,7 @@
 </div>
 
 <script src="clubs-data.js"></script>
+<script src="cjsa-directory.js"></script>
 <script>
   // ---- State ----
   let user = {};
@@ -597,6 +593,88 @@
     el.classList.add('show');
     setTimeout(()=>el.classList.remove('show'), dur);
   }
+
+  // ---- Searchable club picker (Player club, Team Manager club, Follow a Club) ----
+  // Combines the ~46 pro/semi-pro/featured clubs (ALL_CLUBS) with the full 162-club
+  // CJSA directory so every real CT youth club is selectable, not just the 5 pro ones.
+  function buildClubPickerList() {
+    const seen = new Set();
+    const list = [];
+    (typeof ALL_CLUBS !== 'undefined' ? ALL_CLUBS : []).forEach(c => {
+      const key = c.id + '|' + c.name;
+      if (seen.has(key)) return;
+      seen.add(key);
+      list.push({ id: c.id, name: c.name, city: c.city || '' });
+    });
+    (typeof CJSA_DIRECTORY !== 'undefined' ? CJSA_DIRECTORY : []).forEach(c => {
+      const key = c.id + '|' + c.name;
+      if (seen.has(key)) return;
+      seen.add(key);
+      list.push({ id: c.id, name: c.name, city: c.city || '' });
+    });
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }
+  const CLUB_PICKER_LIST = buildClubPickerList();
+
+  function clubNameById(id) {
+    if (!id) return '';
+    const hit = CLUB_PICKER_LIST.find(c => c.id === id);
+    if (hit) return hit.name;
+    const c = typeof getClubById === 'function' ? getClubById(id) : null;
+    return c ? c.name : id;
+  }
+
+  // Wires a hidden <input> (holds the real club id, read by existing save
+  // functions unchanged) to a visible search box + filtered results dropdown.
+  function initClubPicker(hiddenId, searchId, resultsId, onPick) {
+    const hidden = document.getElementById(hiddenId);
+    const search = document.getElementById(searchId);
+    const results = document.getElementById(resultsId);
+    if (!hidden || !search || !results) return;
+
+    function renderResults(query) {
+      const q = query.trim().toLowerCase();
+      const matches = (q
+        ? CLUB_PICKER_LIST.filter(c => c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q))
+        : CLUB_PICKER_LIST
+      ).slice(0, 40);
+      results.innerHTML = matches.length
+        ? matches.map(c => `<div class="club-picker-option" data-id="${c.id}" data-name="${c.name.replace(/"/g,'&quot;')}" style="padding:9px 12px;font-size:.82rem;color:#fff;cursor:pointer;">${c.name}${c.city ? `<span style="color:rgba(255,255,255,.35);font-size:.72rem;"> — ${c.city}</span>` : ''}</div>`).join('')
+        : '<div style="padding:10px 12px;font-size:.78rem;color:rgba(255,255,255,.35);">No clubs found</div>';
+      results.style.display = 'block';
+    }
+
+    search.addEventListener('focus', () => renderResults(search.value));
+    search.addEventListener('input', () => {
+      if (!search.value) hidden.value = '';
+      renderResults(search.value);
+    });
+    search.addEventListener('blur', () => setTimeout(() => { results.style.display = 'none'; }, 150));
+
+    results.addEventListener('mousedown', (e) => {
+      const opt = e.target.closest('.club-picker-option');
+      if (!opt) return;
+      e.preventDefault();
+      hidden.value = opt.dataset.id;
+      search.value = opt.dataset.name;
+      results.style.display = 'none';
+      if (onPick) onPick(opt.dataset.id);
+    });
+  }
+
+  // Call after programmatically setting a hidden club-picker input's value
+  // (e.g. restoring from saved user data) so the visible search box shows the club name.
+  function syncClubPickerDisplay(hiddenId, searchId) {
+    const hidden = document.getElementById(hiddenId);
+    const search = document.getElementById(searchId);
+    if (!hidden || !search) return;
+    search.value = hidden.value ? clubNameById(hidden.value) : '';
+  }
+
+  initClubPicker('p-club', 'p-club-search', 'p-club-results');
+  initClubPicker('tm-club', 'tm-club-search', 'tm-club-results', () => loadTeamRoster());
+  initClubPicker('fan-follow-select', 'fan-follow-search', 'fan-follow-results');
 
   // ---- Boot ----
   function boot() {
@@ -680,6 +758,10 @@
       switchRole('player');
       toast('Select your position and save to join ' + clubId.replace(/-/g,' '));
     }
+
+    // Reflect the current hidden club-picker values as visible club names.
+    syncClubPickerDisplay('p-club', 'p-club-search');
+    syncClubPickerDisplay('tm-club', 'tm-club-search');
   }
 
   function hashStr(s) {
@@ -993,7 +1075,8 @@
 
   async function deleteAccount() {
     if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
-      try { await db.collection('users').doc(user.firebaseUid).delete(); } catch (e) {}
+      try { await db.collection('users').doc(user.firebaseUid).delete(); } catch (e) { console.warn('[Firestore] could not delete profile doc:', e.message); }
+      try { await db.collection('publicProfiles').doc(user.firebaseUid).delete(); } catch (e) { console.warn('[Firestore] could not delete public profile doc:', e.message); }
       try { await fbAuth.currentUser.delete(); }
       catch (err) {
         if (err.code === 'auth/requires-recent-login') {
@@ -1226,6 +1309,8 @@
       user.followedClubs = [...(user.followedClubs||[]), id];
       saveUser(); renderFollowed();
       toast('Now following ' + (getClubById(id)||{name:id}).name);
+      document.getElementById('fan-follow-select').value = '';
+      document.getElementById('fan-follow-search').value = '';
     } else { toast('Already following this club'); }
   }
 
@@ -1272,7 +1357,35 @@
       const { password, ...profileData } = user; // never write the password field to Firestore
       db.collection('users').doc(user.firebaseUid).set(profileData, { merge: true })
         .catch(err => console.warn('[Firestore] profile sync failed:', err.message));
+      syncPublicProfile();
     }
+  }
+
+  // The People directory reads a SEPARATE, restricted-field collection instead of
+  // the full users/ doc, so nothing a signed-in user can query ever exposes email,
+  // birthdate, or other private fields — only what's safe to show publicly.
+  // followerCount/followingCount are deliberately excluded here: they're only ever
+  // touched via FieldValue.increment() in people.html's follow/unfollow, so an
+  // explicit merge write from here can't clobber a count changed by someone else
+  // between page loads.
+  function publicProfileFields() {
+    const club = user.role === 'coach'
+      ? (user.teamInfo && user.teamInfo.club) || null
+      : (user.playerInfo && user.playerInfo.club) || null;
+    return {
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      username: user.username || null,
+      role: user.role || 'fan',
+      club,
+      avatar: user.avatar || null,
+    };
+  }
+
+  function syncPublicProfile() {
+    if (!(typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid)) return;
+    db.collection('publicProfiles').doc(user.firebaseUid).set(publicProfileFields(), { merge: true })
+      .catch(err => console.warn('[Firestore] public profile sync failed:', err.message));
   }
 
   // Show the "local browser only" banner only for genuinely unsynced accounts —
@@ -1324,6 +1437,7 @@
       delete user.password;
       ctsoccerUpdateUser(user);
       updateStorageBanner();
+      syncPublicProfile();
       toast('Synced! Your account now works across devices and browsers.');
     } catch (err) {
       const msg = (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')
@@ -1345,6 +1459,9 @@
           user = { ...user, ...doc.data(), firebaseUid: user.firebaseUid };
           ctsoccerUpdateUser(user);
         }
+        // Backfill the public directory entry on every visit — covers accounts
+        // that existed before publicProfiles was introduced, not just fresh saves.
+        syncPublicProfile();
       } catch (err) {
         console.warn('[Firestore] could not refresh profile:', err.message);
       }

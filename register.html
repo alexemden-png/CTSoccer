@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
@@ -357,6 +358,12 @@
             joined: user.joined,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
+          // Restricted-field mirror the People directory reads — never includes email.
+          // Best-effort: never let this block account creation.
+          db.collection('publicProfiles').doc(cred.user.uid).set({
+            firstName, lastName, role, username: null, club: null, avatar: null,
+            followerCount: 0, followingCount: 0,
+          }).catch(err => console.warn('[Firestore] public profile create failed:', err.message));
           user.firebaseUid = cred.user.uid;
           delete user.password; // Firebase Auth handles credentials now — no need to keep a local copy.
         } catch (err) {

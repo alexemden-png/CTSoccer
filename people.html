@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
@@ -16,6 +17,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="clubs-data.js"></script>
+  <script src="cjsa-directory.js"></script>
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
@@ -75,9 +78,20 @@
   <div id="app" style="max-width:640px;margin:0 auto;padding:28px 20px 80px;display:none;">
     <div style="margin-bottom:20px;">
       <div style="font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:14px;">Find people</div>
-      <div style="position:relative;">
+      <div style="position:relative;margin-bottom:10px;">
         <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="search-input" type="text" placeholder="Search by name or @username" style="width:100%;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:12px 16px 12px 40px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.9rem;outline:none;">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <select id="role-filter" style="flex:1;min-width:140px;background:var(--navy-800);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.82rem;outline:none;">
+          <option value="">All Roles</option>
+          <option value="player">Player</option>
+          <option value="coach">Team Manager</option>
+          <option value="fan">Fan</option>
+        </select>
+        <select id="club-filter" style="flex:2;min-width:200px;background:var(--navy-800);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.82rem;outline:none;">
+          <option value="">All Clubs</option>
+        </select>
       </div>
     </div>
     <div id="loading" style="text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;">Loading people…</div>
@@ -114,26 +128,71 @@
       return ((u.firstName||'?')[0] + (u.lastName||'')[0]).toUpperCase();
     }
 
-    const ROLE_LABEL = { player: '⚽ Player', coach: '📋 Coach', fan: '🏟️ Fan' };
+    const ROLE_LABEL = { player: '⚽ Player', coach: '📋 Team Manager', fan: '🏟️ Fan' };
+
+    // Same club list used by account.html's picker — the ~46 pro/semi-pro/featured
+    // clubs plus the full 162-club CJSA directory, deduped, so the filter covers
+    // every real club, not just the 5 pro ones.
+    function buildClubList() {
+      const seen = new Set();
+      const list = [];
+      (typeof ALL_CLUBS !== 'undefined' ? ALL_CLUBS : []).forEach(c => {
+        const key = c.id + '|' + c.name;
+        if (seen.has(key)) return;
+        seen.add(key);
+        list.push({ id: c.id, name: c.name });
+      });
+      (typeof CJSA_DIRECTORY !== 'undefined' ? CJSA_DIRECTORY : []).forEach(c => {
+        const key = c.id + '|' + c.name;
+        if (seen.has(key)) return;
+        seen.add(key);
+        list.push({ id: c.id, name: c.name });
+      });
+      list.sort((a, b) => a.name.localeCompare(b.name));
+      return list;
+    }
+    const CLUB_LIST = buildClubList();
+    function clubNameById(id) {
+      if (!id) return '';
+      const hit = CLUB_LIST.find(c => c.id === id);
+      if (hit) return hit.name;
+      const c = typeof getClubById === 'function' ? getClubById(id) : null;
+      return c ? c.name : id;
+    }
+
+    const clubFilterEl = document.getElementById('club-filter');
+    clubFilterEl.insertAdjacentHTML('beforeend', CLUB_LIST.map(c => `<option value="${c.id}">${c.name}</option>`).join(''));
 
     let allPeople = [];
     let followingSet = new Set();
 
     async function boot() {
       try {
-        const [usersSnap, followsSnap] = await Promise.all([
-          db.collection('users').get(),
+        const [peopleSnap, followsSnap] = await Promise.all([
+          db.collection('publicProfiles').get(),
           db.collection('follows').where('followerUid', '==', user.firebaseUid).get(),
         ]);
         followsSnap.forEach(doc => followingSet.add(doc.data().followingUid));
-        allPeople = usersSnap.docs
+        allPeople = peopleSnap.docs
           .map(d => ({ uid: d.id, ...d.data() }))
           .filter(p => p.uid !== user.firebaseUid);
         document.getElementById('loading').style.display = 'none';
-        render(allPeople);
+        applyFilters();
       } catch (err) {
         document.getElementById('loading').textContent = 'Could not load people right now (' + err.message + ').';
       }
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('search-input').value.trim().toLowerCase();
+      const roleFilter = document.getElementById('role-filter').value;
+      const clubFilter = document.getElementById('club-filter').value;
+      const filtered = allPeople.filter(p =>
+        (!q || (p.firstName||'').toLowerCase().includes(q) || (p.lastName||'').toLowerCase().includes(q) || (p.username||'').toLowerCase().includes(q))
+        && (!roleFilter || p.role === roleFilter)
+        && (!clubFilter || p.club === clubFilter)
+      );
+      render(filtered);
     }
 
     function render(list) {
@@ -142,22 +201,28 @@
       if (!list.length) {
         listEl.innerHTML = '';
         emptyEl.style.display = 'block';
-        emptyEl.textContent = allPeople.length ? 'No one matches that search.' : 'No one else has joined yet — be the first to invite a teammate!';
+        emptyEl.textContent = allPeople.length ? 'No one matches your search or filters.' : 'No one else has joined yet — be the first to invite a teammate!';
         return;
       }
       emptyEl.style.display = 'none';
       listEl.innerHTML = list.map(personCardHtml).join('');
     }
 
+    // Only name, role, club, and photo are ever read here — publicProfiles never
+    // contains email or other private fields (see Section 1 of the Privacy Policy).
     function personCardHtml(p) {
       const isFollowing = followingSet.has(p.uid);
       const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'CT Soccer Member';
+      const clubName = clubNameById(p.club);
+      const avatarHtml = p.avatar
+        ? `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="">`
+        : initials(p);
       return `
         <div class="person-card fade-in" data-uid="${p.uid}">
-          <div style="width:44px;height:44px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.35);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:var(--accent-lt);flex-shrink:0;">${initials(p)}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.35);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:var(--accent-lt);flex-shrink:0;overflow:hidden;">${avatarHtml}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:.92rem;font-weight:800;color:#fff;">${name}</div>
-            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''}${clubName ? ' &middot; '+clubName : ''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}</div>
           </div>
           <button class="follow-btn ${isFollowing ? 'following' : 'not-following'}" onclick="toggleFollow('${p.uid}', this)">
             <span class="flabel">${isFollowing ? 'Following' : 'Follow'}</span>
@@ -172,38 +237,35 @@
       try {
         if (isFollowing) {
           await db.collection('follows').doc(followId).delete();
-          await db.collection('users').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(-1) });
-          await db.collection('users').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(-1) });
+          await db.collection('publicProfiles').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(-1) });
+          await db.collection('publicProfiles').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(-1) });
           followingSet.delete(targetUid);
         } else {
           await db.collection('follows').doc(followId).set({
             followerUid: user.firebaseUid, followingUid: targetUid,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           });
-          await db.collection('users').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(1) });
-          await db.collection('users').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(1) });
+          await db.collection('publicProfiles').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(1) });
+          await db.collection('publicProfiles').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(1) });
           followingSet.add(targetUid);
         }
         const p = allPeople.find(x => x.uid === targetUid);
         if (p) p.followerCount = (p.followerCount || 0) + (isFollowing ? -1 : 1);
         const card = btn.closest('.person-card');
         btn.outerHTML = `<button class="follow-btn ${!isFollowing ? 'following' : 'not-following'}" onclick="toggleFollow('${targetUid}', this)"><span class="flabel">${!isFollowing ? 'Following' : 'Follow'}</span></button>`;
-        if (p) card.querySelector('div > div:last-child').innerHTML = `${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}`;
+        if (p) {
+          const clubName = clubNameById(p.club);
+          card.querySelector('div > div:last-child').innerHTML = `${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''}${clubName ? ' &middot; '+clubName : ''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}`;
+        }
       } catch (err) {
         btn.disabled = false;
         alert('Could not update follow status: ' + err.message);
       }
     }
 
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      const q = e.target.value.trim().toLowerCase();
-      if (!q) { render(allPeople); return; }
-      render(allPeople.filter(p =>
-        (p.firstName||'').toLowerCase().includes(q) ||
-        (p.lastName||'').toLowerCase().includes(q) ||
-        (p.username||'').toLowerCase().includes(q)
-      ));
-    });
+    document.getElementById('search-input').addEventListener('input', applyFilters);
+    document.getElementById('role-filter').addEventListener('change', applyFilters);
+    document.getElementById('club-filter').addEventListener('change', applyFilters);
   </script>
 </body>
 </html>

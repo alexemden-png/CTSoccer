@@ -24,11 +24,33 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamInfo.club == clubId;
     }
 
+    // Full profile doc — email, bio, location, teamInfo, etc. Owner-only in every
+    // direction: nothing here is meant to be readable by other signed-in users.
+    // The People directory reads publicProfiles/ instead, which only ever holds
+    // name, role, club, and photo.
     match /users/{uid} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && request.auth.uid == uid;
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if isSignedIn() && request.auth.uid == uid;
-      allow delete: if false;
+      allow delete: if isSignedIn() && request.auth.uid == uid;
+    }
+    // Restricted-field mirror of users/ for the People directory — only ever
+    // firstName, lastName, username, role, club, avatar, followerCount,
+    // followingCount. Readable by any signed-in user; writable by the profile
+    // owner, except followerCount, which any signed-in user may adjust by
+    // exactly the counter needed to follow/unfollow someone else.
+    match /publicProfiles/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && (
+        request.auth.uid == uid
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followerCount'])
+          && request.resource.data.followerCount is int
+          && request.resource.data.followerCount >= 0
+        )
+      );
+      allow delete: if isSignedIn() && request.auth.uid == uid;
     }
     match /follows/{followId} {
       allow read: if isSignedIn();
