@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Terms of Service — CT Soccer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.55);
+      --border:   rgba(255,255,255,.08);
+    }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 24px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
+    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
+    .doc .updated { font-size: .8rem; color: rgba(255,255,255,.4); margin-bottom: 36px; }
+    .doc .intro { font-size: .95rem; line-height: 1.8; color: var(--muted); margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+    .doc section { margin-bottom: 40px; }
+    .doc h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; scroll-margin-top: 84px; }
+    .doc h3 { font-size: .92rem; font-weight: 700; color: var(--accent-lt); margin: 20px 0 8px; }
+    .doc p { font-size: .9rem; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
+    .doc ul { margin: 0 0 14px 20px; }
+    .doc li { font-size: .9rem; line-height: 1.8; color: var(--muted); margin-bottom: 6px; }
+    .doc li strong { color: rgba(255,255,255,.85); }
+    .doc a { color: var(--accent-lt); text-decoration: none; }
+    .doc a:hover { text-decoration: underline; }
+    .toc { background: var(--navy-800); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 44px; }
+    .toc div.label { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.32); margin-bottom: 12px; }
+    .toc ol { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+    .toc a { font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.65); }
+    .toc a:hover { color: var(--accent-lt); }
+    .callout { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.2); border-radius: 12px; padding: 16px 18px; font-size: .84rem; line-height: 1.7; color: rgba(255,255,255,.65); margin-bottom: 14px; }
+    .callout strong { color: #F5A800; }
+
+    .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a.nav-link { display: none; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+      .toc ol { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="news.html" class="nav-link">News</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="doc">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
+      <span style="color:rgba(255,255,255,.2);">/</span>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Terms of Service</span>
+    </div>
+
+    <h1>Terms of Service</h1>
+    <div class="updated">Last updated: August 20, 2026</div>
+
+    <p class="intro">
+      These Terms of Service ("Terms") govern your use of ct-soccer.vercel.app and its features — club profiles, the
+      Dashboard, News, Tournaments, Coaching Clinics, the Soccer Assistant, the Community feed, and accounts
+      (collectively, the "Service"), operated by CT Soccer ("CT Soccer," "we," "us"). By creating an account or
+      otherwise using the Service, you agree to these Terms. If you don't agree, please don't use the Service. See
+      also our <a href="privacy-policy.html">Privacy Policy</a>, which explains how we handle your data.
+    </p>
+
+    <div class="toc">
+      <div class="label">On this page</div>
+      <ol>
+        <li><a href="#accounts">1. Accounts &amp; Eligibility</a></li>
+        <li><a href="#use">2. Acceptable Use</a></li>
+        <li><a href="#content">3. Your Content</a></li>
+        <li><a href="#accuracy">4. Accuracy of Club &amp; Event Info</a></li>
+        <li><a href="#third-party">5. Third-Party Links &amp; Services</a></li>
+        <li><a href="#ads">6. Advertising</a></li>
+        <li><a href="#ip">7. Intellectual Property</a></li>
+        <li><a href="#termination">8. Suspension &amp; Termination</a></li>
+        <li><a href="#disclaimers">9. Disclaimers &amp; Limitation of Liability</a></li>
+        <li><a href="#law">10. Governing Law</a></li>
+        <li><a href="#changes">11. Changes to These Terms</a></li>
+        <li><a href="#contact">12. Contact Us</a></li>
+      </ol>
+    </div>
+
+    <section id="accounts">
+      <h2>1. Accounts &amp; Eligibility</h2>
+      <p>You need an account to use features like following clubs, posting to Community, or managing a team roster. When you register, you agree to:</p>
+      <ul>
+        <li>Provide accurate information and keep it up to date in <a href="account.html">Account Settings</a>.</li>
+        <li>Keep your password secure and enable two-factor authentication if you'd like extra protection — you're responsible for activity under your account.</li>
+        <li>Use one account per person. Team Manager accounts should be run by someone actually authorized to represent that club.</li>
+      </ul>
+      <p>The Service isn't directed at children under 13. If you're a minor, a parent or guardian should be involved in your account — for example, when a Team Manager adds a youth player to a roster, that's the manager's responsibility, not the player's own account.</p>
+    </section>
+
+    <section id="use">
+      <h2>2. Acceptable Use</h2>
+      <p>When using CT Soccer, you agree not to:</p>
+      <ul>
+        <li>Impersonate another person, club, or organization, or misrepresent your affiliation with a club.</li>
+        <li>Harass, threaten, or abuse other users, in Community posts, profile content, or anywhere else on the Service.</li>
+        <li>Post content that's illegal, sexually explicit, hateful, or that infringes someone else's rights.</li>
+        <li>Scrape, mass-download, or use automated tools against the Service beyond normal, individual browsing.</li>
+        <li>Submit false match results, fake rosters, or other misleading club/team data as a Team Manager.</li>
+        <li>Attempt to interfere with or disrupt the Service's normal operation or security.</li>
+      </ul>
+      <p>We may remove content or restrict accounts that violate these rules — see Section 8.</p>
+    </section>
+
+    <section id="content">
+      <h2>3. Your Content</h2>
+      <p>
+        You own the photos, videos, captions, and other content you post to Community or elsewhere on the Service
+        ("Your Content"). By posting it, you grant CT Soccer a non-exclusive, worldwide, royalty-free license to
+        host, store, and display Your Content on the Service, solely to operate and provide the Service to you and
+        other users — for example, showing your post in the Community feed to people who follow you.
+      </p>
+      <p>You're responsible for Your Content and confirm you have the rights to post it. You can delete your own posts at any time, which removes that license going forward.</p>
+    </section>
+
+    <section id="accuracy">
+      <h2>4. Accuracy of Club &amp; Event Info</h2>
+      <div class="callout">
+        <strong>Please double-check before you rely on it.</strong> Club rosters, tournament dates, coaching clinic
+        pricing, and match results come from a mix of user submissions, our own research, and third-party sources
+        (CJSA, US Soccer, TheSportsDB, and individual clubs). We do our best to keep this accurate and current, but
+        we don't guarantee it. Tournament dates in particular are "subject to change" — always confirm directly with
+        the hosting organization, and confirm coaching course pricing/registration on learning.ussoccer.com before
+        you rely on either.
+      </div>
+      <p>Live match results and standings shown for Hartford Athletic, AC Connecticut, and CT Rush are pulled automatically from TheSportsDB and may occasionally lag or be temporarily unavailable.</p>
+    </section>
+
+    <section id="third-party">
+      <h2>5. Third-Party Links &amp; Services</h2>
+      <p>
+        The Service links to and relies on third-party sites and services — club websites, learning.ussoccer.com,
+        TheSportsDB, and others. We don't control these and aren't responsible for their content, accuracy, or
+        practices. Visiting a linked site is at your own discretion and subject to that site's own terms.
+      </p>
+    </section>
+
+    <section id="ads">
+      <h2>6. Advertising</h2>
+      <p>
+        CT Soccer displays ads served by Google AdSense to help support the Service. Ads are served by Google and
+        its partners, not curated or endorsed by CT Soccer, and their appearance doesn't imply CT Soccer's
+        endorsement of the advertiser. See our <a href="privacy-policy.html#ads">Privacy Policy</a> for how ad cookies work and how to opt out.
+      </p>
+    </section>
+
+    <section id="ip">
+      <h2>7. Intellectual Property</h2>
+      <p>
+        The CT Soccer name, logo, and site design belong to CT Soccer. Club names, logos, and crests shown on club
+        profile pages belong to their respective clubs and leagues, and are used for identification purposes on this
+        independent, informational platform — CT Soccer is not affiliated with or endorsed by USL, MLS Next Pro,
+        NPSL, CJSA, or the clubs listed, unless stated otherwise.
+      </p>
+    </section>
+
+    <section id="termination">
+      <h2>8. Suspension &amp; Termination</h2>
+      <p>
+        You can delete your account at any time from Account Settings. We may suspend or terminate accounts that
+        violate these Terms, submit false club/team information, or misuse the Service, with or without notice
+        depending on severity. You can also just stop using the Service at any time.
+      </p>
+    </section>
+
+    <section id="disclaimers">
+      <h2>9. Disclaimers &amp; Limitation of Liability</h2>
+      <p>
+        The Service is provided "as is" and "as available," without warranties of any kind, express or implied,
+        including accuracy, availability, or fitness for a particular purpose. To the fullest extent permitted by
+        law, CT Soccer isn't liable for indirect, incidental, or consequential damages arising from your use of the
+        Service, or for decisions made based on club, tournament, or coaching information shown here — always
+        verify directly with the relevant club or organization before relying on it (see Section 4).
+      </p>
+    </section>
+
+    <section id="law">
+      <h2>10. Governing Law</h2>
+      <p>These Terms are governed by the laws of the State of Connecticut, without regard to conflict-of-law principles.</p>
+    </section>
+
+    <section id="changes">
+      <h2>11. Changes to These Terms</h2>
+      <p>We may update these Terms as the Service changes. We'll update the "Last updated" date above when we do — continuing to use the Service after a change means you accept the updated Terms.</p>
+    </section>
+
+    <section id="contact">
+      <h2>12. Contact Us</h2>
+      <p>Questions about these Terms? Reach us at <a href="mailto:info@ctsoccer.com">info@ctsoccer.com</a>.</p>
+    </section>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      &copy; 2026 CT Soccer. This page is provided for general informational purposes and is not legal advice.
+    </p>
+    <p style="font-size:.75rem;color:rgba(255,255,255,.2);margin-top:10px;">
+      <a href="privacy-policy.html" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Privacy Policy</a>
+    </p>
+  </div>
+</body>
+</html>
