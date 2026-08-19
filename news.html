@@ -7,6 +7,8 @@
   <title>News & Events — CT Soccer</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
   <style>
     :root {
       --navy:     #0D1B2A;
@@ -41,6 +43,8 @@
     .badge-milestone { background: rgba(43,124,233,.15); color: var(--accent-lt); border: 1px solid rgba(43,124,233,.2); }
     .badge-event { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
     .badge-site { background: rgba(168,85,247,.14); color: #c084fc; border: 1px solid rgba(168,85,247,.22); }
+    .ad-slot { background: var(--navy-800); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px; text-align: center; }
+    .ad-label { display: block; font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.28); margin-bottom: 10px; }
 
     .mobile-bottom-nav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; transition: all .25s cubic-bezier(.16,1,.3,1); }
@@ -89,6 +93,8 @@
         <a href="tournaments.html" class="nav-link">Tournaments</a>
         <a href="coaching-clinics.html" class="nav-link">Coaching</a>
         <a href="assistant.html" class="nav-link">Assistant</a>
+        <a href="people.html" class="nav-link">People</a>
+        <a href="community.html" class="nav-link">Community</a>
         <a href="news.html" class="nav-link" style="color:#fff;">News</a>
         <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
         <a href="account.html" class="btn-primary">My Account</a>
@@ -119,6 +125,10 @@
       <button class="filter-btn" onclick="filterNews('result',this)">Match Results</button>
       <button class="filter-btn" onclick="filterNews('milestone',this)">Season Milestones</button>
       <button class="filter-btn" onclick="filterNews('site',this)">Platform Updates</button>
+      <span id="live-indicator" style="display:none;align-items:center;gap:7px;font-size:.72rem;font-weight:700;color:#5CDD8B;margin-left:auto;padding:8px 4px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#5CDD8B;box-shadow:0 0 0 3px rgba(92,221,139,.15);"></span>
+        Live — auto-updating
+      </span>
     </div>
     <div id="news-list" style="display:flex;flex-direction:column;gap:16px;"></div>
   </div>
@@ -126,6 +136,9 @@
   <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
     <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
       Match results and standings update automatically from TheSportsDB for Hartford Athletic, AC Connecticut, and CT Rush. See each club's page for the latest.
+    </p>
+    <p style="font-size:.75rem;color:rgba(255,255,255,.2);margin-top:10px;">
+      <a href="privacy-policy.html" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Privacy Policy</a>
     </p>
   </div>
 
@@ -198,6 +211,81 @@
       },
     ];
 
+    // --- Live match-result news ---
+    // Auto-generates "Match Result" stories from real results for Hartford Athletic,
+    // AC Connecticut, and CT Rush. Tries the local /live-data.json cache (refreshed
+    // every 5 min by the CTSoccer-LiveData scheduled task) first, falls back to
+    // fetching TheSportsDB directly per club — same pattern as dashboard.html.
+    let LIVE_NEWS = [];
+
+    function apiName(club) { return club.apiTeamName || club.name; }
+    function sameDay(a, b) { return a.toDateString() === b.toDateString(); }
+
+    function matchToNewsItem(m) {
+      if (m.homeScore == null || m.awayScore == null) return null;
+      const club = getClubById(m.homeId);
+      if (!club) return null;
+      const n = apiName(club);
+      let clubScore, oppScore, oppName, isHome;
+      if (m.away === n) { clubScore = m.awayScore; oppScore = m.homeScore; oppName = m.home; isHome = false; }
+      else { clubScore = m.homeScore; oppScore = m.awayScore; oppName = m.away; isHome = true; }
+      const title = clubScore === oppScore
+        ? `${club.name} draw ${clubScore}–${oppScore} with ${oppName}`
+        : `${club.name} ${clubScore > oppScore ? 'beat' : 'fall to'} ${oppName} ${clubScore}–${oppScore}`;
+      const d = new Date(m.date + 'T00:00:00');
+      // Skip if a curated static story already covers this club on this date.
+      if (NEWS.some(s => s.clubId === club.id && s.category === 'result' && sameDay(new Date(s.date), d))) return null;
+      return {
+        id: `live-${m.homeId}-${m.date}`,
+        category: 'result',
+        badge: 'Match Result', badgeClass: 'badge-result',
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        clubId: club.id,
+        title,
+        summary: `${isHome ? 'Home' : 'Road'} ${m.league || club.league} result${m.venue ? ' at ' + m.venue : ''} — auto-updated from live results.`,
+        live: true,
+      };
+    }
+
+    async function loadLiveNews() {
+      const tracked = CT_CLUBS.filter(c => c.sportsDbId);
+      if (!tracked.length) return;
+      let results = [];
+      try {
+        const cache = await fetch('/live-data.json?t=' + Date.now()).then(r => r.ok ? r.json() : null);
+        const ageMs = cache?.meta?.generatedAt ? Date.now() - new Date(cache.meta.generatedAt).getTime() : Infinity;
+        // Only trust the local cache if it's reasonably fresh — the background sync
+        // task that refreshes it can silently stop running, so a stale cache should
+        // not block a direct fetch of current results.
+        if (cache?.results?.length && ageMs < 30 * 60 * 1000) results = cache.results;
+      } catch {}
+      if (!results.length) {
+        try {
+          const BASE = 'https://www.thesportsdb.com/api/v1/json/3';
+          const fetched = await Promise.all(tracked.map(async club => {
+            try {
+              const r = await fetch(`${BASE}/eventslast.php?id=${club.sportsDbId}`).then(res => res.json());
+              const ev = r.results?.[0];
+              if (!ev) return null;
+              return {
+                home: ev.strHomeTeam, away: ev.strAwayTeam,
+                date: ev.dateEvent,
+                homeScore: ev.intHomeScore != null ? +ev.intHomeScore : null,
+                awayScore: ev.intAwayScore != null ? +ev.intAwayScore : null,
+                league: club.league, venue: ev.strVenue || club.stadium,
+                homeId: club.id,
+              };
+            } catch { return null; }
+          }));
+          results = fetched.filter(Boolean);
+        } catch {}
+      }
+      LIVE_NEWS = results.map(matchToNewsItem).filter(Boolean);
+      renderNews();
+      const pill = document.getElementById('live-indicator');
+      if (pill && results.length) pill.style.display = 'inline-flex';
+    }
+
     let activeFilter = 'all';
     function filterNews(f, btn) {
       activeFilter = f;
@@ -207,24 +295,38 @@
     }
 
     function renderNews() {
-      const list = NEWS.filter(n => activeFilter === 'all' || n.category === activeFilter);
+      const combined = [...LIVE_NEWS, ...NEWS].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const list = combined.filter(n => activeFilter === 'all' || n.category === activeFilter);
       const container = document.getElementById('news-list');
       if (!list.length) {
         container.innerHTML = '<div style="padding:48px;text-align:center;color:rgba(255,255,255,.38);">No stories in this category yet.</div>';
         return;
       }
-      container.innerHTML = list.map(n => {
+      const adSlot = `
+        <div class="ad-slot">
+          <span class="ad-label">Advertisement</span>
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+               data-ad-slot="0000000000"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
+      `;
+      let adCount = 0;
+      container.innerHTML = list.map((n, i) => {
         const club = n.clubId && typeof getClubById === 'function' ? getClubById(n.clubId) : null;
         const avatar = club
           ? `<div class="n-avatar" style="background:${club.primary}22;border:1.5px solid ${club.primary}55;color:${club.primary};">${club.abbr}</div>`
           : `<div class="n-avatar" style="background:rgba(168,85,247,.14);border:1.5px solid rgba(168,85,247,.35);color:#c084fc;">CT</div>`;
         const linkWrap = (inner) => club ? `<a href="club.html?id=${club.id}" style="text-decoration:none;color:inherit;">${inner}</a>` : inner;
-        return `
+        const card = `
           <div class="n-card">
             ${avatar}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
                 <span class="badge ${n.badgeClass}">${n.badge}</span>
+                ${n.live ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5CDD8B;"><span style="width:5px;height:5px;border-radius:50%;background:#5CDD8B;"></span>Live</span>` : ''}
                 <span style="font-size:.75rem;color:rgba(255,255,255,.35);">${n.date}</span>
                 ${club ? `<span style="font-size:.75rem;color:var(--accent-lt);font-weight:700;">${club.name}</span>` : ''}
               </div>
@@ -233,10 +335,21 @@
             </div>
           </div>
         `;
+        // In-feed ad every 4 stories, skipped when it would land as the very last item.
+        const showAd = i > 0 && (i + 1) % 4 === 0 && i !== list.length - 1;
+        if (showAd) adCount++;
+        return showAd ? card + adSlot : card;
       }).join('');
+      // <ins> tags injected via innerHTML don't auto-run their <script> siblings,
+      // so each in-feed ad slot needs an explicit push() after insertion.
+      for (let i = 0; i < adCount; i++) {
+        try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+      }
     }
 
     renderNews();
+    loadLiveNews(); // non-blocking, runs in background
+    setInterval(loadLiveNews, 5 * 60 * 1000); // keep polling so new results appear without a page reload
   </script>
 </body>
 </html>

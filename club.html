@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Club — CT Soccer</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
@@ -548,6 +550,16 @@
                     </a>` : ''}
                   ${!club.contactEmail && !club.contactPhone && !club.contactUrl ? `<div style="font-size:.82rem;color:var(--muted);padding:12px 0;">Contact information not on file. Check the club website for tryout inquiries.</div>` : ''}
                 </div>
+
+                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;">
+                  <span style="display:block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:10px;">Advertisement</span>
+                  <ins class="adsbygoogle"
+                       style="display:block"
+                       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                       data-ad-slot="0000000000"
+                       data-ad-format="auto"
+                       data-full-width-responsive="true"></ins>
+                </div>
               </div>
             </div>
           </div>
@@ -612,6 +624,7 @@
 
       // Wire up buttons now that DOM is ready
       updateFollowBtn();
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
       })();
     }
   </script>

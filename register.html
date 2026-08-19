@@ -7,6 +7,10 @@
   <title>Register</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <style>
     :root {
       --navy:     #0D1B2A;
@@ -261,6 +265,10 @@
         Create My Account
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
       </button>
+
+      <p style="text-align:center;font-size:.72rem;color:rgba(255,255,255,.28);line-height:1.6;">
+        By creating an account, you agree to our <a href="privacy-policy.html" style="color:rgba(255,255,255,.45);text-decoration:underline;">Privacy Policy</a>.
+      </p>
     </form>
 
     <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
@@ -285,7 +293,7 @@
       el.querySelector('input').checked = true;
     }
 
-    document.getElementById('register-form').addEventListener('submit', function(e) {
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const firstName = document.getElementById('firstName').value.trim();
       const lastName  = document.getElementById('lastName').value.trim();
@@ -293,6 +301,7 @@
       const password  = document.getElementById('password').value;
       const role      = document.querySelector('input[name="role"]:checked').value;
       const errorEl   = document.getElementById('error-msg');
+      const submitBtn = e.target.querySelector('button[type="submit"]');
 
       if (password.length < 8) {
         errorEl.textContent = 'Password must be at least 8 characters.';
@@ -307,6 +316,29 @@
         notifications: true,
         stats: { goals: 0, assists: 0, appearances: 0, rating: '—' }
       };
+
+      if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
+        submitBtn.disabled = true;
+        try {
+          const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+          await db.collection('users').doc(cred.user.uid).set({
+            uid: cred.user.uid, email, firstName, lastName, role,
+            username: null, bio: '', location: '',
+            followerCount: 0, followingCount: 0,
+            joined: user.joined,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          user.firebaseUid = cred.user.uid;
+        } catch (err) {
+          submitBtn.disabled = false;
+          errorEl.textContent = err.code === 'auth/email-already-in-use'
+            ? 'An account with that email already exists. Try signing in instead.'
+            : 'Could not create account: ' + err.message;
+          errorEl.style.display = 'block';
+          return;
+        }
+      }
+
       localStorage.setItem('ctsoccer_user', JSON.stringify(user));
       window.location.href = 'dashboard.html';
     });

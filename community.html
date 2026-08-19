@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community — CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID after approval -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    textarea::placeholder,input::placeholder{color:rgba(255,255,255,.28);}
+    textarea{resize:none;}
+    .tab-btn{font-family:'Montserrat',Arial,sans-serif;font-size:.82rem;font-weight:700;padding:8px 16px;border-radius:20px;border:1.5px solid transparent;background:transparent;color:rgba(255,255,255,.45);cursor:pointer;transition:all .15s;}
+    .tab-btn.active{background:rgba(43,124,233,.14);border-color:rgba(43,124,233,.4);color:var(--accent-lt);}
+    .post-card{background:var(--navy-800);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+    .post-media{width:100%;max-height:520px;object-fit:cover;background:#000;display:block;}
+    .btn-primary{background:linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%);color:#fff;font-family:'Montserrat',Arial,sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;transition:opacity .18s,transform .18s;box-shadow:0 4px 16px rgba(43,124,233,.3);}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-primary:disabled{opacity:.5;cursor:default;transform:none;}
+    .file-drop{border:1.5px dashed rgba(255,255,255,.16);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+    .file-drop:hover{border-color:rgba(43,124,233,.45);background:rgba(43,124,233,.04);}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{animation:fadeIn .3s ease both;}
+  </style>
+</head>
+<body>
+
+  <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Community</span>
+    <div style="flex:1;"></div>
+    <a href="people.html" class="btn-outline" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);margin-right:8px;">People</a>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-right:8px;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="dashboard.html" class="btn-outline" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);">Dashboard</a>
+  </nav>
+
+  <div id="gate" style="max-width:460px;margin:100px auto;text-align:center;padding:0 24px;display:none;">
+    <div style="font-size:2.6rem;margin-bottom:14px;">&#128248;</div>
+    <div id="gate-title" style="font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:10px;">Sign in to join the Community</div>
+    <div id="gate-body" style="color:var(--muted);margin-bottom:26px;line-height:1.6;">Share photos and videos from games and training, and see what the people you follow are posting.</div>
+    <div id="gate-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Sign In</a>
+      <a href="register.html" style="background:rgba(255,255,255,.08);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,.12);">Create Account</a>
+    </div>
+  </div>
+
+  <div id="app" style="max-width:600px;margin:0 auto;padding:28px 20px 80px;display:none;">
+
+    <div class="post-card" style="padding:18px;margin-bottom:24px;">
+      <div id="file-drop" class="file-drop" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:1.6rem;margin-bottom:6px;">&#128247;</div>
+        <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.75);">Click to choose a photo or video</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">Up to 50MB</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*,video/*" style="display:none;">
+      <div id="preview-wrap" style="display:none;margin-top:14px;position:relative;">
+        <img id="preview-img" style="display:none;width:100%;max-height:320px;object-fit:cover;border-radius:10px;">
+        <video id="preview-video" style="display:none;width:100%;max-height:320px;border-radius:10px;" controls></video>
+        <button id="clear-file" onclick="clearFile()" style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;cursor:pointer;font-size:1rem;">&times;</button>
+      </div>
+      <textarea id="caption-input" placeholder="Say something about it… (optional)" rows="2" style="width:100%;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.85rem;outline:none;"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+        <div id="upload-status" style="font-size:.75rem;color:var(--muted);"></div>
+        <button id="post-btn" class="btn-primary" onclick="submitPost()" disabled>Post</button>
+      </div>
+    </div>
+
+    <div class="post-card" style="padding:18px;margin-bottom:24px;text-align:center;">
+      <span style="display:block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:10px;">Advertisement</span>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="0000000000"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="tab-btn active" id="tab-everyone" onclick="setTab('everyone')">Everyone</button>
+      <button class="tab-btn" id="tab-following" onclick="setTab('following')">Following</button>
+    </div>
+
+    <div id="loading" style="text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;">Loading posts…</div>
+    <div id="empty" style="display:none;text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;"></div>
+    <div id="feed" style="display:flex;flex-direction:column;gap:18px;"></div>
+  </div>
+
+  <script>
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('ctsoccer_user') || '{}'); } catch(e) {}
+
+    const gateTitle = document.getElementById('gate-title');
+    const gateBody = document.getElementById('gate-body');
+    const gateActions = document.getElementById('gate-actions');
+
+    if (!user.firstName || user.isGuest) {
+      document.getElementById('gate').style.display = 'block';
+    } else if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+      document.getElementById('gate').style.display = 'block';
+      gateTitle.textContent = 'Community is being set up';
+      gateBody.textContent = 'This feature needs a backend connection that isn\'t configured yet — check back soon.';
+      gateActions.innerHTML = '<a href="dashboard.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Back to Dashboard</a>';
+    } else if (!user.firebaseUid) {
+      document.getElementById('gate').style.display = 'block';
+      gateTitle.textContent = 'One more step';
+      gateBody.textContent = 'Sign out and sign back in once to activate People & Community features on this device.';
+      gateActions.innerHTML = '<a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Go to Sign In</a>';
+    } else {
+      document.getElementById('app').style.display = 'block';
+      boot();
+    }
+
+    let selectedFile = null;
+    let followingSet = null;
+    let activeTab = 'everyone';
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 50 * 1024 * 1024) {
+        alert('That file is larger than 50MB — please choose a smaller one.');
+        e.target.value = '';
+        return;
+      }
+      if (!/^image\/|^video\//.test(file.type)) {
+        alert('Please choose an image or video file.');
+        e.target.value = '';
+        return;
+      }
+      selectedFile = file;
+      const url = URL.createObjectURL(file);
+      const isVideo = file.type.startsWith('video/');
+      document.getElementById('preview-img').style.display = isVideo ? 'none' : 'block';
+      document.getElementById('preview-video').style.display = isVideo ? 'block' : 'none';
+      if (isVideo) document.getElementById('preview-video').src = url;
+      else document.getElementById('preview-img').src = url;
+      document.getElementById('preview-wrap').style.display = 'block';
+      document.getElementById('file-drop').style.display = 'none';
+      document.getElementById('post-btn').disabled = false;
+    });
+
+    function clearFile() {
+      selectedFile = null;
+      document.getElementById('file-input').value = '';
+      document.getElementById('preview-wrap').style.display = 'none';
+      document.getElementById('file-drop').style.display = 'block';
+      document.getElementById('post-btn').disabled = true;
+    }
+
+    async function submitPost() {
+      if (!selectedFile) return;
+      const postBtn = document.getElementById('post-btn');
+      const statusEl = document.getElementById('upload-status');
+      postBtn.disabled = true;
+      const isVideo = selectedFile.type.startsWith('video/');
+      const path = `posts/${user.firebaseUid}/${Date.now()}_${selectedFile.name}`;
+      const ref = storage.ref().child(path);
+      const task = ref.put(selectedFile, { contentType: selectedFile.type });
+      task.on('state_changed', (snap) => {
+        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+        statusEl.textContent = `Uploading… ${pct}%`;
+      }, (err) => {
+        statusEl.textContent = 'Upload failed: ' + err.message;
+        postBtn.disabled = false;
+      }, async () => {
+        try {
+          const mediaUrl = await task.snapshot.ref.getDownloadURL();
+          await db.collection('posts').add({
+            uid: user.firebaseUid,
+            authorName: `${user.firstName} ${user.lastName||''}`.trim(),
+            authorUsername: user.username || null,
+            mediaUrl, mediaType: isVideo ? 'video' : 'image',
+            caption: document.getElementById('caption-input').value.trim().slice(0, 500),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          statusEl.textContent = '';
+          clearFile();
+          document.getElementById('caption-input').value = '';
+          loadFeed();
+        } catch (err) {
+          statusEl.textContent = 'Could not save post: ' + err.message;
+        } finally {
+          postBtn.disabled = false;
+        }
+      });
+    }
+
+    function setTab(tab) {
+      activeTab = tab;
+      document.getElementById('tab-everyone').classList.toggle('active', tab === 'everyone');
+      document.getElementById('tab-following').classList.toggle('active', tab === 'following');
+      loadFeed();
+    }
+
+    function timeAgo(date) {
+      if (!date) return '';
+      const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (secs < 60) return 'just now';
+      const mins = Math.floor(secs / 60);
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      if (days < 7) return `${days}d ago`;
+      return date.toLocaleDateString();
+    }
+
+    function initials(name) {
+      const parts = (name||'?').trim().split(/\s+/);
+      return ((parts[0]||'?')[0] + (parts[1]||'')[0]).toUpperCase();
+    }
+
+    function postCardHtml(p) {
+      const created = p.createdAt ? p.createdAt.toDate() : null;
+      const mine = p.uid === user.firebaseUid;
+      return `
+        <div class="post-card fade-in">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.35);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--accent-lt);flex-shrink:0;">${initials(p.authorName)}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.85rem;font-weight:800;color:#fff;">${p.authorName || 'CT Soccer Member'}</div>
+              <div style="font-size:.7rem;color:var(--muted);">${timeAgo(created)}</div>
+            </div>
+            ${mine ? `<button onclick="deletePost('${p.id}')" title="Delete post" style="background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.75rem;font-weight:700;">Delete</button>` : ''}
+          </div>
+          ${p.mediaType === 'video'
+            ? `<video class="post-media" src="${p.mediaUrl}" controls playsinline></video>`
+            : `<img class="post-media" src="${p.mediaUrl}" alt="Post photo">`}
+          ${p.caption ? `<div style="padding:12px 16px;font-size:.85rem;color:rgba(255,255,255,.82);line-height:1.5;">${escapeHtml(p.caption)}</div>` : ''}
+        </div>`;
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    async function deletePost(postId) {
+      if (!confirm('Delete this post?')) return;
+      try {
+        await db.collection('posts').doc(postId).delete();
+        loadFeed();
+      } catch (err) {
+        alert('Could not delete: ' + err.message);
+      }
+    }
+
+    async function loadFeed() {
+      const feedEl = document.getElementById('feed');
+      const emptyEl = document.getElementById('empty');
+      document.getElementById('loading').style.display = 'block';
+      emptyEl.style.display = 'none';
+      feedEl.innerHTML = '';
+      try {
+        if (activeTab === 'following' && followingSet === null) {
+          const snap = await db.collection('follows').where('followerUid', '==', user.firebaseUid).get();
+          followingSet = new Set(snap.docs.map(d => d.data().followingUid));
+        }
+        const snap = await db.collection('posts').orderBy('createdAt', 'desc').limit(50).get();
+        let posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (activeTab === 'following') {
+          posts = posts.filter(p => p.uid === user.firebaseUid || followingSet.has(p.uid));
+        }
+        document.getElementById('loading').style.display = 'none';
+        if (!posts.length) {
+          emptyEl.style.display = 'block';
+          emptyEl.textContent = activeTab === 'following'
+            ? "No posts yet from people you follow — check out Everyone, or find people to follow."
+            : 'No posts yet — be the first to share something!';
+          return;
+        }
+        feedEl.innerHTML = posts.map(postCardHtml).join('');
+      } catch (err) {
+        document.getElementById('loading').textContent = 'Could not load posts right now (' + err.message + ').';
+      }
+    }
+
+    function boot() { loadFeed(); }
+  </script>
+</body>
+</html>

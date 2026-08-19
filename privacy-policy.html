@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Privacy Policy — CT Soccer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.55);
+      --border:   rgba(255,255,255,.08);
+    }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 24px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
+    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
+    .doc .updated { font-size: .8rem; color: rgba(255,255,255,.4); margin-bottom: 36px; }
+    .doc .intro { font-size: .95rem; line-height: 1.8; color: var(--muted); margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+    .doc section { margin-bottom: 40px; }
+    .doc h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; scroll-margin-top: 84px; }
+    .doc h3 { font-size: .92rem; font-weight: 700; color: var(--accent-lt); margin: 20px 0 8px; }
+    .doc p { font-size: .9rem; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
+    .doc ul { margin: 0 0 14px 20px; }
+    .doc li { font-size: .9rem; line-height: 1.8; color: var(--muted); margin-bottom: 6px; }
+    .doc li strong { color: rgba(255,255,255,.85); }
+    .doc a { color: var(--accent-lt); text-decoration: none; }
+    .doc a:hover { text-decoration: underline; }
+    .toc { background: var(--navy-800); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 44px; }
+    .toc div.label { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.32); margin-bottom: 12px; }
+    .toc ol { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+    .toc a { font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.65); }
+    .toc a:hover { color: var(--accent-lt); }
+    .callout { background: rgba(43,124,233,.06); border: 1px solid rgba(43,124,233,.18); border-radius: 12px; padding: 16px 18px; font-size: .84rem; line-height: 1.7; color: rgba(255,255,255,.65); margin-bottom: 14px; }
+
+    .mobile-bottom-nav { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+      .toc ol { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="news.html" class="nav-link">News</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="doc">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
+      <span style="color:rgba(255,255,255,.2);">/</span>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Privacy Policy</span>
+    </div>
+
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: August 18, 2026</div>
+
+    <p class="intro">
+      This Privacy Policy explains what information CT Soccer ("CT Soccer," "we," "us") collects when you use ctsoccer.com and its
+      features — including club profiles, the Dashboard, News, Tournaments, Coaching Clinics, the Soccer Assistant, and the
+      Community feed — how we use it, and the choices you have. By using the site, you agree to the practices described here.
+    </p>
+
+    <div class="toc">
+      <div class="label">On this page</div>
+      <ol>
+        <li><a href="#collect">1. Information We Collect</a></li>
+        <li><a href="#use">2. How We Use Information</a></li>
+        <li><a href="#ads">3. Advertising &amp; Cookies</a></li>
+        <li><a href="#third-party">4. Third-Party Services</a></li>
+        <li><a href="#sharing">5. How We Share Information</a></li>
+        <li><a href="#retention">6. Data Retention &amp; Security</a></li>
+        <li><a href="#children">7. Children's Privacy</a></li>
+        <li><a href="#rights">8. Your Choices &amp; Rights</a></li>
+        <li><a href="#changes">9. Changes to This Policy</a></li>
+        <li><a href="#contact">10. Contact Us</a></li>
+      </ol>
+    </div>
+
+    <section id="collect">
+      <h2>1. Information We Collect</h2>
+      <h3>Account &amp; profile information</h3>
+      <p>When you register or edit your profile, we (via Firebase Authentication and Firestore) store information you provide directly, such as:</p>
+      <ul>
+        <li><strong>Registration details</strong> — first and last name, email address, and password (your password is handled by Firebase Authentication and is never stored by us in plain text).</li>
+        <li><strong>Profile details</strong> — username, bio, CT town/location, profile photo, and your selected role (Player, Team Manager, or Fan).</li>
+        <li><strong>Player details</strong> — position, jersey number, preferred foot, and stats you enter (goals, assists, appearances), plus the club you follow or play for.</li>
+        <li><strong>Team manager details</strong> — managing club, club website, contact email, roster entries, and match results you submit.</li>
+        <li><strong>Security settings</strong> — whether you've enabled two-factor authentication (we store the authenticator setup state, not your authenticator app's codes).</li>
+      </ul>
+      <h3>Content you post</h3>
+      <p>The Community feed lets you upload photos or videos and write captions. These are stored via Firebase Cloud Storage and Firestore and are visible to other users according to the feed's visibility settings.</p>
+      <h3>Automatically collected information</h3>
+      <p>Like most websites, we and our third-party providers automatically receive some technical information when you visit — browser type, device type, general region (from IP address), pages viewed, and referring pages. We use this in aggregate to understand site usage; we don't use it to identify you individually outside of the ad-serving purposes described in Section 3.</p>
+      <h3>Cookies &amp; local storage</h3>
+      <p>We use your browser's local storage to remember your theme preference (light/dark) and to keep you signed in between visits. Google AdSense and other third parties set their own cookies as described in Section 3.</p>
+    </section>
+
+    <section id="use">
+      <h2>2. How We Use Information</h2>
+      <ul>
+        <li>Create and secure your account, and authenticate you when you log in.</li>
+        <li>Operate core features — showing your followed clubs on the Dashboard, displaying your posts in Community, powering the Soccer Assistant's recommendations.</li>
+        <li>Communicate with you about your account (e.g., security alerts).</li>
+        <li>Maintain the safety and integrity of the platform, including detecting abuse.</li>
+        <li>Understand aggregate usage so we can improve the site.</li>
+        <li>Serve and measure advertising, as described below.</li>
+      </ul>
+      <p>We do not sell your personal information.</p>
+    </section>
+
+    <section id="ads">
+      <h2>3. Advertising &amp; Cookies</h2>
+      <p>
+        CT Soccer displays ads served by <strong>Google AdSense</strong>. Google and its advertising partners use cookies
+        and similar technologies to serve ads based on your prior visits to this and other websites. Google's use of
+        advertising cookies enables it and its partners to serve ads based on your visit to this site and/or other sites
+        on the internet.
+      </p>
+      <div class="callout">
+        You can opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ads Settings</a>,
+        or opt out of a participating third-party vendor's use of cookies for personalized advertising at
+        <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">aboutads.info/choices</a>.
+        You can also block cookies generally through your browser settings, though some site features may not work as well as a result.
+      </div>
+      <p>For more detail on how Google uses information from sites that use its services, see <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">How Google uses information from sites or apps that use our services</a>.</p>
+    </section>
+
+    <section id="third-party">
+      <h2>4. Third-Party Services</h2>
+      <p>We rely on the following third parties to operate CT Soccer. Each processes data under its own privacy policy:</p>
+      <ul>
+        <li><strong>Google Firebase</strong> (Authentication, Firestore database, Cloud Storage) — stores your account, profile, and Community content. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase's privacy policy</a>.</li>
+        <li><strong>Google AdSense</strong> — serves ads and sets cookies as described in Section 3. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
+        <li><strong>Google Fonts &amp; Tailwind CSS (jsDelivr/CDN)</strong> — loaded from Google's and other CDN servers to render page styling and typography; these requests can expose your IP address to the host, like any web request.</li>
+        <li><strong>TheSportsDB</strong> — a public sports-data API we use to pull real match results and fixtures for Hartford Athletic, AC Connecticut, and CT Rush. We only send match/team lookups to this API — no personal or account information is shared with it.</li>
+      </ul>
+    </section>
+
+    <section id="sharing">
+      <h2>5. How We Share Information</h2>
+      <p>We don't sell your personal information. We may share it only:</p>
+      <ul>
+        <li>With the service providers listed in Section 4, to the extent necessary for them to provide their service to us.</li>
+        <li>Publicly, when you choose to make it public — for example, a Community post, or your public profile fields (username, photo, bio).</li>
+        <li>If required to comply with a legal obligation, protect the rights and safety of CT Soccer or its users, or investigate abuse.</li>
+        <li>In connection with a merger, acquisition, or sale of assets, in which case this policy would continue to apply to your information.</li>
+      </ul>
+    </section>
+
+    <section id="retention">
+      <h2>6. Data Retention &amp; Security</h2>
+      <p>We retain your account and profile information for as long as your account is active, or as needed to provide you the service. If you delete your account (available in Account Settings), we delete your profile data and remove your Community content within a reasonable period, except where we're required to retain it by law.</p>
+      <p>We rely on Firebase's security infrastructure to protect your data, but no method of transmission or storage is 100% secure, and we can't guarantee absolute security.</p>
+    </section>
+
+    <section id="children">
+      <h2>7. Children's Privacy</h2>
+      <p>
+        CT Soccer is intended for coaches, team managers, players, and fans, and is not directed at children under 13.
+        We don't knowingly collect personal information from children under 13 without parental involvement. If your
+        child is a youth player whose information appears on the platform (e.g., a roster entry added by a team
+        manager) and you'd like it removed, contact us using the details in Section 10 and we'll address it promptly.
+      </p>
+    </section>
+
+    <section id="rights">
+      <h2>8. Your Choices &amp; Rights</h2>
+      <ul>
+        <li><strong>Access &amp; update</strong> — review and edit your profile information anytime from <a href="account.html">Account Settings</a>.</li>
+        <li><strong>Delete your account</strong> — use the "Delete Account" option in Account Settings to permanently remove your profile and associated data.</li>
+        <li><strong>Delete individual posts</strong> — remove your own Community posts at any time.</li>
+        <li><strong>Ad personalization</strong> — opt out via the links in Section 3.</li>
+        <li><strong>Cookies</strong> — control or clear cookies and local storage through your browser settings.</li>
+      </ul>
+      <p>If you're in a jurisdiction that grants additional data rights (such as the EU/UK GDPR or the California CPRA), contact us and we'll do our best to accommodate applicable requests.</p>
+    </section>
+
+    <section id="changes">
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time as the site changes. We'll update the "Last updated" date above when we do. Material changes will be reflected here — we encourage you to review this page periodically.</p>
+    </section>
+
+    <section id="contact">
+      <h2>10. Contact Us</h2>
+      <p>Questions about this policy or your data? Reach us at <a href="mailto:info@ctsoccer.com">info@ctsoccer.com</a>.</p>
+    </section>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      &copy; 2026 CT Soccer. This page is provided for general informational purposes and is not legal advice.
+    </p>
+  </div>
+</body>
+</html>

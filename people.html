@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>People — CT Soccer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    input::placeholder{color:rgba(255,255,255,.28);}
+    .person-card{background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:center;transition:border-color .2s;}
+    .person-card:hover{border-color:rgba(43,124,233,.3);}
+    .follow-btn{font-family:'Montserrat',Arial,sans-serif;font-size:.8rem;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;flex-shrink:0;}
+    .follow-btn.not-following{background:var(--accent);color:#fff;}
+    .follow-btn.not-following:hover{background:#1a5cb8;}
+    .follow-btn.following{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.14);}
+    .follow-btn.following:hover{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.3);}
+    .follow-btn.following:hover .flabel::before{content:'Unfollow';}
+    .follow-btn.following .flabel::before{content:'Following';}
+    .follow-btn.following .flabel{font-size:0;}
+    .follow-btn.following .flabel::before{font-size:.8rem;}
+    .follow-btn:disabled{opacity:.5;cursor:default;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    .fade-in{animation:fadeIn .25s ease both;}
+  </style>
+</head>
+<body>
+
+  <nav style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">People</span>
+    <div style="flex:1;"></div>
+    <a href="community.html" class="btn-outline" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);margin-right:8px;">Community</a>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;margin-right:8px;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="dashboard.html" class="btn-outline" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);">Dashboard</a>
+  </nav>
+
+  <div id="gate" style="max-width:460px;margin:100px auto;text-align:center;padding:0 24px;display:none;">
+    <div style="font-size:2.6rem;margin-bottom:14px;">&#128101;</div>
+    <div id="gate-title" style="font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:10px;">Sign in to find and follow people</div>
+    <div id="gate-body" style="color:var(--muted);margin-bottom:26px;line-height:1.6;">Look up other players, coaches, and fans on CT Soccer and follow the ones you want to keep up with.</div>
+    <div id="gate-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Sign In</a>
+      <a href="register.html" style="background:rgba(255,255,255,.08);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,.12);">Create Account</a>
+    </div>
+  </div>
+
+  <div id="app" style="max-width:640px;margin:0 auto;padding:28px 20px 80px;display:none;">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:14px;">Find people</div>
+      <div style="position:relative;">
+        <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search-input" type="text" placeholder="Search by name or @username" style="width:100%;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:12px 16px 12px 40px;color:#fff;font-family:'Montserrat',Arial,sans-serif;font-size:.9rem;outline:none;">
+      </div>
+    </div>
+    <div id="loading" style="text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;">Loading people…</div>
+    <div id="empty" style="display:none;text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;"></div>
+    <div id="list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+
+  <script>
+    let user = {};
+    try { user = JSON.parse(localStorage.getItem('ctsoccer_user') || '{}'); } catch(e) {}
+
+    const gateTitle = document.getElementById('gate-title');
+    const gateBody = document.getElementById('gate-body');
+    const gateActions = document.getElementById('gate-actions');
+
+    if (!user.firstName || user.isGuest) {
+      document.getElementById('gate').style.display = 'block';
+    } else if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+      document.getElementById('gate').style.display = 'block';
+      gateTitle.textContent = 'People directory is being set up';
+      gateBody.textContent = 'This feature needs a backend connection that isn\'t configured yet — check back soon.';
+      gateActions.innerHTML = '<a href="dashboard.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Back to Dashboard</a>';
+    } else if (!user.firebaseUid) {
+      document.getElementById('gate').style.display = 'block';
+      gateTitle.textContent = 'One more step';
+      gateBody.textContent = 'Sign out and sign back in once to activate People & Community features on this device.';
+      gateActions.innerHTML = '<a href="login.html" style="background:var(--accent);color:#fff;font-weight:700;padding:12px 24px;border-radius:10px;text-decoration:none;">Go to Sign In</a>';
+    } else {
+      document.getElementById('app').style.display = 'block';
+      boot();
+    }
+
+    function initials(u) {
+      return ((u.firstName||'?')[0] + (u.lastName||'')[0]).toUpperCase();
+    }
+
+    const ROLE_LABEL = { player: '⚽ Player', coach: '📋 Coach', fan: '🏟️ Fan' };
+
+    let allPeople = [];
+    let followingSet = new Set();
+
+    async function boot() {
+      try {
+        const [usersSnap, followsSnap] = await Promise.all([
+          db.collection('users').get(),
+          db.collection('follows').where('followerUid', '==', user.firebaseUid).get(),
+        ]);
+        followsSnap.forEach(doc => followingSet.add(doc.data().followingUid));
+        allPeople = usersSnap.docs
+          .map(d => ({ uid: d.id, ...d.data() }))
+          .filter(p => p.uid !== user.firebaseUid);
+        document.getElementById('loading').style.display = 'none';
+        render(allPeople);
+      } catch (err) {
+        document.getElementById('loading').textContent = 'Could not load people right now (' + err.message + ').';
+      }
+    }
+
+    function render(list) {
+      const listEl = document.getElementById('list');
+      const emptyEl = document.getElementById('empty');
+      if (!list.length) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = allPeople.length ? 'No one matches that search.' : 'No one else has joined yet — be the first to invite a teammate!';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      listEl.innerHTML = list.map(personCardHtml).join('');
+    }
+
+    function personCardHtml(p) {
+      const isFollowing = followingSet.has(p.uid);
+      const name = `${p.firstName||''} ${p.lastName||''}`.trim() || 'CT Soccer Member';
+      return `
+        <div class="person-card fade-in" data-uid="${p.uid}">
+          <div style="width:44px;height:44px;border-radius:50%;background:rgba(43,124,233,.15);border:1.5px solid rgba(43,124,233,.35);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:var(--accent-lt);flex-shrink:0;">${initials(p)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.92rem;font-weight:800;color:#fff;">${name}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}</div>
+          </div>
+          <button class="follow-btn ${isFollowing ? 'following' : 'not-following'}" onclick="toggleFollow('${p.uid}', this)">
+            <span class="flabel">${isFollowing ? 'Following' : 'Follow'}</span>
+          </button>
+        </div>`;
+    }
+
+    async function toggleFollow(targetUid, btn) {
+      btn.disabled = true;
+      const followId = `${user.firebaseUid}_${targetUid}`;
+      const isFollowing = followingSet.has(targetUid);
+      try {
+        if (isFollowing) {
+          await db.collection('follows').doc(followId).delete();
+          await db.collection('users').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(-1) });
+          await db.collection('users').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(-1) });
+          followingSet.delete(targetUid);
+        } else {
+          await db.collection('follows').doc(followId).set({
+            followerUid: user.firebaseUid, followingUid: targetUid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          await db.collection('users').doc(user.firebaseUid).update({ followingCount: firebase.firestore.FieldValue.increment(1) });
+          await db.collection('users').doc(targetUid).update({ followerCount: firebase.firestore.FieldValue.increment(1) });
+          followingSet.add(targetUid);
+        }
+        const p = allPeople.find(x => x.uid === targetUid);
+        if (p) p.followerCount = (p.followerCount || 0) + (isFollowing ? -1 : 1);
+        const card = btn.closest('.person-card');
+        btn.outerHTML = `<button class="follow-btn ${!isFollowing ? 'following' : 'not-following'}" onclick="toggleFollow('${targetUid}', this)"><span class="flabel">${!isFollowing ? 'Following' : 'Follow'}</span></button>`;
+        if (p) card.querySelector('div > div:last-child').innerHTML = `${p.username ? '@'+p.username+' &middot; ' : ''}${ROLE_LABEL[p.role]||''} &middot; ${p.followerCount||0} follower${p.followerCount===1?'':'s'}`;
+      } catch (err) {
+        btn.disabled = false;
+        alert('Could not update follow status: ' + err.message);
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) { render(allPeople); return; }
+      render(allPeople.filter(p =>
+        (p.firstName||'').toLowerCase().includes(q) ||
+        (p.lastName||'').toLowerCase().includes(q) ||
+        (p.username||'').toLowerCase().includes(q)
+      ));
+    });
+  </script>
+</body>
+</html>

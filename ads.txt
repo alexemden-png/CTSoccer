@@ -1,0 +1,5 @@
+# Authorized digital sellers for ctsoccer — required by Google AdSense.
+# Replace pub-0000000000000000 below with your real AdSense publisher ID
+# (find it at adsense.google.com > Account > Account information) once approved.
+# This file must be reachable at https://<your-domain>/ads.txt exactly as-is.
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
