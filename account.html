@@ -287,25 +287,57 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
       <div class="card">
         <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">My Club</div>
-        <div><label class="field-label">Managing Club</label>
-          <div class="club-picker" style="margin-bottom:12px;">
-            <input type="text" id="tm-club-search" placeholder="Search for your club..." autocomplete="off">
-            <input type="hidden" id="tm-club">
-            <div class="club-picker-results" id="tm-club-results"></div>
+
+        <div id="tm-status-none">
+          <div><label class="field-label">Which club do you manage?</label>
+            <div class="club-picker" style="margin-bottom:12px;">
+              <input type="text" id="tm-request-club-search" placeholder="Search for your club..." autocomplete="off">
+              <input type="hidden" id="tm-request-club">
+              <div class="club-picker-results" id="tm-request-club-results"></div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="requestTeamManager('tm-request-club')" style="width:100%;justify-content:center;">Request Team Manager Status</button>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5;">Requests are reviewed before you can submit results for a club.</div>
+        </div>
+
+        <div id="tm-status-pending" style="display:none;">
+          <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.22);border-radius:10px;padding:14px;font-size:.85rem;color:rgba(255,255,255,.75);line-height:1.6;">
+            Your request to manage <strong id="tm-pending-club-name" style="color:#fff;"></strong> is pending approval.
           </div>
         </div>
-        <div><label class="field-label">Club Website</label>
-          <input type="text" id="tm-website" placeholder="yourclub.com" style="margin-bottom:12px;">
+
+        <div id="tm-status-denied" style="display:none;">
+          <div style="background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.25);border-radius:10px;padding:14px;margin-bottom:14px;font-size:.85rem;color:rgba(255,255,255,.75);line-height:1.6;">
+            Your request to manage <strong id="tm-denied-club-name" style="color:#fff;"></strong> was declined.
+          </div>
+          <div><label class="field-label">Request a different club?</label>
+            <div class="club-picker" style="margin-bottom:12px;">
+              <input type="text" id="tm-redo-club-search" placeholder="Search for your club..." autocomplete="off">
+              <input type="hidden" id="tm-redo-club">
+              <div class="club-picker-results" id="tm-redo-club-results"></div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="requestTeamManager('tm-redo-club')" style="width:100%;justify-content:center;">Submit New Request</button>
         </div>
-        <div><label class="field-label">Contact Email</label>
-          <input type="email" id="tm-email" placeholder="manager@yourclub.com" style="margin-bottom:12px;">
+
+        <div id="tm-status-approved" style="display:none;">
+          <div style="background:rgba(92,221,139,.1);border:1px solid rgba(92,221,139,.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.85rem;color:rgba(255,255,255,.85);">
+            Approved Team Manager for <strong id="tm-approved-club-name" style="color:#fff;"></strong>
+          </div>
+          <div><label class="field-label">Club Website</label>
+            <input type="text" id="tm-website" placeholder="yourclub.com" style="margin-bottom:12px;">
+          </div>
+          <div><label class="field-label">Contact Email</label>
+            <input type="email" id="tm-email" placeholder="manager@yourclub.com" style="margin-bottom:12px;">
+          </div>
+          <button class="btn-primary" onclick="saveTeamContactInfo()" style="width:100%;justify-content:center;">Save Contact Info</button>
         </div>
-        <button class="btn-primary" onclick="saveTeamInfo()" style="width:100%;justify-content:center;">Save Club Info</button>
       </div>
 
       <div class="card">
         <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Enter Match Result</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
+        <div id="tm-result-locked" style="font-size:.82rem;color:var(--muted);line-height:1.6;">Available once your Team Manager request is approved.</div>
+        <div id="tm-result-form" style="display:none;flex-direction:column;gap:10px;">
           <div><label class="field-label">Opponent</label><input type="text" id="res-opponent" placeholder="Opponent club name..."></div>
           <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
             <div><label class="field-label">Your Score</label><input type="text" id="res-home" placeholder="0" style="text-align:center;"></div>
@@ -319,30 +351,32 @@
       </div>
     </div>
 
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <div style="font-size:.85rem;font-weight:800;color:#fff;">Roster Management</div>
-        <button class="btn-primary" onclick="showAddPlayer()" style="font-size:.78rem;padding:8px 14px;">+ Add Player</button>
-      </div>
-      <div id="add-player-form" style="display:none;background:rgba(43,124,233,.06);border:1px solid rgba(43,124,233,.15);border-radius:10px;padding:14px;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr 80px 100px auto;gap:8px;align-items:end;">
-          <div><label class="field-label">Name</label><input type="text" id="np-name" placeholder="Full name"></div>
-          <div><label class="field-label">Position</label><select id="np-pos"><option>GK</option><option>DF</option><option>MF</option><option>FW</option></select></div>
-          <div><label class="field-label">#</label><input type="text" id="np-num" placeholder="7"></div>
-          <div><label class="field-label">Nationality</label><input type="text" id="np-nat" placeholder="USA"></div>
-          <div><button class="btn-primary" onclick="addPlayerToRoster()" style="padding:10px 14px;">Add</button></div>
+    <div id="tm-manager-only-sections" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:.85rem;font-weight:800;color:#fff;">Roster Management</div>
+          <button class="btn-primary" onclick="showAddPlayer()" style="font-size:.78rem;padding:8px 14px;">+ Add Player</button>
         </div>
+        <div id="add-player-form" style="display:none;background:rgba(43,124,233,.06);border:1px solid rgba(43,124,233,.15);border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 80px 100px auto;gap:8px;align-items:end;">
+            <div><label class="field-label">Name</label><input type="text" id="np-name" placeholder="Full name"></div>
+            <div><label class="field-label">Position</label><select id="np-pos"><option>GK</option><option>DF</option><option>MF</option><option>FW</option></select></div>
+            <div><label class="field-label">#</label><input type="text" id="np-num" placeholder="7"></div>
+            <div><label class="field-label">Nationality</label><input type="text" id="np-nat" placeholder="USA"></div>
+            <div><button class="btn-primary" onclick="addPlayerToRoster()" style="padding:10px 14px;">Add</button></div>
+          </div>
+        </div>
+        <div id="tm-roster-list"></div>
       </div>
-      <div id="tm-roster-list"></div>
-    </div>
 
-    <div class="card" style="margin-top:16px;">
-      <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Team Announcement</div>
-      <div><label class="field-label">Post announcement to team</label>
-        <textarea id="announcement-text" placeholder="e.g. Practice is moved to 6pm Thursday at Dillon Park..."></textarea>
+      <div class="card" style="margin-top:16px;">
+        <div style="font-size:.85rem;font-weight:800;color:#fff;margin-bottom:14px;">Team Announcement</div>
+        <div><label class="field-label">Post announcement to team</label>
+          <textarea id="announcement-text" placeholder="e.g. Practice is moved to 6pm Thursday at Dillon Park..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="postAnnouncement()" style="margin-top:10px;">Post Announcement</button>
+        <div id="announcements-list" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
       </div>
-      <button class="btn-primary" onclick="postAnnouncement()" style="margin-top:10px;">Post Announcement</button>
-      <div id="announcements-list" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
     </div>
   </div>
 
@@ -673,7 +707,8 @@
   }
 
   initClubPicker('p-club', 'p-club-search', 'p-club-results');
-  initClubPicker('tm-club', 'tm-club-search', 'tm-club-results', () => loadTeamRoster());
+  initClubPicker('tm-request-club', 'tm-request-club-search', 'tm-request-club-results');
+  initClubPicker('tm-redo-club', 'tm-redo-club-search', 'tm-redo-club-results');
   initClubPicker('fan-follow-select', 'fan-follow-search', 'fan-follow-results');
 
   // ---- Boot ----
@@ -715,15 +750,16 @@
       document.getElementById('stat-rating').textContent  = user.stats.rating||'—';
     }
 
-    // Team manager
+    // Team manager — club assignment now comes from managerStatus (admin-approved),
+    // not from this self-editable profile field. Website/email are still just
+    // informational display fields the manager controls once approved.
     if (user.teamInfo) {
-      if (document.getElementById('tm-club'))    document.getElementById('tm-club').value    = user.teamInfo.club||'';
       if (document.getElementById('tm-website')) document.getElementById('tm-website').value = user.teamInfo.website||'';
       if (document.getElementById('tm-email'))   document.getElementById('tm-email').value   = user.teamInfo.email||'';
     }
     tmRoster = user.tmRoster || [];
     announcements = user.announcements || [];
-    loadTeamRoster();
+    renderManagerStatus();
     renderAnnouncements();
 
     // Fan
@@ -761,7 +797,6 @@
 
     // Reflect the current hidden club-picker values as visible club names.
     syncClubPickerDisplay('p-club', 'p-club-search');
-    syncClubPickerDisplay('tm-club', 'tm-club-search');
   }
 
   function hashStr(s) {
@@ -1149,17 +1184,99 @@
   }
 
   // ---- Team Manager ----
-  function saveTeamInfo() {
+  // Club assignment is admin-approved, never self-granted (see managerApprovals/
+  // in firebase-rules.md). managerStatus.state is one of: 'none' (never
+  // requested), 'pending', 'denied', 'approved'. Only 'approved' unlocks the
+  // roster, announcements, and match-result submission.
+  let managerStatus = { state: 'none', club: null, requestId: null };
+
+  async function refreshManagerStatus() {
+    if (!(typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid)) {
+      managerStatus = { state: 'none', club: null, requestId: null };
+      return;
+    }
+    try {
+      const approvalDoc = await db.collection('managerApprovals').doc(user.firebaseUid).get();
+      if (approvalDoc.exists) {
+        managerStatus = { state: 'approved', club: approvalDoc.data().club, requestId: null };
+        return;
+      }
+      const reqSnap = await db.collection('managerRequests').where('uid', '==', user.firebaseUid).get();
+      const reqs = reqSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.createdAt ? b.createdAt.toMillis() : 0) - (a.createdAt ? a.createdAt.toMillis() : 0));
+      const latest = reqs[0];
+      if (latest && latest.status === 'pending') {
+        managerStatus = { state: 'pending', club: latest.club, requestId: latest.id };
+      } else if (latest && latest.status === 'denied') {
+        managerStatus = { state: 'denied', club: latest.club, requestId: latest.id };
+      } else {
+        managerStatus = { state: 'none', club: null, requestId: null };
+      }
+    } catch (err) {
+      console.warn('[Firestore] could not load manager status:', err.message);
+      managerStatus = { state: 'none', club: null, requestId: null };
+    }
+  }
+
+  function renderManagerStatus() {
+    ['none', 'pending', 'denied', 'approved'].forEach(s => {
+      const el = document.getElementById('tm-status-' + s);
+      if (el) el.style.display = (managerStatus.state === s) ? '' : 'none';
+    });
+    const toolsEl = document.getElementById('tm-manager-only-sections');
+    if (toolsEl) toolsEl.style.display = (managerStatus.state === 'approved') ? '' : 'none';
+    const resultLocked = document.getElementById('tm-result-locked');
+    const resultForm = document.getElementById('tm-result-form');
+    if (resultLocked) resultLocked.style.display = (managerStatus.state === 'approved') ? 'none' : '';
+    if (resultForm) resultForm.style.display = (managerStatus.state === 'approved') ? 'flex' : 'none';
+
+    if (managerStatus.state === 'pending' && document.getElementById('tm-pending-club-name')) {
+      document.getElementById('tm-pending-club-name').textContent = clubNameById(managerStatus.club);
+    } else if (managerStatus.state === 'denied' && document.getElementById('tm-denied-club-name')) {
+      document.getElementById('tm-denied-club-name').textContent = clubNameById(managerStatus.club);
+    } else if (managerStatus.state === 'approved') {
+      if (document.getElementById('tm-approved-club-name')) document.getElementById('tm-approved-club-name').textContent = clubNameById(managerStatus.club);
+      loadTeamRoster();
+    }
+  }
+
+  async function requestTeamManager(hiddenId) {
+    const clubId = document.getElementById(hiddenId).value;
+    if (!clubId) { toast('Select a club first'); return; }
+    if (!(typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid)) {
+      toast('Sign in required to request Team Manager status');
+      return;
+    }
+    try {
+      await db.collection('managerRequests').add({
+        uid: user.firebaseUid,
+        requesterName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'CT Soccer Member',
+        requesterEmail: user.email || '',
+        club: clubId,
+        status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      toast('Request submitted — pending approval');
+      await refreshManagerStatus();
+      renderManagerStatus();
+    } catch (err) {
+      toast('Could not submit request: ' + err.message);
+    }
+  }
+
+  function saveTeamContactInfo() {
     user.teamInfo = {
-      club:    document.getElementById('tm-club').value,
+      club: managerStatus.club,
       website: document.getElementById('tm-website').value,
-      email:   document.getElementById('tm-email').value,
+      email: document.getElementById('tm-email').value,
     };
-    saveUser(); toast('Club info saved!');
+    saveUser();
+    toast('Contact info saved!');
   }
 
   function loadTeamRoster() {
-    const clubId = document.getElementById('tm-club').value;
+    const clubId = managerStatus.club;
     if (clubId && !tmRoster.length) {
       const club = getClubById(clubId);
       if (club) tmRoster = [...(club.roster||[])];
@@ -1227,8 +1344,8 @@
     const date  = document.getElementById('res-date').value.trim();
     const venue = document.getElementById('res-venue').value.trim();
     if (!opp||home===''||away==='') { toast('Fill in opponent and scores'); return; }
-    const clubId = user.teamInfo && user.teamInfo.club;
-    if (!clubId) { toast('Select your managing club above first'); return; }
+    if (managerStatus.state !== 'approved') { toast('You must be an approved Team Manager to submit results'); return; }
+    const clubId = managerStatus.club;
     const result = parseInt(home)>parseInt(away)?'W':parseInt(home)<parseInt(away)?'L':'D';
 
     if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && user.firebaseUid) {
@@ -1369,8 +1486,10 @@
   // explicit merge write from here can't clobber a count changed by someone else
   // between page loads.
   function publicProfileFields() {
+    // Coaches only show a club once admin-approved for it — teamInfo.club is
+    // just the manager's own display preference and isn't proof of anything.
     const club = user.role === 'coach'
-      ? (user.teamInfo && user.teamInfo.club) || null
+      ? (managerStatus.state === 'approved' ? managerStatus.club : null)
       : (user.playerInfo && user.playerInfo.club) || null;
     return {
       firstName: user.firstName || '',
@@ -1459,6 +1578,9 @@
           user = { ...user, ...doc.data(), firebaseUid: user.firebaseUid };
           ctsoccerUpdateUser(user);
         }
+        // Must resolve before syncPublicProfile()/boot() — both read managerStatus
+        // to know whether this user is an admin-approved Team Manager.
+        await refreshManagerStatus();
         // Backfill the public directory entry on every visit — covers accounts
         // that existed before publicProfiles was introduced, not just fresh saves.
         syncPublicProfile();

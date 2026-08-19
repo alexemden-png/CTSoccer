@@ -13,15 +13,20 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // A "Team Manager" is any signed-in user whose own profile self-declares
-    // role == 'coach' and teamInfo.club == clubId. There is no separate
-    // verification/approval step in this app — any user can set this on their
-    // own account settings page. This rule only enforces "you claimed to
-    // manage this club", not identity-verified club ownership.
+    // The one CT Soccer admin account. Checked against the auth token's email
+    // claim (part of the signed, server-verified ID token — not client-supplied
+    // data), so this can't be spoofed by editing a profile document or the UI.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email.lower() == 'alexemden@icloud.com';
+    }
+
+    // A "Team Manager" is someone with an admin-approved managerApprovals/{uid}
+    // doc for that specific club. Approval docs are admin-write-only (see below)
+    // — a user can never grant this to themselves, unlike the old design where
+    // this checked a self-editable field on the user's own profile.
     function isTeamManagerOf(clubId) {
       return isSignedIn()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamInfo.club == clubId;
+        && get(/databases/$(database)/documents/managerApprovals/$(request.auth.uid)).data.club == clubId;
     }
 
     // Full profile doc — email, bio, location, teamInfo, etc. Owner-only in every
@@ -76,6 +81,29 @@ service cloud.firestore {
         && isTeamManagerOf(request.resource.data.clubId);
       allow update: if isTeamManagerOf(resource.data.clubId);
       allow delete: if isTeamManagerOf(resource.data.clubId);
+    }
+
+    // Team Manager requests — a user can create their own pending request and
+    // read it back, plus the admin can read every request (to review the queue).
+    // Only the admin can change status (approve/deny) or delete a request; a
+    // requester can never approve their own request or edit an existing one.
+    match /managerRequests/{requestId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.uid || isAdmin());
+      allow create: if isSignedIn()
+        && request.auth.uid == request.resource.data.uid
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Approved Team Manager assignments — the actual authorization matchResults
+    // checks. Deliberately admin-write-only in every direction: a user can read
+    // their own approval (to know they're approved and for which club) but can
+    // never create, edit, or delete it themselves — that would let anyone
+    // self-approve, defeating the whole point of the approval step.
+    match /managerApprovals/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
     }
   }
 }
