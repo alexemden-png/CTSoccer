@@ -118,7 +118,7 @@
     </div>
 
     <div id="loading" style="text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;">Loading posts…</div>
-    <div id="empty" style="display:none;text-align:center;color:var(--muted);padding:40px 0;font-size:.85rem;"></div>
+    <div id="empty" class="post-card" style="display:none;text-align:center;padding:40px 24px;"></div>
     <div id="feed" style="display:flex;flex-direction:column;gap:18px;"></div>
   </div>
 
@@ -307,9 +307,13 @@
         document.getElementById('loading').style.display = 'none';
         if (!posts.length) {
           emptyEl.style.display = 'block';
-          emptyEl.textContent = activeTab === 'following'
-            ? "No posts yet from people you follow — check out Everyone, or find people to follow."
-            : 'No posts yet — be the first to share something!';
+          emptyEl.innerHTML = activeTab === 'following'
+            ? `<div style="font-size:1.8rem;margin-bottom:10px;">&#128101;</div>
+               <div style="font-size:.95rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:5px;">Nothing here yet</div>
+               <div style="font-size:.8rem;color:var(--muted);line-height:1.5;">No posts yet from people you follow — check out Everyone, or find people to follow.</div>`
+            : `<div style="font-size:1.8rem;margin-bottom:10px;">&#128247;</div>
+               <div style="font-size:.95rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:5px;">No posts yet</div>
+               <div style="font-size:.8rem;color:var(--muted);line-height:1.5;">Be the first to share something with the community!</div>`;
           return;
         }
         feedEl.innerHTML = posts.map(postCardHtml).join('');
