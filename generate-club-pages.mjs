@@ -1,0 +1,292 @@
+// Generates a static, crawlable HTML page per club in clubs-data.js at
+// /clubs/<id>.html — real server-rendered content (name, league, description,
+// roster, results, standings) instead of the client-side-only club.html?id=
+// view, so search engines can index each club individually.
+//
+// Run with: node generate-club-pages.mjs
+
+import fs from 'fs';
+import path from 'path';
+import vm from 'vm';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const OUT_DIR = path.join(__dirname, 'clubs');
+if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
+
+const clubsDataSrc = fs.readFileSync(path.join(__dirname, 'clubs-data.js'), 'utf8');
+const sandbox = {};
+vm.createContext(sandbox);
+vm.runInContext(clubsDataSrc, sandbox);
+// Top-level `const`/`let` in a vm-run script don't attach to the sandbox object
+// itself, but they do persist in that context's global lexical scope across
+// further runInContext calls — so pull them back out explicitly.
+const { ALL_CLUBS, LEAGUE_STANDINGS, clubPts, clubGD, clubWinPct, clubPlayed, tierBadgeHtml, leagueStandingsHtml } =
+  vm.runInContext('({ALL_CLUBS, LEAGUE_STANDINGS, clubPts, clubGD, clubWinPct, clubPlayed, tierBadgeHtml, leagueStandingsHtml})', sandbox);
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function metaDescription(club) {
+  let d = club.description || `${club.name} is a soccer club in ${club.city}, Connecticut, competing in ${club.league}.`;
+  d = d.replace(/\s+/g, ' ').trim();
+  if (d.length > 158) d = d.slice(0, 155).replace(/\s+\S*$/, '') + '…';
+  return d;
+}
+
+function statCard(label, value, color) {
+  return `<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 12px;text-align:center;">
+    <div style="font-size:1.25rem;font-weight:800;letter-spacing:-.03em;color:${color || '#fff'};">${value}</div>
+    <div style="font-size:.6rem;color:rgba(255,255,255,.42);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;">${label}</div>
+  </div>`;
+}
+
+function rosterTableHtml(club) {
+  if (!club.roster || !club.roster.length) return '';
+  const rows = club.roster.map(p => `
+    <div style="display:grid;grid-template-columns:40px 1fr 60px 90px;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;">
+      <div style="font-weight:800;color:rgba(255,255,255,.4);">${esc(p.number ?? '')}</div>
+      <div style="font-weight:700;color:#fff;">${esc(p.name)}</div>
+      <div style="color:rgba(255,255,255,.55);">${esc(p.pos)}</div>
+      <div style="color:rgba(255,255,255,.4);font-size:.78rem;">${esc(p.nationality)}</div>
+    </div>`).join('');
+  return `
+    <section style="margin-bottom:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:12px;">Roster</h2>
+      <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+        <div style="display:grid;grid-template-columns:40px 1fr 60px 90px;gap:8px;padding:8px 16px;font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.08);">
+          <div>#</div><div>Player</div><div>Pos</div><div>Country</div>
+        </div>
+        ${rows}
+      </div>
+    </section>`;
+}
+
+function matchListHtml(title, matches, isResult) {
+  if (!matches || !matches.length) return '';
+  const rows = matches.map(m => {
+    if (isResult) {
+      const color = m.result === 'W' ? '#5CDD8B' : m.result === 'L' ? '#ff7070' : '#F5A800';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;">
+        <div><span style="color:${color};font-weight:800;margin-right:8px;">${m.result}</span><span style="color:#fff;font-weight:600;">${m.home ? 'vs' : '@'} ${esc(m.opponent)}</span></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="color:rgba(255,255,255,.85);font-weight:700;">${esc(m.score)}</span><span style="color:rgba(255,255,255,.35);font-size:.78rem;">${esc(m.date)}</span></div>
+      </div>`;
+    }
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;">
+      <div style="color:#fff;font-weight:600;">${m.home ? 'vs' : '@'} ${esc(m.opponent)}</div>
+      <div style="color:rgba(255,255,255,.5);font-size:.78rem;">${esc(m.date)}${m.time ? ' · ' + esc(m.time) : ''}</div>
+    </div>`;
+  }).join('');
+  return `
+    <section style="margin-bottom:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:12px;">${title}</h2>
+      <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;overflow:hidden;">${rows}</div>
+    </section>`;
+}
+
+function contactBlockHtml(club) {
+  const hasContact = club.contactEmail || club.contactPhone || club.contactUrl;
+  if (!hasContact && !club.tryoutsNote) return '';
+  const items = [];
+  if (club.contactEmail) items.push(`<a href="mailto:${esc(club.contactEmail)}" style="display:block;color:var(--accent-lt);text-decoration:none;font-weight:600;margin-bottom:6px;">${esc(club.contactEmail)}</a>`);
+  if (club.contactPhone) items.push(`<a href="tel:${esc(club.contactPhone.replace(/\D/g, ''))}" style="display:block;color:rgba(255,255,255,.8);text-decoration:none;margin-bottom:6px;">${esc(club.contactPhone)}</a>`);
+  if (club.contactUrl) items.push(`<a href="${esc(club.contactUrl)}" target="_blank" rel="noopener" style="display:block;color:var(--accent-lt);text-decoration:none;font-weight:600;">${esc(club.contactUrl.replace(/^https?:\/\//, ''))} &rarr;</a>`);
+  const tryouts = club.tryoutsNote ? `<p style="font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.65);margin-top:10px;">${esc(club.tryoutsNote)}</p>` : '';
+  const tryoutsLink = club.tryoutsUrl ? `<a href="${esc(club.tryoutsUrl)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;color:var(--accent-lt);text-decoration:none;font-weight:700;font-size:.85rem;">Tryout info &rarr;</a>` : '';
+  const tournaments = (club.tournaments && club.tournaments.length)
+    ? `<div style="margin-top:16px;"><div style="font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">Tournaments &amp; Events</div>${club.tournaments.map(t => `<div style="font-size:.82rem;color:rgba(255,255,255,.65);margin-bottom:4px;">&bull; ${esc(t)}</div>`).join('')}</div>`
+    : '';
+  return `
+    <section style="margin-bottom:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:12px;">Contact &amp; Tryouts</h2>
+      <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;">
+        ${items.join('')}
+        ${tryouts}
+        ${tryoutsLink}
+        ${tournaments}
+      </div>
+    </section>`;
+}
+
+function quickFactsHtml(club) {
+  const rows = [
+    ['League', club.league],
+    ['Tier', club.tier],
+    ['Founded', club.founded || '—'],
+    ['Home Venue', club.stadium],
+    ['Location', `${club.city}, ${club.state}`],
+    club.coach ? ['Head Coach / Director', club.coach] : null,
+    club.ageGroups && club.ageGroups.length ? ['Age Groups', club.ageGroups.join(', ')] : null,
+    club.website ? ['Website', club.website] : null,
+  ].filter(Boolean);
+  return `
+    <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:14px;">Club Info</h2>
+      ${rows.map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;"><span style="color:rgba(255,255,255,.4);">${esc(k)}</span><span style="color:#fff;font-weight:600;text-align:right;">${esc(v)}</span></div>`).join('')}
+    </div>`;
+}
+
+function pageHtml(club) {
+  const played = clubPlayed(club);
+  const hasRecord = played > 0;
+  const pts = clubPts(club), gd = clubGD(club), winPct = clubWinPct(club);
+  const standings = LEAGUE_STANDINGS[club.id] ? leagueStandingsHtml(club.id) : '';
+  const title = `${esc(club.name)} — ${esc(club.league)} | CT Soccer`;
+  const description = metaDescription(club);
+  const canonical = `https://ctsoccerhub.com/clubs/${club.id}.html`;
+
+  const statsBlock = hasRecord ? `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;">
+      ${statCard('Wins', club.wins, '#5CDD8B')}
+      ${statCard('Draws', club.draws)}
+      ${statCard('Losses', club.losses, '#ff7070')}
+      ${statCard('Points', pts, 'var(--accent-lt)')}
+    </div>` : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="../theme.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <meta name="description" content="${esc(description)}">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${esc(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta name="twitter:card" content="summary">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    a { color: inherit; }
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:10px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .2s,transform .2s;}
+    .btn-primary:hover{opacity:.85;transform:translateY(-1px);}
+    .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .mobile-bottom-nav { display: flex !important; }
+      nav.sub-nav { padding: 0 16px !important; }
+      .nav-crumb { display: none !important; }
+      .quick-stats { grid-template-columns: repeat(2,1fr) !important; }
+      .roster-row { grid-template-columns: 32px 1fr 48px !important; }
+      .roster-row > div:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="../dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="../news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="../account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav class="sub-nav" style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="../dashboard.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="../logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+      </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg class="nav-crumb" width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="nav-crumb" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(club.name)}</span>
+    <div style="flex:1;"></div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="../dashboard.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap;">Dashboard</a>
+  </nav>
+
+  <div style="max-width:900px;margin:0 auto;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 0 0;font-size:.78rem;color:rgba(255,255,255,.35);flex-wrap:wrap;">
+      <a href="../index.html" style="text-decoration:none;color:inherit;">Home</a>
+      <span>/</span>
+      <a href="../dashboard.html" style="text-decoration:none;color:inherit;">Clubs</a>
+      <span>/</span>
+      <span style="color:rgba(255,255,255,.6);">${esc(club.name)}</span>
+    </div>
+
+    <!-- HERO -->
+    <div style="padding:20px 0 32px;border-bottom:1px solid var(--border);margin-bottom:28px;">
+      <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+        <div style="width:72px;height:72px;border-radius:16px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:1.2rem;font-weight:900;color:${club.primary};letter-spacing:.02em;">${esc(club.abbr)}</span>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+            <h1 style="margin:0;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;letter-spacing:-.03em;color:#fff;">${esc(club.name)}</h1>
+            ${tierBadgeHtml(club.tier)}
+          </div>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.5);margin:0 0 16px;">${esc(club.league)} &bull; ${esc(club.city)}, ${esc(club.state)}${club.founded ? ` &bull; Founded ${club.founded}` : ''}</p>
+          <a href="../club.html?id=${encodeURIComponent(club.id)}" class="btn-primary">View live dashboard &amp; follow this club &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+    ${statsBlock}
+
+    <section style="margin-bottom:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:12px;">About ${esc(club.name)}</h2>
+      <p style="font-size:.92rem;line-height:1.8;color:rgba(255,255,255,.7);margin-bottom:14px;">${esc(club.description)}</p>
+      ${club.about ? `<p style="font-size:.92rem;line-height:1.8;color:rgba(255,255,255,.7);">${esc(club.about)}</p>` : ''}
+    </section>
+
+    ${quickFactsHtml(club)}
+    ${rosterTableHtml(club)}
+    ${matchListHtml('Recent Results', club.recentResults, true)}
+    ${matchListHtml('Upcoming Matches', club.upcoming, false)}
+    ${standings ? `<section style="margin-bottom:28px;"><h2 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:12px;">League Standings</h2>${standings}</section>` : ''}
+    ${contactBlockHtml(club)}
+
+    <div style="text-align:center;padding:20px 0 48px;">
+      <a href="../club.html?id=${encodeURIComponent(club.id)}" class="btn-primary">Follow ${esc(club.name)} on CT Soccer &rarr;</a>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      Club information is sourced from CJSA, US Soccer, TheSportsDB, and club websites/submissions. See our <a href="../about.html" style="color:inherit;text-decoration:underline;">About page</a> for details.
+    </p>
+    <p style="font-size:.75rem;color:rgba(255,255,255,.2);margin-top:10px;">
+      <a href="../privacy-policy.html" style="color:inherit;text-decoration:none;">Privacy Policy</a>
+      &middot;
+      <a href="../terms-of-service.html" style="color:inherit;text-decoration:none;">Terms of Service</a>
+    </p>
+  </div>
+</body>
+</html>
+`;
+}
+
+let count = 0;
+const urls = [];
+for (const club of ALL_CLUBS) {
+  const html = pageHtml(club);
+  fs.writeFileSync(path.join(OUT_DIR, `${club.id}.html`), html, 'utf8');
+  urls.push(club.id);
+  count++;
+}
+
+console.log(`Generated ${count} club pages in /clubs/`);
+fs.writeFileSync(path.join(__dirname, '.club-page-ids.json'), JSON.stringify(urls, null, 2));

@@ -6,6 +6,8 @@
   <script src="auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Club — CT Soccer</title>
+  <meta name="description" content="Browse real Connecticut soccer club profiles — league, roster, results, and standings.">
+  <meta name="robots" content="noindex, follow">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google AdSense — replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID after approval -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
@@ -291,6 +293,7 @@
                     ${followed ? 'Following &#10004;' : '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Follow Club'}
                   </button>
                   <a href="account.html?action=join&club=${club.id}" class="btn-primary" style="font-size:.82rem;padding:8px 16px;">+ Join as Player</a>
+                  ${!club.isDirectoryOnly ? `<a href="clubs/${club.id}.html" class="btn-outline" style="font-size:.82rem;padding:8px 16px;">Full Club Profile &rarr;</a>` : ''}
                   <button class="btn-outline" onclick="openContactModal()" style="font-size:.82rem;padding:8px 16px;">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     Contact Club

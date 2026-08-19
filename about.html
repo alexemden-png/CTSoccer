@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About CT Soccer — Connecticut's Soccer Hub</title>
+  <meta name="description" content="CT Soccer is a hub for Connecticut soccer — real club profiles, tournaments, coaching clinics, and a community for players, coaches, team managers, and fans. Learn what we are and how our data is sourced.">
+  <link rel="canonical" href="https://ctsoccerhub.com/about.html">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.55);
+      --border:   rgba(255,255,255,.08);
+    }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 28px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
+    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
+    .doc .intro { font-size: .98rem; line-height: 1.8; color: var(--muted); margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+    .doc section { margin-bottom: 40px; }
+    .doc h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; }
+    .doc p { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
+    .doc ul { margin: 0 0 14px 20px; }
+    .doc li { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 8px; }
+    .doc li strong { color: rgba(255,255,255,.85); }
+    .doc a { color: var(--accent-lt); text-decoration: none; }
+    .doc a:hover { text-decoration: underline; }
+    .audience-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 8px; }
+    .audience-card { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px; text-align: center; }
+    .audience-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .audience-card .label { font-size: .82rem; font-weight: 700; color: #fff; }
+    .source-list { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; }
+
+    .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a.nav-link { display: none; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+      .audience-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="news.html" class="nav-link">News</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="doc">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
+      <span style="color:rgba(255,255,255,.2);">/</span>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">About</span>
+    </div>
+
+    <h1>About CT Soccer</h1>
+
+    <p class="intro">
+      CT Soccer (ctsoccerhub.com) is a hub for Connecticut soccer — one place to find real club profiles, live
+      results, tournaments, coaching clinic listings, and a community feed for the people who make up the state's
+      soccer scene, from Hartford Athletic's professional roster down to town-level youth clubs.
+    </p>
+
+    <section id="who-its-for">
+      <h2>Who it's for</h2>
+      <p>CT Soccer is built for four overlapping groups:</p>
+      <div class="audience-grid">
+        <div class="audience-card"><div class="icon">&#9917;</div><div class="label">Players</div></div>
+        <div class="audience-card"><div class="icon">&#128203;</div><div class="label">Coaches</div></div>
+        <div class="audience-card"><div class="icon">&#128188;</div><div class="label">Team Managers</div></div>
+        <div class="audience-card"><div class="icon">&#127943;</div><div class="label">Fans</div></div>
+      </div>
+      <p style="margin-top:16px;">
+        Whether you're a player following Hartford Athletic's season, a parent trying to find the right youth club
+        or an upcoming tryout, a coach comparing CJSA course pricing, or a team manager keeping your roster and
+        results up to date, CT Soccer is meant to be the fastest way to find what you're looking for.
+      </p>
+    </section>
+
+    <section id="what-you-can-do">
+      <h2>What's on the site</h2>
+      <ul>
+        <li><strong>Club Dashboard</strong> — profiles for Connecticut's professional, semi-professional, and youth clubs, with live results for Hartford Athletic, AC Connecticut, and CT Rush pulled automatically from TheSportsDB.</li>
+        <li><strong>Tournaments</strong> — a browsable list of CJSA and EDP tournaments across the state.</li>
+        <li><strong>Coaching Clinics</strong> — every CJSA and US Soccer coaching course available in Connecticut, with real pricing.</li>
+        <li><strong>Soccer Assistant</strong> — a guided recommendation tool to help match players and families with the right club or course.</li>
+        <li><strong>News</strong> — season storylines and auto-updating match results for CT's real clubs.</li>
+        <li><strong>People &amp; Community</strong> — a directory and social feed for the CT Soccer community, once you create a free account.</li>
+      </ul>
+    </section>
+
+    <section id="data-sources">
+      <h2>How our data is sourced</h2>
+      <p>We're not making this up as we go — club and league data comes from a mix of real, named sources:</p>
+      <div class="source-list">
+        <ul style="margin-bottom:0;">
+          <li><strong>CJSA</strong> (Connecticut Junior Soccer Association) — the club directory and coaching course listings are sourced from cjsa.org.</li>
+          <li><strong>US Soccer</strong> — national coaching license pricing and course structure via the US Soccer Learning Center (learning.ussoccer.com).</li>
+          <li><strong>TheSportsDB</strong> — a public sports-data API that powers live match results and fixtures for Hartford Athletic, AC Connecticut, and CT Rush.</li>
+          <li><strong>Official league standings</strong> — USL Championship, MLS Next Pro, NPSL, and USL League Two tables sourced from each league's own site (uslchampionship.com, mlsnextpro.com, npsl.com, uslleaguetwo.com).</li>
+          <li><strong>Club websites &amp; submissions</strong> — youth and competitive club contact info, tryout details, and program descriptions are gathered from clubs' own public websites. If you run a CT club and see something out of date, <a href="mailto:info@ctsoccerhub.com">let us know</a> and we'll fix it.</li>
+        </ul>
+      </div>
+      <p style="margin-top:16px;">
+        Some club descriptions and season stats are still being verified against live sources — see our
+        <a href="terms-of-service.html#accuracy">Terms of Service</a> for the full accuracy disclaimer before relying
+        on anything here for a real decision (like a tryout date). When in doubt, confirm directly with the club.
+      </p>
+    </section>
+
+    <section id="contact">
+      <h2>Questions or corrections</h2>
+      <p>Reach us at <a href="mailto:info@ctsoccerhub.com">info@ctsoccerhub.com</a>, or see our <a href="privacy-policy.html">Privacy Policy</a> and <a href="terms-of-service.html">Terms of Service</a> for more on how the site works.</p>
+    </section>
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      &copy; 2026 CT Soccer.
+    </p>
+    <p style="font-size:.75rem;color:rgba(255,255,255,.2);margin-top:10px;">
+      <a href="privacy-policy.html" style="color:inherit;text-decoration:none;">Privacy Policy</a>
+      &middot;
+      <a href="terms-of-service.html" style="color:inherit;text-decoration:none;">Terms of Service</a>
+    </p>
+  </div>
+</body>
+</html>
