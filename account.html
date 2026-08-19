@@ -185,11 +185,12 @@
     </div>
   </div>
 
-  <div style="display:flex;gap:9px;background:rgba(43,124,233,.06);border:1px solid rgba(43,124,233,.18);border-radius:10px;padding:11px 14px;margin-bottom:16px;">
+  <div id="local-storage-banner" style="display:none;align-items:center;gap:12px;background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.22);border-radius:10px;padding:11px 14px;margin-bottom:16px;flex-wrap:wrap;">
     <span style="flex-shrink:0;font-size:.9rem;line-height:1.5;">💾</span>
-    <p style="font-size:.78rem;line-height:1.6;color:rgba(255,255,255,.55);margin:0;">
-      Your profile is currently stored in this browser only, not on a server — clearing your browser data or switching devices/browsers will lose it. We'll let you know here before that changes.
+    <p style="font-size:.78rem;line-height:1.6;color:rgba(255,255,255,.55);margin:0;flex:1;min-width:220px;">
+      Your profile is only saved in this browser — from before accounts moved to the cloud. Clearing your browser data or switching devices will lose it.
     </p>
+    <button id="sync-cloud-btn" class="btn-primary" onclick="syncToCloud()" style="flex-shrink:0;padding:8px 16px;font-size:.78rem;">Sync my account to the cloud</button>
   </div>
 
   <!-- ROLE TABS -->
@@ -599,6 +600,7 @@
 
   // ---- Boot ----
   function boot() {
+    updateStorageBanner();
     renderAvatar();
     document.getElementById('display-name').textContent  = user.firstName ? `${user.firstName} ${user.lastName||''}`.trim() : 'Guest';
     document.getElementById('display-username').textContent = user.username ? '@'+user.username : '';
@@ -1270,6 +1272,66 @@
       const { password, ...profileData } = user; // never write the password field to Firestore
       db.collection('users').doc(user.firebaseUid).set(profileData, { merge: true })
         .catch(err => console.warn('[Firestore] profile sync failed:', err.message));
+    }
+  }
+
+  // Show the "local browser only" banner only for genuinely unsynced accounts —
+  // i.e. Firebase is configured but this profile has no firebaseUid yet.
+  function updateStorageBanner() {
+    const banner = document.getElementById('local-storage-banner');
+    if (!banner) return;
+    const isSynced = typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && !!user.firebaseUid;
+    banner.style.display = isSynced ? 'none' : 'flex';
+  }
+
+  // One-time migration for accounts created before Firebase went live: provisions
+  // a real Firebase Auth user (reusing the password already saved locally, same
+  // as the legacy-migration path in login.html) and writes the local profile to
+  // Firestore. If this email already has a Firebase account — e.g. synced from
+  // another browser already — signs into it and merges instead of erroring.
+  async function syncToCloud() {
+    if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+      toast('Cloud sync isn\'t available right now — try again later.');
+      return;
+    }
+    if (!user.email || !user.password) {
+      toast('Missing saved sign-in info — please sign out and back in, then try again.');
+      return;
+    }
+    const btn = document.getElementById('sync-cloud-btn');
+    const originalLabel = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+    try {
+      let uid;
+      try {
+        const cred = await fbAuth.createUserWithEmailAndPassword(user.email, user.password);
+        uid = cred.user.uid;
+      } catch (err) {
+        if (err.code === 'auth/email-already-in-use') {
+          // Already provisioned (e.g. synced from another browser) — sign in and merge instead.
+          const cred = await fbAuth.signInWithEmailAndPassword(user.email, user.password);
+          uid = cred.user.uid;
+        } else {
+          throw err;
+        }
+      }
+      const { password, firebaseUid, ...profileData } = user;
+      await db.collection('users').doc(uid).set({
+        uid, ...profileData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      user.firebaseUid = uid;
+      delete user.password;
+      ctsoccerUpdateUser(user);
+      updateStorageBanner();
+      toast('Synced! Your account now works across devices and browsers.');
+    } catch (err) {
+      const msg = (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')
+        ? 'This email is already registered in the cloud with a different password. Sign out and sign back in with that password, then try syncing again.'
+        : 'Could not sync: ' + err.message;
+      toast(msg, 4200);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
     }
   }
 
