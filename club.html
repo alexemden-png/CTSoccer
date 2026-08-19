@@ -216,22 +216,27 @@
       // no-ops for signed-out visitors rather than showing an error.
       if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && !club.isDirectoryOnly) {
         try {
+          // Filter by clubId only (single-field, auto-indexed) and sort client-side —
+          // filtering on one field plus ordering by another needs a composite index
+          // that isn't provisioned, and this avoids that dependency entirely.
           const snap = await db.collection('matchResults')
             .where('clubId', '==', club.id)
-            .orderBy('createdAt', 'desc')
-            .limit(10)
             .get();
-          const managerResults = snap.docs.map(doc => {
-            const d = doc.data();
-            return {
-              opponent: d.opponent,
-              home: true,
-              score: `${d.homeScore}-${d.awayScore}`,
-              result: d.result,
-              date: d.date || (d.createdAt ? d.createdAt.toDate().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : ''),
-              manager: true,
-            };
-          });
+          const managerResults = snap.docs
+            .map(doc => {
+              const d = doc.data();
+              return {
+                opponent: d.opponent,
+                home: true,
+                score: `${d.homeScore}-${d.awayScore}`,
+                result: d.result,
+                date: d.date || (d.createdAt ? d.createdAt.toDate().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : ''),
+                manager: true,
+                _sortMs: d.createdAt ? d.createdAt.toMillis() : 0,
+              };
+            })
+            .sort((a, b) => b._sortMs - a._sortMs)
+            .slice(0, 10);
           if (managerResults.length) club.recentResults = [...managerResults, ...(club.recentResults || [])];
         } catch (err) {
           console.info('[Firestore] match results unavailable:', err.message);

@@ -282,7 +282,7 @@
         username: d.username || null, bio: d.bio || '', location: d.location || '',
         joined: d.joined || (localMatch && localMatch.joined) || new Date().toISOString(),
         followedClubs: (localMatch && localMatch.followedClubs) || [],
-        notifications: (localMatch && localMatch.notifications) !== undefined ? localMatch.notifications : true,
+        notifications: localMatch && localMatch.notifications !== undefined ? localMatch.notifications : true,
         stats: (localMatch && localMatch.stats) || { goals: 0, assists: 0, appearances: 0, rating: '—' },
         firebaseUid: doc.id,
       };
