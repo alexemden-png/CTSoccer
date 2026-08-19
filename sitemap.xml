@@ -14,12 +14,6 @@
   </url>
 
   <url>
-    <loc>https://ctsoccerhub.com/club.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
     <loc>https://ctsoccerhub.com/tournaments.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -74,3 +68,5 @@
   </url>
 
 </urlset>
+
+
