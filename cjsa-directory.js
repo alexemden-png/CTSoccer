@@ -77,7 +77,7 @@ const CJSA_DIRECTORY = [
   { id:'killingly-youth-soccer', name:'Killingly Youth Soccer', city:'Killingly', website:'http://www.neconn.org/' },
   { id:'lebanon-soccer-club', name:'Lebanon Soccer Club', city:'Lebanon', website:'https://www.lebanonsoccerclub.com/' },
   { id:'ledyard-soccer-club', name:'Ledyard Soccer Club', city:'Ledyard', website:'https://clubs.bluesombrero.com/Default.aspx?tabid=754720' },
-  { id:'liberty-football-club', name:'Liberty Football Club', city:'Norwich', website:'http://www.libertyfootball.org/' },
+  { id:'liberty-football-club', name:'Liberty Football Club', city:'Norwich', website:'' },
   { id:'litchfield-soccer-club', name:'Litchfield Soccer Club', city:'Litchfield', website:'https://clubs.bluesombrero.com/litchfield' },
   { id:'lyme-old-lyme-soccer-club', name:'Lyme Old Lyme Soccer Club', city:'Old Lyme', website:'https://www.lolsc.com/' },
   { id:'madison-youth-soccer-club', name:'Madison Youth Soccer Club', city:'Madison', website:'https://clubs.bluesombrero.com/madison' },
@@ -167,5 +167,5 @@ const CJSA_DIRECTORY = [
   { id:'wolcott-soccer-wyaa', name:'Wolcott Soccer (WYAA)', city:'Wolcott', website:'https://www.wolcottsoccer.com/' },
   { id:'woodbridge-soccer-club', name:'Woodbridge Soccer Club', city:'Woodbridge', website:'https://clubs.bluesombrero.com/woodbridge' },
   { id:'woodbury-bethlehem-youth-soccer', name:'Woodbury Bethlehem Youth Soccer', city:'Woodbury', website:'http://www.wbysclub.com/' },
-  { id:'yankee-united-fc', name:'Yankee United FC', city:'Enfield', website:'http://www.yankeeunited.com/', edpClubId:'yankee-united-fc' },
+  { id:'yankee-united-fc', name:'Yankee United FC', city:'Enfield', website:'', edpClubId:'yankee-united-fc' },
 ];
