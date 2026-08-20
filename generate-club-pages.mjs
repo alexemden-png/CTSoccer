@@ -189,6 +189,8 @@ function pageHtml(club) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8">
   <script src="../theme.js"></script>
   <script src="../cookie-consent.js"></script>
