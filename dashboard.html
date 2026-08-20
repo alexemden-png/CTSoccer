@@ -846,6 +846,25 @@
       if (name==='matches')    showMatches('upcoming', null);
       if (name==='clubs')      filterClubs();
       if (name==='directory')  filterDirectory();
+
+      // Switching sections shouldn't leave the user at whatever scroll
+      // position the *previous* section happened to be at — land them at
+      // the top of the new one. Which element actually scrolls depends on
+      // viewport width: <main> is its own scroll container on desktop
+      // (overflow-y:auto, sidebar beside it), but the @media(max-width:860px)
+      // rule switches main to overflow-y:visible and stacks the sidebar
+      // above it in normal flow, making the window the real scroll
+      // container — and pushing <main> hundreds of pixels below the top of
+      // the page. Checking main's computed overflow-y (rather than
+      // hardcoding that breakpoint here too) tracks whichever is active.
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        if (getComputedStyle(mainEl).overflowY === 'auto') {
+          mainEl.scrollTop = 0;
+        } else {
+          window.scrollTo(0, mainEl.getBoundingClientRect().top + window.scrollY);
+        }
+      }
     }
 
     let _dirFilteredList = [];
