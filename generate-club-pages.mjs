@@ -117,6 +117,7 @@ function quickFactsHtml(club) {
     ['Home Venue', club.stadium],
     ['Location', `${club.city}, ${club.state}`],
     club.coach ? ['Head Coach / Director', club.coach] : null,
+    club.generalManager ? ['General Manager', club.generalManager] : null,
     club.ageGroups && club.ageGroups.length ? ['Age Groups', club.ageGroups.join(', ')] : null,
     club.website ? ['Website', club.website] : null,
   ].filter(Boolean);
