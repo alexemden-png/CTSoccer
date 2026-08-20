@@ -112,6 +112,15 @@
       color: #fca5a5;
       display: none;
     }
+    #reset-msg {
+      background: rgba(43,124,233,.12);
+      border: 1px solid rgba(43,124,233,.28);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: .82rem;
+      color: var(--accent-lt);
+      display: none;
+    }
     .mobile-app-bar {
       position: fixed;
       left: 12px;
@@ -216,6 +225,7 @@
 
     <form id="login-form" style="display:flex;flex-direction:column;gap:18px;">
       <div id="error-msg">Incorrect email or password. Please try again.</div>
+      <div id="reset-msg"></div>
 
       <div>
         <label class="field-label">Email Address</label>
@@ -225,6 +235,9 @@
       <div>
         <label class="field-label">Password</label>
         <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
+        <div style="text-align:right;margin-top:8px;">
+          <a href="#" onclick="handleForgotPassword(); return false;" style="font-size:.76rem;color:var(--accent-lt);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forgot your password?</a>
+        </div>
       </div>
 
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
@@ -288,6 +301,40 @@
         stats: (localMatch && localMatch.stats) || { goals: 0, assists: 0, appearances: 0, rating: '—' },
         firebaseUid: doc.id,
       };
+    }
+
+    async function handleForgotPassword() {
+      const errorEl = document.getElementById('error-msg');
+      const resetEl = document.getElementById('reset-msg');
+      errorEl.style.display = 'none';
+      resetEl.style.display = 'none';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      if (!email) {
+        errorEl.textContent = 'Enter your email address above, then click "Forgot your password?" again.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+        errorEl.textContent = 'Password reset isn\'t available right now. Please try again later.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        await fbAuth.sendPasswordResetEmail(email);
+      } catch (err) {
+        // Don't reveal whether an account exists for this email — show the
+        // same neutral confirmation for "not found" as for a real send.
+        if (err.code !== 'auth/user-not-found' && err.code !== 'auth/invalid-email') {
+          errorEl.textContent = 'Could not send reset email: ' + err.message;
+          errorEl.style.display = 'block';
+          return;
+        }
+      }
+      resetEl.textContent = 'If an account exists for ' + email + ', a password reset email has been sent. Check your inbox (and spam folder).';
+      resetEl.style.display = 'block';
     }
 
     document.getElementById('login-form').addEventListener('submit', async function(e) {

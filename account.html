@@ -624,8 +624,9 @@
   }
   
   if (!user.firstName) {
-    // Not logged in — redirect to home
-    // (leave page accessible but show a "not signed in" banner)
+    // Not logged in — redirect to sign in.
+    window.location.href = 'login.html';
+    throw new Error('Not signed in');
   }
 
   let tmRoster = [];
