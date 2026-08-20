@@ -104,12 +104,6 @@
   </url>
 
   <url>
-    <loc>https://ctsoccerhub.com/clubs/ct-rush.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
     <loc>https://ctsoccerhub.com/clubs/farmington-valley-sc.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -231,12 +225,6 @@
 
   <url>
     <loc>https://ctsoccerhub.com/clubs/ole-fc.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://ctsoccerhub.com/clubs/ct-rush-select.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

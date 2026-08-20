@@ -2,5 +2,6 @@ node_modules/
 temporary screenshots/
 *.png
 !logo.png
+!images/clubs/*.png
 package-lock.json
 _contact.js

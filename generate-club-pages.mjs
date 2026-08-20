@@ -281,8 +281,8 @@ function pageHtml(club) {
     <!-- HERO -->
     <div style="padding:20px 0 32px;border-bottom:1px solid var(--border);margin-bottom:28px;">
       <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
-        <div style="width:72px;height:72px;border-radius:16px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span class="club-badge-abbr" style="font-size:1.2rem;font-weight:900;color:${club.primary};letter-spacing:.02em;">${esc(club.abbr)}</span>
+        <div style="width:72px;height:72px;border-radius:16px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+          ${club.logo ? `<img src="../${club.logo}" alt="${esc(club.name)} logo" style="width:100%;height:100%;object-fit:contain;padding:6px;">` : `<span class="club-badge-abbr" style="font-size:1.2rem;font-weight:900;color:${club.primary};letter-spacing:.02em;">${esc(club.abbr)}</span>`}
         </div>
         <div style="flex:1;min-width:200px;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">

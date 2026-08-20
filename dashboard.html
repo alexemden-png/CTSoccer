@@ -813,7 +813,7 @@
             <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <div style="flex:1;"><div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;">Location</div><div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.85);">${c.address}</div></div>
           </div>` : ''}
-          <a href="club.html?id=${c.id}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--accent);border-radius:12px;text-decoration:none;color:#fff;font-weight:700;font-size:.85rem;">${hasRichProfile ? 'View Full CT Soccer Profile' : 'View Club Profile'} &rarr;</a>
+          <a href="club.html?id=${c.edpClubId || c.id}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--accent);border-radius:12px;text-decoration:none;color:#fff;font-weight:700;font-size:.85rem;">${hasRichProfile ? 'View Full CT Soccer Profile' : 'View Club Profile'} &rarr;</a>
           ${!c.email && !c.phone && !c.address ? `<div style="font-size:.78rem;color:var(--muted);text-align:center;padding:6px 0;">No additional contact info on file yet — visit the website above.</div>` : ''}
         </div>
       `;

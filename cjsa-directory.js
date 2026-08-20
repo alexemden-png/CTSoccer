@@ -36,7 +36,7 @@ const CJSA_DIRECTORY = [
   { id:'coventry-soccer', name:'Coventry Soccer', city:'Coventry', website:'https://clubs.bluesombrero.com/coventrysoccerct' },
   { id:'cromwell-chill-soccer-club', name:'Cromwell Chill Soccer Club', city:'Cromwell', website:'https://clubs.bluesombrero.com/default.aspx?portalid=51169' },
   { id:'ct-impact-united-soccer-academy', name:'CT Impact United Soccer Academy', city:'Hartford', website:'https://www.impactusact.com/' },
-  { id:'ct-rush-select', name:'CT Rush', city:'Southbury', website:'https://www.northeastrush.com/', edpClubId:'ct-rush-select' },
+  { id:'ct-rush-select', name:'CT Rush', city:'Southbury', website:'https://www.northeastrush.com/', edpClubId:'vale-sc' },
   { id:'danbury-youth-soccer-club', name:'Danbury Youth Soccer Club', city:'Danbury', website:'https://clubs.bluesombrero.com/danburyyouthsoccer' },
   { id:'darien-sa', name:'Darien Soccer Association', city:'Darien', website:'http://www.dariensoccer.org/', edpClubId:'darien-sa' },
   { id:'derby-youth-soccer', name:'Derby Youth Soccer', city:'Derby', website:'http://www.electronicvalley.org/derby/rec/soccer.htm' },
