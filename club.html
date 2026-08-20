@@ -266,6 +266,12 @@
             followed = true;
           }
           ctsoccerUpdateUser(u);
+          // Sync to Firestore too — this previously only ever updated local
+          // storage, so following a club never persisted across devices.
+          if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && u.firebaseUid) {
+            db.collection('users').doc(u.firebaseUid).set({ followedClubs: u.followedClubs }, { merge: true })
+              .catch(err => console.warn('[Firestore] follow sync failed:', err.message));
+          }
           updateFollowBtn();
         } catch(e){}
       }
@@ -344,6 +350,7 @@
                     Contact Club
                   </button>
                   ${club.website ? `<a href="https://${club.website}" target="_blank" rel="noopener" class="btn-outline" style="font-size:.82rem;padding:8px 16px;">Website &rarr;</a>` : ''}
+                  <a href="suggest.html?type=correction&club=${encodeURIComponent(club.name)}" class="btn-outline" style="font-size:.82rem;padding:8px 16px;">Suggest a correction</a>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;margin-top:14px;">
                   <span style="font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-right:2px;">Share</span>

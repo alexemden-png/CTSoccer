@@ -156,7 +156,41 @@
       boot();
     }
 
-    document.getElementById('file-input').addEventListener('change', (e) => {
+    // Resize images to a reasonable max dimension and re-encode as JPEG before
+    // upload, so full-resolution phone photos (often 10MB+) don't get uploaded
+    // as-is once Storage is live. Videos pass through untouched — client-side
+    // video compression needs a much heavier tool (e.g. ffmpeg.wasm) than fits
+    // here; size is still capped by the 50MB check above.
+    async function compressImage(file, maxDim = 1600, quality = 0.85) {
+      let objectUrl;
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          objectUrl = URL.createObjectURL(file);
+          el.onload = () => resolve(el);
+          el.onerror = () => reject(new Error('Could not read image'));
+          el.src = objectUrl;
+        });
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+        if (!blob) return file;
+        return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+      } catch (err) {
+        console.warn('[compressImage] falling back to original file:', err.message);
+        return file;
+      } finally {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      }
+    }
+
+    document.getElementById('file-input').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 50 * 1024 * 1024) {
@@ -169,9 +203,16 @@
         e.target.value = '';
         return;
       }
-      selectedFile = file;
-      const url = URL.createObjectURL(file);
       const isVideo = file.type.startsWith('video/');
+      const statusEl = document.getElementById('upload-status');
+      if (!isVideo) {
+        statusEl.textContent = 'Optimizing image…';
+        selectedFile = await compressImage(file);
+        statusEl.textContent = '';
+      } else {
+        selectedFile = file;
+      }
+      const url = URL.createObjectURL(selectedFile);
       document.getElementById('preview-img').style.display = isVideo ? 'none' : 'block';
       document.getElementById('preview-video').style.display = isVideo ? 'block' : 'none';
       if (isVideo) document.getElementById('preview-video').src = url;

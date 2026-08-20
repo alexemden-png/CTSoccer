@@ -319,6 +319,13 @@
       <button class="filter-btn" onclick="filterTournaments('adult',this)">Adult / Open</button>
       <button class="filter-btn" onclick="filterTournaments('spring',this)">Spring</button>
       <button class="filter-btn" onclick="filterTournaments('fall',this)">Fall</button>
+      <select id="age-filter" onchange="renderTournaments()" style="font-family:'Montserrat',Arial,sans-serif;font-size:.78rem;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);cursor:pointer;">
+        <option value="">All Ages</option>
+        <option value="9-12">U9 – U12</option>
+        <option value="13-15">U13 – U15</option>
+        <option value="16-19">U16 – U19</option>
+        <option value="adult">Adult / Professional</option>
+      </select>
     </div>
 
     <div id="tournament-list" style="display:flex;flex-direction:column;gap:16px;"></div>
@@ -556,13 +563,29 @@
       renderTournaments();
     }
 
+    // Buckets rather than one option per age group (U9...U19 individually would
+    // make the dropdown unwieldy) — matches if ANY of a tournament's age groups
+    // falls in the selected range.
+    function ageGroupMatchesBucket(ageGroups, bucket) {
+      if (!bucket) return true;
+      if (bucket === 'adult') return ageGroups.some(a => /adult|master|senior|professional/i.test(a));
+      const [lo, hi] = bucket.split('-').map(Number);
+      return ageGroups.some(a => {
+        const m = a.match(/U(\d+)/);
+        if (!m) return false;
+        const n = Number(m[1]);
+        return n >= lo && n <= hi;
+      });
+    }
+
     function renderTournaments() {
+      const ageBucket = document.getElementById('age-filter')?.value || '';
       const list = TOURNAMENTS.filter(t => {
-        if (activeFilter === 'all') return true;
-        if (activeFilter === 'youth') return t.type === 'youth';
-        if (activeFilter === 'adult') return t.type === 'adult';
-        if (activeFilter === 'spring') return t.season === 'spring';
-        if (activeFilter === 'fall') return t.season === 'fall';
+        if (activeFilter === 'youth' && t.type !== 'youth') return false;
+        if (activeFilter === 'adult' && t.type !== 'adult') return false;
+        if (activeFilter === 'spring' && t.season !== 'spring') return false;
+        if (activeFilter === 'fall' && t.season !== 'fall') return false;
+        if (!ageGroupMatchesBucket(t.ageGroups, ageBucket)) return false;
         return true;
       });
 
@@ -657,123 +680,47 @@
       document.head.appendChild(script);
     })();
 
-    let bracketState = {};
-    let bracketUpdateIntervals = {};
-
-    function initBracketState(tournamentId) {
-      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
-      if (!tournament.bracket || bracketState[tournamentId]) return;
-      bracketState[tournamentId] = {};
-      tournament.bracket.rounds.forEach((round, ri) => {
-        round.matches.forEach((match, mi) => {
-          bracketState[tournamentId][match.id] = JSON.parse(JSON.stringify(match));
-        });
-      });
-    }
-
+    // Shows the known/seeded bracket exactly as listed in TOURNAMENTS — no
+    // simulated results. An earlier version of this modal auto-generated
+    // random scores every 3 seconds and "advanced" winners based on them,
+    // which displayed fabricated outcomes as if they were real. Matches with
+    // no real score yet (scores [0,0], the placeholder for "not yet played")
+    // now show as "Not yet played" instead of a fake 0-0 final.
     function viewBracket(tournamentId) {
       const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
       if (!tournament.bracket) return;
-      initBracketState(tournamentId);
       document.getElementById('bracketTitle').textContent = tournament.name + ' — Bracket';
-      
-      // Clear any existing interval for this tournament
-      if (bracketUpdateIntervals[tournamentId]) {
-        clearInterval(bracketUpdateIntervals[tournamentId]);
-      }
-      
-      // Initial auto-update
-      autoUpdateScores(tournamentId);
-      
-      // Set up auto-update every 3 seconds
-      bracketUpdateIntervals[tournamentId] = setInterval(() => {
-        autoUpdateScores(tournamentId);
-      }, 3000);
-      
-      renderBracketRounds(tournamentId);
+      renderBracketRounds(tournament);
       document.getElementById('bracketModal').classList.add('active');
     }
 
     function closeBracket() {
-      // Clear all active intervals
-      Object.keys(bracketUpdateIntervals).forEach(tourId => {
-        clearInterval(bracketUpdateIntervals[tourId]);
-      });
-      bracketUpdateIntervals = {};
       document.getElementById('bracketModal').classList.remove('active');
     }
 
-    function renderBracketRounds(tournamentId) {
-      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
-      const state = bracketState[tournamentId];
-      const roundsHtml = tournament.bracket.rounds.map((round, ri) => {
-        const matchesHtml = round.matches.map(match => {
-          const m = state[match.id];
-          const winner = m.scores[0] > m.scores[1] ? 0 : (m.scores[1] > m.scores[0] ? 1 : -1);
-          const status = m.scores[0] === 0 && m.scores[1] === 0 ? '(Pending)' : '(Final)';
+    function renderBracketRounds(tournament) {
+      const roundsHtml = tournament.bracket.rounds.map(round => {
+        const matchesHtml = round.matches.map(m => {
+          const played = m.scores[0] !== 0 || m.scores[1] !== 0;
+          const winner = played ? (m.scores[0] > m.scores[1] ? 0 : (m.scores[1] > m.scores[0] ? 1 : -1)) : -1;
           return `
             <div class="match-box">
               <div class="team-row ${winner === 0 ? 'winner' : winner === 1 ? 'loser' : ''}">
                 <span class="team-name">${m.teams[0]}</span>
-                <span class="team-score">${m.scores[0]}</span>
+                <span class="team-score">${played ? m.scores[0] : '–'}</span>
               </div>
               <div class="vs-divider"></div>
               <div class="team-row ${winner === 1 ? 'winner' : winner === 0 ? 'loser' : ''}">
                 <span class="team-name">${m.teams[1]}</span>
-                <span class="team-score">${m.scores[1]}</span>
+                <span class="team-score">${played ? m.scores[1] : '–'}</span>
               </div>
-              <div style="font-size:.7rem;color:rgba(255,255,255,.35);text-align:center;margin-top:6px;">${status}</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.35);text-align:center;margin-top:6px;">${played ? 'Final' : 'Not yet played'}</div>
             </div>
           `;
         }).join('');
         return `<div class="bracket-round"><div class="round-label">${round.name}</div>${matchesHtml}</div>`;
       }).join('');
       document.getElementById('bracketRounds').innerHTML = roundsHtml;
-    }
-
-    function autoUpdateScores(tournamentId) {
-      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
-      const state = bracketState[tournamentId];
-      
-      tournament.bracket.rounds.forEach((round, ri) => {
-        round.matches.forEach((match) => {
-          const m = state[match.id];
-          if (m.scores[0] === 0 && m.scores[1] === 0) {
-            const rand = Math.random();
-            m.scores[0] = Math.floor(Math.random() * 4);
-            m.scores[1] = Math.floor(Math.random() * 4);
-            while (m.scores[0] === m.scores[1]) {
-              m.scores[1] = Math.floor(Math.random() * 4);
-            }
-          }
-        });
-      });
-      
-      advanceBracket(tournamentId);
-      renderBracketRounds(tournamentId);
-    }
-
-    function advanceBracket(tournamentId) {
-      const tournament = TOURNAMENTS.find(t => t.id === tournamentId);
-      const state = bracketState[tournamentId];
-      const rounds = tournament.bracket.rounds;
-      for (let i = 0; i < rounds.length - 1; i++) {
-        const currentRound = rounds[i].matches;
-        const nextRound = rounds[i + 1].matches;
-        currentRound.forEach((match, idx) => {
-          const m = state[match.id];
-          if (m.scores[0] === 0 && m.scores[1] === 0) return;
-          const winner = m.scores[0] > m.scores[1] ? m.teams[0] : m.teams[1];
-          const nextMatchIdx = Math.floor(idx / 2);
-          const teamSlot = idx % 2;
-          if (nextRound[nextMatchIdx]) {
-            const nextMatch = state[nextRound[nextMatchIdx].id];
-            if (nextMatch) {
-              nextMatch.teams[teamSlot] = winner;
-            }
-          }
-        });
-      }
     }
 
     document.getElementById('bracketModal').addEventListener('click', (e) => {

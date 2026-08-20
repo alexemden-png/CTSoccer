@@ -273,7 +273,8 @@
     }
 
     // Build the local ctsoccer_user record from a Firestore users/{uid} doc,
-    // preserving any locally-cached fields (like followedClubs) this browser already had.
+    // preferring server data (so e.g. followed clubs show up on a new device)
+    // but falling back to whatever this browser already had locally cached.
     function userFromFirestoreDoc(doc, email, localMatch) {
       const d = doc.data() || {};
       return {
@@ -282,7 +283,7 @@
         email, role: d.role || (localMatch && localMatch.role) || 'fan',
         username: d.username || null, bio: d.bio || '', location: d.location || '',
         joined: d.joined || (localMatch && localMatch.joined) || new Date().toISOString(),
-        followedClubs: (localMatch && localMatch.followedClubs) || [],
+        followedClubs: d.followedClubs || (localMatch && localMatch.followedClubs) || [],
         notifications: localMatch && localMatch.notifications !== undefined ? localMatch.notifications : true,
         stats: (localMatch && localMatch.stats) || { goals: 0, assists: 0, appearances: 0, rating: '—' },
         firebaseUid: doc.id,

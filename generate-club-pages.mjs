@@ -310,6 +310,7 @@ function pageHtml(club) {
 
     <div style="text-align:center;padding:20px 0 48px;">
       <a href="../club.html?id=${encodeURIComponent(club.id)}" class="btn-primary">Follow ${esc(club.name)} on CT Soccer &rarr;</a>
+      <a href="../suggest.html?type=correction&club=${encodeURIComponent(club.name)}" style="display:inline-block;margin-left:12px;padding:11px 22px;border-radius:9px;border:1.5px solid rgba(255,255,255,.14);color:rgba(255,255,255,.55);text-decoration:none;font-size:.9rem;font-weight:600;">Suggest a correction</a>
     </div>
   </div>
 

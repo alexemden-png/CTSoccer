@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+  <meta charset="UTF-8">
+  <script src="theme.js"></script>
+  <script src="cookie-consent.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>What's New — CT Soccer</title>
+  <meta name="description" content="Recent updates and new features added to CT Soccer, in reverse chronological order.">
+  <link rel="canonical" href="https://ctsoccerhub.com/whats-new.html">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy:     #0D1B2A;
+      --navy-800: #111f31;
+      --navy-700: #162338;
+      --accent:   #2B7CE9;
+      --accent-lt:#5BA3F5;
+      --muted:    rgba(255,255,255,.55);
+      --border:   rgba(255,255,255,.08);
+    }
+    html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
+    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 28px; }
+    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+    .doc { max-width: 720px; margin: 0 auto; padding: 56px 24px 100px; }
+    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
+    .doc .intro { font-size: .98rem; line-height: 1.8; color: var(--muted); margin-bottom: 44px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+
+    .month-group { margin-bottom: 40px; }
+    .month-label { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 16px; }
+    .entry-list { display: flex; flex-direction: column; gap: 4px; }
+    .entry { display: flex; gap: 16px; padding: 16px 18px; background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; }
+    .entry-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1.3; }
+    .entry-title { font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .entry-desc { font-size: .85rem; line-height: 1.65; color: var(--muted); }
+    .entry-tag { display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; margin-bottom: 6px; }
+    .tag-feature { background: rgba(43,124,233,.15); color: var(--accent-lt); border: 1px solid rgba(43,124,233,.25); }
+    .tag-improvement { background: rgba(92,221,139,.12); color: #5CDD8B; border: 1px solid rgba(92,221,139,.2); }
+    .tag-fix { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+
+    .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
+    .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .mobile-bottom-item svg { width: 17px; height: 17px; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 88px; }
+      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
+      .nav-inner > div { width: 100%; justify-content: space-between; }
+      .nav-inner > div > a.nav-link { display: none; }
+      .nav-inner > div > a { font-size: .75rem; }
+      .mobile-bottom-nav { display: flex !important; }
+      .entry { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a class="mobile-bottom-item" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5 9.5V20h14V9.5"/></svg>
+      Home
+    </a>
+    <a class="mobile-bottom-item" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Clubs
+    </a>
+    <a class="mobile-bottom-item" href="news.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      News
+    </a>
+    <a class="mobile-bottom-item" href="account.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </a>
+  </nav>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
+          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:28px;">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="tournaments.html" class="nav-link">Tournaments</a>
+        <a href="news.html" class="nav-link">News</a>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+        <a href="account.html" class="btn-primary">My Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="doc">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
+      <span style="color:rgba(255,255,255,.2);">/</span>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">What's New</span>
+    </div>
+
+    <h1>What's New</h1>
+    <p class="intro">
+      Recent updates and new features on CT Soccer, newest first. This page is updated by hand as things ship —
+      if something looks missing, it probably just hasn't been added here yet.
+    </p>
+
+    <div class="month-group">
+      <div class="month-label">August 2026</div>
+      <div class="entry-list">
+        <div class="entry">
+          <div class="entry-icon">🔔</div>
+          <div>
+            <span class="entry-tag tag-feature">New</span>
+            <div class="entry-title">Notifications for clubs you follow</div>
+            <div class="entry-desc">Following a club now syncs to your account, and a notification bell on your Dashboard and Account page lets you know when a club you follow has a new match result posted.</div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">🛡️</div>
+          <div>
+            <span class="entry-tag tag-improvement">Improved</span>
+            <div class="entry-title">Team Manager access now requires approval</div>
+            <div class="entry-desc">Requesting to manage a club's match results and roster now goes through a review step instead of being granted instantly, so match results stay trustworthy.</div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">👥</div>
+          <div>
+            <span class="entry-tag tag-feature">New</span>
+            <div class="entry-title">Member directory (People)</div>
+            <div class="entry-desc">Search and browse other players, coaches, and fans on CT Soccer, filter by role or club, and follow the people you want to keep up with — only public profile info is ever shown.</div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">⚽</div>
+          <div>
+            <span class="entry-tag tag-feature">New</span>
+            <div class="entry-title">Team Manager match result submissions</div>
+            <div class="entry-desc">Approved Team Managers can now submit real match results for their club, visible to anyone browsing that club's page.</div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-icon">☁️</div>
+          <div>
+            <span class="entry-tag tag-improvement">Improved</span>
+            <div class="entry-title">Accounts moved to the cloud</div>
+            <div class="entry-desc">Accounts, profiles, and club follows are now stored server-side instead of only in your browser — sign in from any device and everything is right where you left it.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:24px;text-align:center;">
+    <p style="font-size:.8rem;color:rgba(255,255,255,.25);">
+      <a href="index.html" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.25)'">Home</a>
+      &middot;
+      <a href="about.html" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.25)'">About</a>
+      &middot;
+      <a href="privacy-policy.html" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.25)'">Privacy Policy</a>
+    </p>
+  </div>
+</body>
+</html>
