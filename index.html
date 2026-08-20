@@ -32,6 +32,15 @@
     }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    /* Subtle dark-mode-only grain/grid texture reads as a muddy visible pattern once
+       inverted rather than the near-invisible depth cue it's meant to be — hide it. */
+    html[data-theme="light"] .noise::before,
+    html[data-theme="light"] .grid-bg { display: none; }
+    /* The hero canvas draws its own colors directly (deliberately excluded from the
+       page-wide invert filter, like photos/video, so it doesn't render as a negative)
+       — but its green glow orbs were tuned to sit on a dark background and read as a
+       muddy tinted wash on light. Purely decorative, so just hide it in light mode. */
+    html[data-theme="light"] #hero-shader { display: none; }
 
     *, *::before, *::after { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 

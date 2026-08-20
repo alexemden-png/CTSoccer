@@ -23,6 +23,10 @@
     }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    /* Club color badges use the club's own brand hex as solid text on a faint
+       tint of that same hex — low contrast even in dark mode, and the invert
+       filter makes it worse. Force a safe, always-legible color in light mode. */
+    html[data-theme="light"] .club-badge-abbr { filter: invert(1) hue-rotate(180deg) !important; color: #0D1B2A !important; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
     nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
@@ -189,7 +193,7 @@
   <script>
     document.getElementById('club-partners').innerHTML = CT_CLUBS.map(c => `
       <a href="club.html?id=${c.id}" class="p-card">
-        <div class="p-logo" style="background:${c.primary}22;border:1.5px solid ${c.primary}55;color:${c.primary};">${c.abbr}</div>
+        <div class="p-logo club-badge-abbr" style="background:${c.primary}22;border:1.5px solid ${c.primary}55;color:${c.primary};">${c.abbr}</div>
         <div>
           <span class="badge badge-club">${c.leagueShort}</span>
           <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">${c.name}</h3>

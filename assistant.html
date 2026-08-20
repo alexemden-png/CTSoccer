@@ -17,6 +17,10 @@
     :root { --navy:#0D1B2A; --navy-800:#162236; --navy-700:#1D2E47; --accent:#2B7CE9; --accent-lt:#5BA3FF; --silver:#8BA4BC; --silver-lt:#C8D8E8; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    /* Club color badges use the club's own brand hex as solid text on a faint
+       tint of that same hex — low contrast even in dark mode, and the invert
+       filter makes it worse. Force a safe, always-legible color in light mode. */
+    html[data-theme="light"] .club-badge-abbr { filter: invert(1) hue-rotate(180deg) !important; color: #0D1B2A !important; }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
@@ -295,7 +299,7 @@
       const sub = c.type === 'youth' ? `${c.leagueShort} &middot; ${(c.ageGroups||[]).slice(0,4).join(', ')}${(c.ageGroups||[]).length>4?'…':''}` : `${c.leagueShort} &middot; ${c.league}`;
       return `
         <a href="club.html?id=${c.id}" class="rec-card">
-          <div style="width:44px;height:44px;border-radius:10px;background:${c.primary}22;border:1.5px solid ${c.primary}55;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:${c.primary};flex-shrink:0;">${c.abbr}</div>
+          <div class="club-badge-abbr" style="width:44px;height:44px;border-radius:10px;background:${c.primary}22;border:1.5px solid ${c.primary}55;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:${c.primary};flex-shrink:0;">${c.abbr}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:.9rem;font-weight:800;color:#fff;">${c.name}</div>
             <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${c.city}, CT &middot; ${sub}</div>

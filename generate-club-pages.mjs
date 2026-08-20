@@ -208,6 +208,10 @@ function pageHtml(club) {
     :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    /* Club color badges use the club's own brand hex as solid text on a faint
+       tint of that same hex — low contrast even in dark mode, and the invert
+       filter makes it worse. Force a safe, always-legible color in light mode. */
+    html[data-theme="light"] .club-badge-abbr { filter: invert(1) hue-rotate(180deg) !important; color: #0D1B2A !important; }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     a { color: inherit; }
@@ -275,7 +279,7 @@ function pageHtml(club) {
     <div style="padding:20px 0 32px;border-bottom:1px solid var(--border);margin-bottom:28px;">
       <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
         <div style="width:72px;height:72px;border-radius:16px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span style="font-size:1.2rem;font-weight:900;color:${club.primary};letter-spacing:.02em;">${esc(club.abbr)}</span>
+          <span class="club-badge-abbr" style="font-size:1.2rem;font-weight:900;color:${club.primary};letter-spacing:.02em;">${esc(club.abbr)}</span>
         </div>
         <div style="flex:1;min-width:200px;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
