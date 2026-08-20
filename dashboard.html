@@ -491,15 +491,22 @@
           <div id="dir-body"></div>
         </div>
 
-        <!-- CJSA CLUB CONTACT MODAL -->
-        <div id="dir-contact-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;" onclick="if(event.target.id==='dir-contact-modal')closeDirModal()">
-          <div id="dir-contact-modal-body" style="background:var(--navy-800);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:440px;width:100%;position:relative;"></div>
-        </div>
         <div style="margin-top:12px;font-size:.75rem;color:rgba(255,255,255,.25);text-align:center;">Source: Connecticut Junior Soccer Association (cjsa.org). Clubs marked with a star have full profiles on this platform.</div>
       </section>
 
     </div>
   </main>
+
+  <!-- CJSA CLUB CONTACT MODAL — deliberately kept outside <main>/the fade-in
+       sections. A section with the .fade-in class keeps a residual (identity)
+       transform after its entrance animation finishes ("animation: ... both"),
+       and any non-"none" transform on an ancestor creates a new containing
+       block for position:fixed descendants — which silently repositions this
+       modal relative to that (very tall, 162-row) section instead of the
+       viewport, pushing it thousands of pixels below the visible screen. -->
+  <div id="dir-contact-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;" onclick="if(event.target.id==='dir-contact-modal')closeDirModal()">
+    <div id="dir-contact-modal-body" style="background:var(--navy-800);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:440px;width:100%;position:relative;"></div>
+  </div>
 
   <script src="clubs-data.js"></script>
   <script src="cjsa-directory.js"></script>
