@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CT Soccer Hub Widget</title>
+<style>
+  :root {
+    --bg:#0D1B2A; --card:#162236; --border:rgba(255,255,255,.09); --text:#fff;
+    --muted:rgba(255,255,255,.45); --muted2:rgba(255,255,255,.28);
+    --accent:#2B7CE9; --accent-lt:#5BA3FF; --accent-tint:rgba(43,124,233,.14);
+    --win:#5CDD8B; --loss:#FF7070; --draw:#F5A800;
+  }
+  html[data-theme="light"] {
+    --bg:#ffffff; --card:#F5F7FA; --border:#E3E8EE; --text:#0D1B2A;
+    --muted:#5B6B7C; --muted2:#8A97A6;
+    --accent:#2B7CE9; --accent-lt:#1B63C4; --accent-tint:rgba(43,124,233,.08);
+    --win:#1E9E5A; --loss:#D93B3B; --draw:#B8790A;
+  }
+  * { box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html,body { margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+    font-size:13px; line-height:1.4;
+  }
+  a { color:inherit; }
+  .widget { display:flex; flex-direction:column; min-height:100vh; }
+  .hdr { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); }
+  .badge { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.68rem; flex-shrink:0; overflow:hidden; }
+  .badge img { width:100%; height:100%; object-fit:contain; }
+  .hdr-name { font-weight:800; font-size:.92rem; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hdr-sub { font-size:.7rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .body { flex:1; overflow-y:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--border); }
+  .row:last-child { border-bottom:none; }
+  .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .res-main { flex:1; min-width:0; font-size:.8rem; font-weight:700; }
+  .res-main .opp { font-weight:500; color:var(--muted); }
+  .res-sub { font-size:.66rem; color:var(--muted2); margin-top:2px; }
+  .res-score { font-weight:800; font-size:.85rem; flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:6px; padding:3px 9px; }
+  .pos { width:18px; flex-shrink:0; font-size:.72rem; font-weight:800; color:var(--muted2); text-align:center; }
+  .st-name { flex:1; min-width:0; font-size:.78rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .st-pts { flex-shrink:0; font-size:.72rem; font-weight:800; color:var(--muted); }
+  .row.self { background:var(--accent-tint); }
+  .row.self .st-name, .row.self .pos, .row.self .st-pts { color:var(--accent-lt); }
+  .updated { padding:7px 16px; font-size:.63rem; color:var(--muted2); border-bottom:1px solid var(--border); }
+  .empty { padding:28px 16px; text-align:center; color:var(--muted); font-size:.8rem; }
+  .ftr { display:flex; align-items:center; justify-content:center; gap:5px; padding:9px 16px; border-top:1px solid var(--border); background:var(--card); font-size:.7rem; font-weight:700; text-decoration:none; transition:opacity .15s; }
+  .ftr:hover { opacity:.75; }
+  .ftr strong { color:var(--accent-lt); }
+</style>
+<script>
+  // Set theme before first paint (no flash), and strictly as a whitelisted
+  // switch — the raw query string is never written into the page anywhere.
+  (function () {
+    var theme = new URLSearchParams(location.search).get('theme') === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+<body>
+  <div id="widget-root" class="widget"></div>
+
+  <script src="clubs-data.js"></script>
+  <script>
+    var params   = new URLSearchParams(location.search);
+    var clubId   = params.get('club');
+    var type     = params.get('type') === 'standings' ? 'standings' : 'results';
+    var showAll  = params.get('rows') === 'all';
+    var root     = document.getElementById('widget-root');
+
+    // `clubId` is used only as a lookup key into our own static data — it is
+    // never concatenated into HTML. Everything actually rendered below comes
+    // from the resolved club object (developer-authored data), not the URL.
+    var club = clubId ? getClubById(clubId) : null;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+      });
+    }
+
+    function badgeHtml(c) {
+      if (c.logo) {
+        return '<div class="badge" style="background:#fff;padding:3px;">' +
+          '<img src="' + esc(c.logo) + '" alt=""></div>';
+      }
+      // Solid brand-color chip with white text — club primaries in this
+      // dataset are all dark team colors, so this stays readable regardless
+      // of theme, unlike a tinted-background/colored-text badge would.
+      return '<div class="badge" style="background:' + c.primary + ';color:#fff;">' +
+        esc(c.abbr) + '</div>';
+    }
+
+    function profileUrl(c) {
+      return c.isDirectoryOnly ? ('club.html?id=' + encodeURIComponent(c.id)) : ('clubs/' + encodeURIComponent(c.id) + '.html');
+    }
+
+    function footerHtml(c) {
+      return '<a class="ftr" href="' + profileUrl(c) + '" target="_top" rel="noopener">' +
+        '⚽&nbsp;Powered by <strong>CT&nbsp;Soccer&nbsp;Hub</strong>&nbsp;→</a>';
+    }
+
+    function renderNotFound() {
+      root.innerHTML =
+        '<div class="body"><div class="empty">Club not found.</div></div>' +
+        '<a class="ftr" href="dashboard.html" target="_top" rel="noopener">⚽&nbsp;Powered by <strong>CT&nbsp;Soccer&nbsp;Hub</strong>&nbsp;→</a>';
+    }
+
+    function renderResults(c) {
+      var results = (c.recentResults || []).slice(0, 5);
+      var rowsHtml = results.length ? results.map(function (r) {
+        var color = r.result === 'W' ? 'var(--win)' : r.result === 'L' ? 'var(--loss)' : 'var(--draw)';
+        var isHome = r.home !== false;
+        var line = isHome
+          ? '<strong>' + esc(c.name) + '</strong> <span class="opp">vs ' + esc(r.opponent) + '</span>'
+          : '<span class="opp">' + esc(r.opponent) + ' vs</span> <strong>' + esc(c.name) + '</strong>';
+        return '<div class="row">' +
+          '<span class="dot" style="background:' + color + ';"></span>' +
+          '<div class="res-main">' + line +
+            '<div class="res-sub">' + esc(r.date) + (r.manager ? ' &middot; via team manager' : '') + '</div>' +
+          '</div>' +
+          '<div class="res-score">' + esc(r.score) + '</div>' +
+        '</div>';
+      }).join('') : '<div class="empty">No results available yet.</div>';
+
+      root.innerHTML =
+        '<div class="hdr">' + badgeHtml(c) +
+          '<div style="min-width:0;">' +
+            '<div class="hdr-name">' + esc(c.name) + '</div>' +
+            '<div class="hdr-sub">Recent Results &middot; ' + esc(c.leagueShort || c.league || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="body">' + rowsHtml + '</div>' +
+        footerHtml(c);
+    }
+
+    function renderStandings(c) {
+      var table = (typeof LEAGUE_STANDINGS !== 'undefined') ? LEAGUE_STANDINGS[c.id] : null;
+      if (!table) {
+        root.innerHTML =
+          '<div class="hdr">' + badgeHtml(c) +
+            '<div style="min-width:0;"><div class="hdr-name">' + esc(c.name) + '</div></div>' +
+          '</div>' +
+          '<div class="body"><div class="empty">Standings aren’t available for this club yet.</div></div>' +
+          footerHtml(c);
+        return;
+      }
+      var sorted = table.rows.slice().sort(function (a, b) {
+        return standingsRowPts(b, table.type) - standingsRowPts(a, table.type);
+      });
+      var selfIdx = sorted.findIndex(function (r) { return r.abbr === table.selfAbbr; });
+
+      var start = 0, end = sorted.length;
+      if (!showAll && sorted.length > 5) {
+        start = Math.max(0, selfIdx - 2);
+        end = Math.min(sorted.length, start + 5);
+        start = Math.max(0, end - 5);
+      }
+
+      var rowsHtml = sorted.slice(start, end).map(function (r, i) {
+        var pos = start + i + 1;
+        var isSelf = r.abbr === table.selfAbbr;
+        return '<div class="row' + (isSelf ? ' self' : '') + '">' +
+          '<div class="pos">' + pos + '</div>' +
+          '<div class="st-name">' + esc(r.name) + '</div>' +
+          '<div class="st-pts">' + standingsRowPts(r, table.type) + ' PTS</div>' +
+        '</div>';
+      }).join('');
+
+      root.innerHTML =
+        '<div class="hdr">' + badgeHtml(c) +
+          '<div style="min-width:0;">' +
+            '<div class="hdr-name">' + esc(c.name) + '</div>' +
+            '<div class="hdr-sub">' + esc(table.league) + (table.conference ? ' &middot; ' + esc(table.conference) : '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        (table.updated ? '<div class="updated">Updated ' + esc(table.updated) + '</div>' : '') +
+        '<div class="body">' + rowsHtml + '</div>' +
+        footerHtml(c);
+    }
+
+    if (!club) {
+      renderNotFound();
+    } else if (type === 'standings') {
+      renderStandings(club);
+    } else {
+      renderResults(club);
+    }
+  </script>
+</body>
+</html>
