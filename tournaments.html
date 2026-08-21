@@ -7,6 +7,7 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="tournaments-data.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tournaments — CT Soccer</title>
   <meta name="description" content="Browse CJSA and EDP youth soccer tournaments across Connecticut, with dates and age groups, all in one place.">
@@ -370,190 +371,6 @@
   </div>
 
   <script>
-    const TOURNAMENTS = [
-      {
-        id: 'cjsa-state-cup',
-        name: 'CJSA State Cup',
-        org: 'Connecticut Junior Soccer Association',
-        season: 'fall',
-        type: 'youth',
-        level: 'featured',
-        dates: 'September – November 2026',
-        location: 'Various venues across Connecticut',
-        description: 'The premier annual state championship for Connecticut youth soccer. Open to all CJSA member clubs. Teams compete through regional qualifying rounds before the final championship weekend.',
-        ageGroups: ['U9','U10','U11','U12','U13','U14','U15','U16','U17','U18','U19'],
-        registrationUrl: 'https://cjsa.org',
-        infoUrl: 'https://cjsa.org',
-        badgeLabel: 'CJSA Official',
-        badgeClass: 'badge-blue',        bracket: {
-          rounds: [
-            { name: 'Round 1', matches: [{id: 1, teams: ['Beachside SC', 'Yale FC'], scores: [0, 0]}, {id: 2, teams: ['Vale SC', 'Ole FC'], scores: [0, 0]}, {id: 3, teams: ['Ginga FC', 'Sporting CT'], scores: [0, 0]}, {id: 4, teams: ['FSA FC', 'CFC U19'], scores: [0, 0]}] },
-            { name: 'Semifinals', matches: [{id: 5, teams: ['TBD', 'TBD'], scores: [0, 0]}, {id: 6, teams: ['TBD', 'TBD'], scores: [0, 0]}] },
-            { name: 'Final', matches: [{id: 7, teams: ['TBD', 'TBD'], scores: [0, 0]}] }
-          ]
-        }      },
-      {
-        id: 'edp-cup',
-        name: 'EDP Cup',
-        org: 'Elite Development Platform',
-        season: 'spring',
-        type: 'youth',
-        level: 'featured',
-        dates: 'April – June 2026',
-        location: 'New England region (CT, MA, NY, NJ)',
-        description: 'The EDP Cup is the flagship tournament of the Elite Development Platform — one of the largest youth soccer organizations in the country. CT-based EDP clubs including Sporting CT, Vale SC, Ole FC, and others compete for regional and national berths.',
-        ageGroups: ['U9','U10','U11','U12','U13','U14','U15','U16','U17','U18','U19'],
-        registrationUrl: 'https://edpsoccer.com',
-        infoUrl: 'https://edpsoccer.com',
-        badgeLabel: 'EDP League',
-        badgeClass: 'badge-blue',
-      },
-      {
-        id: 'mls-next-cup',
-        name: 'MLS NEXT Cup',
-        org: 'MLS NEXT',
-        season: 'spring',
-        type: 'youth',
-        level: 'featured',
-        dates: 'June 2026',
-        location: 'National (CT teams travel)',
-        description: 'The MLS NEXT Cup is the national championship for MLS NEXT clubs — the top tier of youth development soccer in the United States. Connecticut clubs Beachside Soccer Club and Ginga FC compete in the MLS NEXT league and are eligible for the national cup.',
-        ageGroups: ['U13','U14','U15','U16','U17','U18','U19'],
-        registrationUrl: 'https://mlsnext.com',
-        infoUrl: 'https://mlsnext.com',
-        badgeLabel: 'MLS NEXT',
-        badgeClass: 'badge-green',
-      },
-      {
-        id: 'nutmeg-games',
-        name: 'Nutmeg Games — Soccer',
-        org: 'Connecticut Amateur Sports Foundation',
-        season: 'spring',
-        type: 'adult',
-        level: 'open',
-        dates: 'June 2026',
-        location: 'New Britain, CT',
-        description: "Connecticut's annual multi-sport festival modeled on the Olympic Games. The soccer competition draws amateur adult players and teams from across the state. Open enrollment — individuals can register to be placed on a team.",
-        ageGroups: ['Adults (18+)', 'Masters (30+)', 'Senior (40+)'],
-        registrationUrl: 'https://nutmeggames.com',
-        infoUrl: 'https://nutmeggames.com',
-        badgeLabel: 'Amateur Open',
-        badgeClass: 'badge-gold',
-      },
-      {
-        id: 'ecnl-girls-regional',
-        name: 'ECNL Girls Regional League Events',
-        org: 'Elite Clubs National League',
-        season: 'fall',
-        type: 'youth',
-        level: 'featured',
-        dates: 'October – December 2026',
-        location: 'Northeast region',
-        description: 'The ECNL Girls Regional League hosts showcase events and playoff competitions throughout the fall season. Connecticut Football Club (CFC) and FSA FC are CT-based ECNL members. Top performers earn advancement to the ECNL National Event.',
-        ageGroups: ['U13','U14','U15','U16','U17','U18','U19'],
-        registrationUrl: 'https://theecnl.com',
-        infoUrl: 'https://theecnl.com',
-        badgeLabel: 'ECNL',
-        badgeClass: 'badge-blue',
-      },
-      {
-        id: 'beachside-tournament',
-        name: 'Beachside Soccer Club Tournament',
-        org: 'Beachside Soccer Club',
-        season: 'fall',
-        type: 'youth',
-        level: 'youth',
-        dates: 'September / October 2026',
-        location: 'Gallagher Field / Strawberry Hill, Norwalk, CT',
-        description: 'Annual invitational tournament hosted by Beachside Soccer Club — one of CT\'s premier MLS NEXT clubs. Attracts competitive youth teams from across New England. Contact the club directly for registration.',
-        ageGroups: ['U11','U12','U13','U14','U15','U16'],
-        registrationUrl: 'https://beachsidesoccer.org',
-        infoUrl: 'https://beachsidesoccer.org',
-        badgeLabel: 'Club Invitational',
-        badgeClass: 'badge-gray',
-      },
-      {
-        id: 'ct-open-cup',
-        name: 'CT Open Cup',
-        org: 'Connecticut Junior Soccer Association',
-        season: 'spring',
-        type: 'youth',
-        level: 'youth',
-        dates: 'May 2026',
-        location: 'Various CT venues',
-        description: 'Open cup competition run by CJSA for youth clubs statewide. Any CJSA-registered team may enter regardless of league affiliation. A great first tournament experience for developing clubs.',
-        ageGroups: ['U9','U10','U11','U12','U13','U14','U15','U16','U17'],
-        registrationUrl: 'https://cjsa.org',
-        infoUrl: 'https://cjsa.org',
-        badgeLabel: 'CJSA',
-        badgeClass: 'badge-blue',
-      },
-      {
-        id: 'capelli-international',
-        name: 'Capelli Sport International Tour',
-        org: 'Capelli Sport / Beachside SC',
-        season: 'summer',
-        type: 'youth',
-        level: 'youth',
-        dates: 'Summer 2026 (Denmark)',
-        location: 'Denmark (International)',
-        description: 'International tour and tournament co-organized by Capelli Sport and Beachside Soccer Club. CT youth players get the opportunity to compete abroad and experience international soccer culture. Travel details arranged through Beachside SC.',
-        ageGroups: ['U13','U14','U15','U16','U17'],
-        registrationUrl: 'https://beachsidesoccer.org',
-        infoUrl: 'https://beachsidesoccer.org',
-        badgeLabel: 'International',
-        badgeClass: 'badge-gold',
-      },
-      {
-        id: 'cjsa-indoor-state-cup',
-        name: 'CJSA Indoor State Cup',
-        org: 'Connecticut Junior Soccer Association',
-        season: 'fall',
-        type: 'youth',
-        level: 'youth',
-        dates: 'December 2026 – January 2027',
-        location: 'Indoor facilities across CT',
-        description: 'The winter edition of the CJSA State Cup played on indoor fields. A competitive showcase for CT youth players during the off-season, helping players maintain match fitness and skill development.',
-        ageGroups: ['U9','U10','U11','U12','U13','U14'],
-        registrationUrl: 'https://cjsa.org',
-        infoUrl: 'https://cjsa.org',
-        badgeLabel: 'Indoor',
-        badgeClass: 'badge-gray',
-      },
-      {
-        id: 'yankee-invitational',
-        name: 'Yankee United Invitational',
-        org: 'Yankee United FC',
-        season: 'spring',
-        type: 'youth',
-        level: 'youth',
-        dates: 'April 2026',
-        location: 'Enfield, CT',
-        description: 'Annual spring invitational hosted by Yankee United FC in Enfield. A well-attended regional tournament drawing teams from across New England with multiple fields and age group divisions.',
-        ageGroups: ['U10','U11','U12','U13','U14','U15'],
-        registrationUrl: 'https://yankeeunited.com',
-        infoUrl: 'https://yankeeunited.com',
-        badgeLabel: 'Club Invitational',
-        badgeClass: 'badge-gray',
-      },
-      {
-        id: 'usl-c-playoffs',
-        name: 'USL Championship Playoffs',
-        org: 'USL Championship',
-        season: 'fall',
-        type: 'adult',
-        level: 'featured',
-        dates: 'October – November 2026',
-        location: 'Trinity Health Stadium, Hartford, CT (+ travel)',
-        description: 'Hartford Athletic FC\'s postseason campaign in the USL Championship — the second tier of American professional soccer. Home playoff games are played at Trinity Health Stadium. Buy tickets through Hartford Athletic directly.',
-        ageGroups: ['Professional'],
-        registrationUrl: 'https://hartfordathletic.com/tickets',
-        infoUrl: 'https://hartfordathletic.com',
-        badgeLabel: 'Professional',
-        badgeClass: 'badge-blue',
-      },
-    ];
-
     let activeFilter = 'all';
 
     function filterTournaments(filter, btn) {
@@ -772,6 +589,7 @@
             <li><a href="coaching-clinics.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Coaching Clinics</a></li>
             <li><a href="clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Clubs by Town</a></li>
             <li><a href="compare.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Compare Clubs</a></li>
+            <li><a href="events.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Events</a></li>
           </ul>
         </div>
 
