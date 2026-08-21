@@ -491,7 +491,7 @@
             <div style="font-size:.85rem;font-weight:800;color:#fff;">Two-Factor Authentication</div>
             <span id="tfa-badge" style="font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);">Disabled</span>
           </div>
-          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:14px;">Add an extra layer of security — after your password, you'll need a code from an authenticator app to sign in.</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:14px;">Add an extra layer of security — after your password, you'll need a code from an authenticator app to sign in. We're building this properly before turning it on, so it isn't available yet.</div>
           <div id="tfa-actions"></div>
         </div>
 
@@ -975,6 +975,11 @@
   }
 
   // ---- Two-Factor Authentication ----
+  // Not real TOTP yet — there's no RFC 6238 verification and login.html never
+  // challenges for a code, so enabling this stored a secret/backup codes
+  // without adding any actual login protection. Gated off (same pattern as
+  // STORAGE_ENABLED in firebase-config.js) until it's a real implementation.
+  const TFA_ENABLED = false;
   function randomBase32(len) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
     let out = '';
@@ -991,6 +996,14 @@
     const badge = document.getElementById('tfa-badge');
     const actions = document.getElementById('tfa-actions');
     if (!badge || !actions) return;
+    if (!TFA_ENABLED) {
+      badge.textContent = 'Coming Soon';
+      badge.style.background = 'rgba(255,255,255,.08)';
+      badge.style.color = 'rgba(255,255,255,.4)';
+      badge.style.borderColor = 'rgba(255,255,255,.12)';
+      actions.innerHTML = `<button class="btn-outline" disabled style="width:100%;justify-content:center;opacity:.5;cursor:default;">Enable 2FA</button>`;
+      return;
+    }
     const enabled = !!(user.twoFactor && user.twoFactor.enabled);
     badge.textContent = enabled ? 'Enabled' : 'Disabled';
     badge.style.background = enabled ? 'rgba(92,221,139,.12)' : 'rgba(255,255,255,.08)';
