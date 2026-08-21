@@ -76,8 +76,8 @@ function rowHtml(r) {
   const href = r.richId ? `clubs/${esc(r.richId)}.html` : esc(r.website);
   const external = !r.richId;
   return `
-        <li style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;">
-          <a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''} style="font-size:.92rem;font-weight:700;color:#fff;text-decoration:none;">${esc(r.name)}</a>
+        <li style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.18)';this.style.background='#182740'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--navy-800)'">
+          <a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''} style="font-size:.92rem;font-weight:700;color:#fff;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--accent-lt)'" onmouseout="this.style.color='#fff'">${esc(r.name)}</a>
           ${r.richId ? `<span style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-lt);background:rgba(43,124,233,.12);border:1px solid rgba(43,124,233,.22);padding:3px 8px;border-radius:5px;flex-shrink:0;">Full Profile</span>` : `<svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`}
         </li>`;
 }
@@ -136,9 +136,12 @@ function pageHtml() {
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     a { color: inherit; }
+    .btn-primary{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%);color:#fff;font-weight:700;font-size:.85rem;padding:9px 18px;border-radius:9px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .18s,transform .18s;box-shadow:0 4px 14px rgba(43,124,233,.35);}
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px);}
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 2px; border-radius: 4px; }
     ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
     @media (max-width: 640px) {
       body { padding-bottom: 88px; }
@@ -204,7 +207,7 @@ function pageHtml() {
     </div>
 
     <div style="text-align:center;padding:16px 0 48px;">
-      <a href="dashboard.html" style="display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:10px;text-decoration:none;">Browse the Full Directory &rarr;</a>
+      <a href="dashboard.html" class="btn-primary">Browse the Full Directory &rarr;</a>
     </div>
   </div>
 
