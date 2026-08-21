@@ -19,16 +19,16 @@
 
   <style>
     :root {
-      --navy:      #0B1D14;
-      --navy-800:  #102219;
-      --navy-700:  #162D20;
-      --accent:    #00AE5B;
-      --accent-lt: #33E582;
-      --silver:    #72A888;
-      --silver-lt: #B0E8CA;
-      --silver-bg: #D4F0E5;
+      --navy:      #0D1B2A;
+      --navy-800:  #162236;
+      --navy-700:  #1D2E47;
+      --accent:    #2B7CE9;
+      --accent-lt: #5BA3FF;
+      --silver:    #8BA4BC;
+      --silver-lt: #C8D8E8;
+      --silver-bg: #DCE8F8;
       --border:    rgba(255,255,255,.07);
-      --muted:     rgba(255,255,255,.45);
+      --muted:     rgba(255,255,255,.42);
     }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
@@ -54,13 +54,13 @@
 
     .btn-primary {
       display: inline-flex; align-items: center; gap: 8px;
-      background: var(--accent); color: #fff; font-weight: 700; font-size: .9375rem;
+      background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-weight: 700; font-size: .9375rem;
       padding: 13px 28px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0,174,91,.38), 0 1px 3px rgba(0,174,91,.2);
+      box-shadow: 0 4px 18px rgba(43,124,233,.38), 0 1px 3px rgba(43,124,233,.2);
       transition: opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
       font-family: 'Montserrat', Arial, sans-serif;
     }
-    .btn-primary:hover  { opacity: .86; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,174,91,.48); }
+    .btn-primary:hover  { opacity: .86; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(43,124,233,.48); }
     .btn-primary:active { transform: translateY(0); }
     .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -89,7 +89,7 @@
     /* Below this, the 10-link row is too wide to force Sign In / Register Now onto one
        line without pushing them off-screen — let them wrap there instead. */
     @media (min-width: 1300px) {
-      #nav-signin, #nav-register { white-space: nowrap; }
+      #nav-register, #nav-auth-btn { white-space: nowrap; }
     }
     .nav-link {
       font-size: .875rem; font-weight: 500; color: rgba(255,255,255,.6);
@@ -108,11 +108,11 @@
 
     .glow-accent {
       position: absolute; border-radius: 50%; pointer-events: none;
-      background: radial-gradient(circle, rgba(0,174,91,.2) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(43,124,233,.2) 0%, transparent 70%);
     }
     .glow-silver {
       position: absolute; border-radius: 50%; pointer-events: none;
-      background: radial-gradient(circle, rgba(114,168,136,.1) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(139,164,188,.1) 0%, transparent 70%);
     }
 
     .grid-bg {
@@ -346,10 +346,9 @@
 
       <div style="display:flex;align-items:center;gap:10px;" id="nav-auth-container">
         <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
-        <a href="login.html" class="nav-link nav-desktop" style="font-size:.85rem;" id="nav-signin">Sign In</a>
         <a href="#join" class="btn-primary" style="padding:9px 18px;font-size:.85rem;" id="nav-cta-mobile">Register Now</a>
         <a href="#join" class="btn-primary nav-desktop" style="padding:9px 18px;font-size:.85rem;display:inline-flex;" id="nav-register">Register Now</a>
-        <a href="tournaments.html" class="btn-primary" style="padding:9px 18px;font-size:.85rem;display:none;" id="nav-tournaments">Tournaments</a>
+        <a href="login.html" class="btn-primary" style="padding:9px 18px;font-size:.85rem;" id="nav-auth-btn">Sign In</a>
         <button id="menu-btn"
                 style="display:none;padding:8px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer;"
                 aria-label="Toggle menu">
@@ -379,21 +378,18 @@
   <script>
     function updateNavbarAuth() {
       const user = ctsoccerGetUser();
-      const signinBtn = document.getElementById('nav-signin');
       const registerBtn = document.getElementById('nav-register');
       const mobileCtaBtn = document.getElementById('nav-cta-mobile');
-      const tournamentsBtn = document.getElementById('nav-tournaments');
-      
+      const authBtn = document.getElementById('nav-auth-btn');
+
       if (user) {
-        if (signinBtn) signinBtn.style.display = 'none';
         if (registerBtn) registerBtn.style.display = 'none';
         if (mobileCtaBtn) mobileCtaBtn.style.display = 'none';
-        if (tournamentsBtn) tournamentsBtn.style.display = 'inline-flex';
+        if (authBtn) { authBtn.textContent = 'Dashboard'; authBtn.href = 'dashboard.html'; }
       } else {
-        if (signinBtn) signinBtn.style.display = 'inline-block';
         if (registerBtn) registerBtn.style.display = 'inline-flex';
         if (mobileCtaBtn) mobileCtaBtn.style.display = 'inline-flex';
-        if (tournamentsBtn) tournamentsBtn.style.display = 'none';
+        if (authBtn) { authBtn.textContent = 'Sign In'; authBtn.href = 'login.html'; }
       }
     }
     updateNavbarAuth();
@@ -409,7 +405,7 @@
 
     <div style="position:relative;z-index:3;max-width:900px;width:100%;margin:0 auto;padding:88px 24px 0;text-align:center;">
 
-      <div class="au ad1" style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,174,91,.1);border:1px solid rgba(0,174,91,.22);border-radius:100px;padding:6px 16px;font-size:.8125rem;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:32px;letter-spacing:.01em;">
+      <div class="au ad1" style="display:inline-flex;align-items:center;gap:8px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.22);border-radius:100px;padding:6px 16px;font-size:.8125rem;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:32px;letter-spacing:.01em;">
         <span style="width:7px;height:7px;border-radius:50%;background:var(--silver-lt);flex-shrink:0;"></span>
         Connecticut's Premier Soccer Community
       </div>
@@ -432,7 +428,7 @@
       </div>
 
       <!-- Browser mockup -->
-      <div class="au ad5 browser" style="max-width:880px;margin:0 auto;box-shadow:0 0 80px rgba(0,174,91,.14),0 40px 80px rgba(0,0,0,.55);">
+      <div class="au ad5 browser" style="max-width:880px;margin:0 auto;box-shadow:0 0 80px rgba(43,124,233,.14),0 40px 80px rgba(0,0,0,.55);">
         <div class="browser-bar">
           <div class="b-dot" style="background:#ff5f57;"></div>
           <div class="b-dot" style="background:#ffbd2e;"></div>
@@ -457,11 +453,11 @@
                 <div style="font-size:1.7rem;font-weight:800;color:#fff;letter-spacing:-.035em;line-height:1;">24</div>
                 <div style="font-size:.7rem;color:rgba(255,255,255,.36);margin-top:3px;">Players</div>
               </div>
-              <div style="background:rgba(0,174,91,.1);border:1px solid rgba(0,174,91,.2);border-radius:11px;padding:15px;">
+              <div style="background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.2);border-radius:11px;padding:15px;">
                 <div style="font-size:1.7rem;font-weight:800;color:var(--accent-lt);letter-spacing:-.035em;line-height:1;">8W-2L</div>
                 <div style="font-size:.7rem;color:rgba(255,255,255,.36);margin-top:3px;">Season Record</div>
               </div>
-              <div style="background:rgba(114,168,136,.08);border:1px solid rgba(114,168,136,.16);border-radius:11px;padding:15px;">
+              <div style="background:rgba(139,164,188,.08);border:1px solid rgba(139,164,188,.16);border-radius:11px;padding:15px;">
                 <div style="font-size:1.7rem;font-weight:800;color:var(--silver-lt);letter-spacing:-.035em;line-height:1;">#1</div>
                 <div style="font-size:.7rem;color:rgba(255,255,255,.36);margin-top:3px;">Division Rank</div>
               </div>
@@ -469,12 +465,12 @@
             <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px;flex:1;">
               <div style="font-size:.7rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;">Season Performance</div>
               <div style="display:flex;align-items:flex-end;gap:8px;height:100px;">
-                <div style="flex:1;background:rgba(0,174,91,.22);border-radius:4px 4px 0 0;height:55%;"></div>
-                <div style="flex:1;background:rgba(0,174,91,.22);border-radius:4px 4px 0 0;height:72%;"></div>
-                <div style="flex:1;background:rgba(0,174,91,.22);border-radius:4px 4px 0 0;height:40%;"></div>
-                <div style="flex:1;background:rgba(0,174,91,.22);border-radius:4px 4px 0 0;height:88%;"></div>
-                <div style="flex:1;background:rgba(0,174,91,.22);border-radius:4px 4px 0 0;height:65%;"></div>
-                <div style="flex:1;background:var(--accent);border-radius:4px 4px 0 0;height:100%;box-shadow:0 0 12px rgba(0,174,91,.5);"></div>
+                <div style="flex:1;background:rgba(43,124,233,.22);border-radius:4px 4px 0 0;height:55%;"></div>
+                <div style="flex:1;background:rgba(43,124,233,.22);border-radius:4px 4px 0 0;height:72%;"></div>
+                <div style="flex:1;background:rgba(43,124,233,.22);border-radius:4px 4px 0 0;height:40%;"></div>
+                <div style="flex:1;background:rgba(43,124,233,.22);border-radius:4px 4px 0 0;height:88%;"></div>
+                <div style="flex:1;background:rgba(43,124,233,.22);border-radius:4px 4px 0 0;height:65%;"></div>
+                <div style="flex:1;background:var(--accent);border-radius:4px 4px 0 0;height:100%;box-shadow:0 0 12px rgba(43,124,233,.5);"></div>
               </div>
             </div>
           </div>
@@ -482,7 +478,7 @@
       </div>
     </div>
 
-    <div style="position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:80%;height:260px;background:radial-gradient(ellipse at center bottom,rgba(0,174,91,.12) 0%,rgba(114,168,136,.04) 45%,transparent 75%);pointer-events:none;z-index:4;"></div>
+    <div style="position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:80%;height:260px;background:radial-gradient(ellipse at center bottom,rgba(43,124,233,.12) 0%,rgba(139,164,188,.04) 45%,transparent 75%);pointer-events:none;z-index:4;"></div>
   </section>
 
 
@@ -503,7 +499,7 @@
           <div style="margin-top:8px;">
             <div class="check-item reveal rd1">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="flex-shrink:0;margin-top:1px;">
-                <circle cx="11" cy="11" r="10" fill="rgba(0,174,91,.12)" stroke="rgba(0,174,91,.32)"/>
+                <circle cx="11" cy="11" r="10" fill="rgba(43,124,233,.12)" stroke="rgba(43,124,233,.32)"/>
                 <path d="M7 11l3 3 5-5" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <div>
@@ -513,7 +509,7 @@
             </div>
             <div class="check-item reveal rd2">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="flex-shrink:0;margin-top:1px;">
-                <circle cx="11" cy="11" r="10" fill="rgba(0,174,91,.12)" stroke="rgba(0,174,91,.32)"/>
+                <circle cx="11" cy="11" r="10" fill="rgba(43,124,233,.12)" stroke="rgba(43,124,233,.32)"/>
                 <path d="M7 11l3 3 5-5" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <div>
@@ -523,7 +519,7 @@
             </div>
             <div class="check-item reveal rd3">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="flex-shrink:0;margin-top:1px;">
-                <circle cx="11" cy="11" r="10" fill="rgba(0,174,91,.12)" stroke="rgba(0,174,91,.32)"/>
+                <circle cx="11" cy="11" r="10" fill="rgba(43,124,233,.12)" stroke="rgba(43,124,233,.32)"/>
                 <path d="M7 11l3 3 5-5" stroke="var(--accent-lt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <div>
@@ -537,7 +533,7 @@
         </div>
 
         <div class="reveal rd1">
-          <div class="browser" style="box-shadow:0 0 60px rgba(0,174,91,.1),0 28px 64px rgba(0,0,0,.42);">
+          <div class="browser" style="box-shadow:0 0 60px rgba(43,124,233,.1),0 28px 64px rgba(0,0,0,.42);">
             <div class="browser-bar">
               <div class="b-dot" style="background:#ff5f57;"></div>
               <div class="b-dot" style="background:#ffbd2e;"></div>
@@ -552,14 +548,14 @@
                     <div style="font-size:.875rem;font-weight:600;color:#fff;">Hartford United vs Stamford FC</div>
                     <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:3px;">Jun 5 . Dillon Stadium</div>
                   </div>
-                  <span style="background:rgba(114,168,136,.1);border:1px solid rgba(114,168,136,.22);color:var(--silver-lt);border-radius:6px;font-size:.68rem;font-weight:700;padding:4px 10px;white-space:nowrap;">Upcoming</span>
+                  <span style="background:rgba(139,164,188,.1);border:1px solid rgba(139,164,188,.22);color:var(--silver-lt);border-radius:6px;font-size:.68rem;font-weight:700;padding:4px 10px;white-space:nowrap;">Upcoming</span>
                 </div>
                 <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;">
                   <div>
                     <div style="font-size:.875rem;font-weight:600;color:#fff;">New Haven SC vs Bridgeport City</div>
                     <div style="font-size:.72rem;color:rgba(255,255,255,.32);margin-top:3px;">Jun 7 . Yale Bowl</div>
                   </div>
-                  <span style="background:rgba(0,174,91,.12);border:1px solid rgba(0,174,91,.22);color:var(--accent-lt);border-radius:6px;font-size:.68rem;font-weight:700;padding:4px 10px;white-space:nowrap;">Register</span>
+                  <span style="background:rgba(43,124,233,.12);border:1px solid rgba(43,124,233,.22);color:var(--accent-lt);border-radius:6px;font-size:.68rem;font-weight:700;padding:4px 10px;white-space:nowrap;">Register</span>
                 </div>
                 <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;">
                   <div>
@@ -591,7 +587,7 @@
       <div class="grid-2col">
 
         <div class="reveal card-silver">
-          <div style="position:absolute;top:-70px;right:-70px;width:230px;height:230px;border-radius:50%;background:rgba(0,174,91,.06);pointer-events:none;"></div>
+          <div style="position:absolute;top:-70px;right:-70px;width:230px;height:230px;border-radius:50%;background:rgba(43,124,233,.06);pointer-events:none;"></div>
           <span style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(13,27,42,.42);display:block;margin-bottom:14px;">Youth &amp; Academies</span>
           <h3 style="font-size:clamp(1.45rem,2.4vw,2rem);font-weight:800;letter-spacing:-.035em;line-height:1.18;color:#0D1B2A;margin:0 0 14px;">
             Develop the next<br>generation of talent.
@@ -796,7 +792,7 @@
     <div class="glow-accent" style="width:900px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.28;"></div>
     <div style="position:relative;z-index:2;max-width:700px;margin:0 auto;padding:0 24px;text-align:center;">
       <div class="reveal">
-        <div style="width:80px;height:80px;border-radius:20px;background:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:0 12px 40px rgba(0,174,91,.3);padding:10px;">
+        <div style="width:80px;height:80px;border-radius:20px;background:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:0 12px 40px rgba(43,124,233,.3);padding:10px;">
           <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
         </div>
 
@@ -837,7 +833,7 @@
   <section id="contact" style="padding:96px 0;background:var(--navy-800);border-top:1px solid rgba(255,255,255,.06);">
     <div style="max-width:680px;margin:0 auto;padding:0 24px;">
       <div style="text-align:center;margin-bottom:48px;">
-        <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(0,174,91,.1);border:1px solid rgba(0,174,91,.25);border-radius:100px;padding:5px 14px;font-size:.7rem;font-weight:700;color:var(--accent-lt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Get In Touch</div>
+        <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(43,124,233,.1);border:1px solid rgba(43,124,233,.25);border-radius:100px;padding:5px 14px;font-size:.7rem;font-weight:700;color:var(--accent-lt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px;">Get In Touch</div>
         <h2 style="font-size:clamp(1.75rem,4vw,2.75rem);font-weight:800;letter-spacing:-.04em;color:#fff;margin:0 0 14px;">Contact Us</h2>
         <p style="font-size:1rem;color:rgba(255,255,255,.45);line-height:1.7;margin:0;">Questions about clubs, leagues, or the site? We'll get back to you.</p>
       </div>
@@ -853,20 +849,20 @@
             <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Name</label>
             <input name="name" type="text" placeholder="Your name" required
               style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;"
-              onfocus="this.style.borderColor='rgba(0,174,91,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+              onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
           </div>
           <div>
             <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Email</label>
             <input name="email" type="email" placeholder="your@email.com" required
               style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;"
-              onfocus="this.style.borderColor='rgba(0,174,91,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+              onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
           </div>
         </div>
         <div>
           <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Subject</label>
           <select name="subject"
             style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;appearance:none;cursor:pointer;"
-            onfocus="this.style.borderColor='rgba(0,174,91,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+            onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
             <option value="General Question">General Question</option>
             <option value="Club Information">Club Information</option>
             <option value="League / Tournament">League / Tournament</option>
@@ -879,7 +875,7 @@
           <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">Message</label>
           <textarea name="message" placeholder="How can we help?" required rows="5"
             style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',sans-serif;outline:none;box-sizing:border-box;resize:vertical;transition:border-color .2s;"
-            onfocus="this.style.borderColor='rgba(0,174,91,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"></textarea>
+            onfocus="this.style.borderColor='rgba(43,124,233,.6)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"></textarea>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:4px;">
           <p id="cf-status" style="font-size:.82rem;color:rgba(255,255,255,.4);margin:0;"></p>
@@ -1121,7 +1117,7 @@
         w * .28 + Math.sin(t) * .04 * w, h * .32 + Math.cos(t * .7) * .03 * h, 0,
         w * .28, h * .32, w * .7
       );
-      g1.addColorStop(0, 'rgba(0,174,91,.22)');
+      g1.addColorStop(0, 'rgba(43,124,233,.22)');
       g1.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g1; ctx.fillRect(0, 0, w, h);
 
