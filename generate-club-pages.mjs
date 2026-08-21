@@ -28,6 +28,16 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// "2026-08-21" -> "Aug 21, 2026". Static pages only show the plain date,
+// never a relative "X days ago" — that judgment would silently go stale
+// the moment real time passes without a rebuild, so it's left to the
+// client-rendered pages (dashboard, compare.html) that can compute it
+// fresh on every view instead.
+function formatSyncDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function metaDescription(club) {
   let d = club.description || `${club.name} is a soccer club in ${club.city}, Connecticut, competing in ${club.league}.`;
   d = d.replace(/\s+/g, ' ').trim();
@@ -120,6 +130,7 @@ function quickFactsHtml(club) {
     club.generalManager ? ['General Manager', club.generalManager] : null,
     club.ageGroups && club.ageGroups.length ? ['Age Groups', club.ageGroups.join(', ')] : null,
     club.website ? ['Website', club.website] : null,
+    club.lastSynced ? ['Data Synced', formatSyncDate(club.lastSynced)] : null,
   ].filter(Boolean);
   return `
     <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:28px;">
@@ -289,7 +300,7 @@ function pageHtml(club) {
             <h1 style="margin:0;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;letter-spacing:-.03em;color:#fff;">${esc(club.name)}</h1>
             ${tierBadgeHtml(club.tier)}
           </div>
-          <p style="font-size:.9rem;color:rgba(255,255,255,.5);margin:0 0 16px;">${esc(club.league)} &bull; ${esc(club.city)}, ${esc(club.state)}${club.founded ? ` &bull; Founded ${club.founded}` : ''}</p>
+          <p style="font-size:.9rem;color:rgba(255,255,255,.5);margin:0 0 16px;">${esc(club.league)} &bull; ${esc(club.city)}, ${esc(club.state)}${club.founded ? ` &bull; Founded ${club.founded}` : ''}${club.lastSynced ? ` &bull; <span style="color:rgba(255,255,255,.35);">Data synced ${formatSyncDate(club.lastSynced)}</span>` : ''}</p>
           <a href="../club.html?id=${encodeURIComponent(club.id)}" class="btn-primary">View live dashboard &amp; follow this club &rarr;</a>
           ${shareButtonsHtml(canonical, club.name + ' — CT Soccer')}
         </div>

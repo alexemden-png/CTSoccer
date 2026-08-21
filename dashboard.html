@@ -340,7 +340,8 @@
               </div>
               <div>
                 <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Hartford Athletic FC</div>
-                <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:10px;">USL Championship &bull; Trinity Health Stadium, Hartford CT &bull; Est. 2018</div>
+                <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:4px;">USL Championship &bull; Trinity Health Stadium, Hartford CT &bull; Est. 2018</div>
+                <div id="feat-sync" style="font-size:.7rem;margin-bottom:10px;"></div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
                   <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 14px;text-align:center;">
                     <div id="feat-record" style="font-size:1rem;font-weight:800;color:#fff;"></div>
@@ -657,6 +658,15 @@
       document.getElementById('feat-record').textContent = `${c.wins}W ${c.draws}D ${c.losses}L`;
       document.getElementById('feat-points').textContent = `${clubPts(c)} pts`;
       document.getElementById('feat-gfga').textContent = `${c.gf}–${c.ga}`;
+      const syncEl = document.getElementById('feat-sync');
+      if (syncEl && c.lastSynced) {
+        const synced = new Date(c.lastSynced + 'T00:00:00');
+        const daysAgo = Math.round((Date.now() - synced.getTime()) / 86400000);
+        const label = synced.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const stale = daysAgo > 7;
+        syncEl.style.color = stale ? '#fbbf24' : 'rgba(255,255,255,.35)';
+        syncEl.textContent = stale ? `⚠ Data synced ${label} (${daysAgo}d ago)` : `Data synced ${label}`;
+      }
     }
 
     const TIER_GROUPS = [

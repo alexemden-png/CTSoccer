@@ -50,6 +50,13 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Plain date only, same reasoning as generate-club-pages.mjs's version — a
+// static page can't keep a relative "X days ago" accurate between rebuilds.
+function formatSyncDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
 
 function standingsPts(row) { return row.w * 3 + (row.d || 0); }
@@ -138,6 +145,7 @@ function buildBody(existingStory) {
     club.coach ? `<p style="font-size:.85rem;color:rgba(255,255,255,.45);margin:0;">Head of program: ${esc(club.coach)}</p>` : '',
     `<h2 style="font-size:1.05rem;font-weight:800;color:#fff;margin:24px 0 14px;">By the Numbers</h2>`,
     `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">${statsHtml()}</div>`,
+    club.lastSynced ? `<p style="font-size:.76rem;color:rgba(255,255,255,.32);margin:10px 0 0;">Data synced ${formatSyncDate(club.lastSynced)}</p>` : '',
     quoteHtml(existingStory),
     involvementHtml(),
   ].filter(Boolean);

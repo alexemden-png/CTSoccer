@@ -339,6 +339,21 @@
       </div>`;
     }
 
+    // Computed live in the browser (not baked in at build time), so "X
+    // days ago" and the staleness color stay accurate no matter when this
+    // page was last deployed — see clubs-data.js's lastSynced field,
+    // set only on the 4 clubs with live/hand-refreshed data.
+    function syncCaptionHtml(club) {
+      if (!club.lastSynced) return '';
+      const synced = new Date(club.lastSynced + 'T00:00:00');
+      const daysAgo = Math.round((Date.now() - synced.getTime()) / 86400000);
+      const label = synced.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const stale = daysAgo > 7;
+      const color = stale ? '#fbbf24' : 'rgba(255,255,255,.35)';
+      const text = stale ? `&#9888; Data synced ${label} (${daysAgo}d ago)` : `Data synced ${label}`;
+      return `<div style="margin-top:8px;font-size:.7rem;color:${color};">${text}</div>`;
+    }
+
     function headerCardHtml(club) {
       const linkHref = club.isDirectoryOnly
         ? (club.contactUrl || null)
@@ -350,6 +365,7 @@
           <div style="font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:4px;">${club.name}</div>
           <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:12px;">${club.city}, CT</div>
           ${tierBadgeHtml(club.tier)}
+          ${syncCaptionHtml(club)}
           <div style="margin-top:14px;">
             ${linkHref ? `<a href="${linkHref}" ${club.isDirectoryOnly ? 'target="_blank" rel="noopener"' : ''} style="font-size:.78rem;font-weight:700;color:var(--accent-lt);text-decoration:none;">${linkLabel} &rarr;</a>` : `<span style="font-size:.78rem;color:rgba(255,255,255,.3);">No link available</span>`}
           </div>
