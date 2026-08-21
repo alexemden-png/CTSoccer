@@ -34,14 +34,17 @@ function toRfc822(dateStr) {
 // Sort newest first, same as news.html's feed.
 const sorted = [...NEWS_STORIES].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-const items = sorted.map(n => `
+const items = sorted.map(n => {
+  const link = `${SITE}/news/${esc(n.id)}.html`;
+  return `
   <item>
     <title>${esc(n.title)}</title>
-    <link>${SITE}/news.html#${esc(n.id)}</link>
-    <guid isPermaLink="false">${esc(n.id)}</guid>
+    <link>${link}</link>
+    <guid isPermaLink="true">${link}</guid>
     <pubDate>${toRfc822(n.date)}</pubDate>
     <description>${esc(n.summary)}</description>
-  </item>`).join('\n');
+  </item>`;
+}).join('\n');
 
 const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">

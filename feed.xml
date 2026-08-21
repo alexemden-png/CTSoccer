@@ -5,61 +5,69 @@
     <link>https://ctsoccerhub.com/news.html</link>
     <description>Season storylines and match results for Connecticut's real professional and semi-pro soccer clubs.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 19 Aug 2026 17:41:30 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 20 Aug 2026 20:48:35 GMT</lastBuildDate>
     <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="https://ctsoccerhub.com/feed.xml" rel="self" type="application/rss+xml"/>
 
   <item>
+    <title>This Week in CT Soccer — August 20, 2026</title>
+    <link>https://ctsoccerhub.com/news/week-2026-08-20.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/week-2026-08-20.html</guid>
+    <pubDate>Thu, 20 Aug 2026 16:00:00 GMT</pubDate>
+    <description>Results and what's next for Hartford Athletic, CT United FC, New Haven United FC, AC Connecticut, and CT Rush.</description>
+  </item>
+
+  <item>
     <title>New: Coaching Clinics directory with real CJSA/US Soccer course pricing</title>
-    <link>https://ctsoccerhub.com/news.html#site-coaching-launch</link>
-    <guid isPermaLink="false">site-coaching-launch</guid>
+    <link>https://ctsoccerhub.com/news/site-coaching-launch.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/site-coaching-launch.html</guid>
     <pubDate>Fri, 14 Aug 2026 16:00:00 GMT</pubDate>
     <description>Browse every Grassroots-through-B-License course CJSA and US Soccer offer in Connecticut, filterable by tier and ranked by value.</description>
   </item>
 
   <item>
     <title>Live results now tracking for Hartford Athletic, AC Connecticut, and CT Rush</title>
-    <link>https://ctsoccerhub.com/news.html#site-live-data</link>
-    <guid isPermaLink="false">site-live-data</guid>
+    <link>https://ctsoccerhub.com/news/site-live-data.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/site-live-data.html</guid>
     <pubDate>Thu, 13 Aug 2026 16:00:00 GMT</pubDate>
     <description>CT Soccer now pulls real results and upcoming fixtures automatically for all three USL-affiliated clubs, refreshing every five minutes.</description>
   </item>
 
   <item>
     <title>Hartford Athletic draw 1–1 with Indy Eleven</title>
-    <link>https://ctsoccerhub.com/news.html#hfd-usl2</link>
-    <guid isPermaLink="false">hfd-usl2</guid>
+    <link>https://ctsoccerhub.com/news/hfd-usl2.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/hfd-usl2.html</guid>
     <pubDate>Sun, 09 Aug 2026 16:00:00 GMT</pubDate>
     <description>Jordan Scarlett's second-half equalizer salvaged a point on the road, part of a stretch that has seen Hartford draw four of its last six USL Championship matches.</description>
   </item>
 
   <item>
     <title>CT United FC beats Orlando City B 4–2, fourth win in five matches</title>
-    <link>https://ctsoccerhub.com/news.html#ctu-streak</link>
-    <guid isPermaLink="false">ctu-streak</guid>
+    <link>https://ctsoccerhub.com/news/ctu-streak.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/ctu-streak.html</guid>
     <pubDate>Sat, 01 Aug 2026 16:00:00 GMT</pubDate>
     <description>A four-goal outing continued CT United's strong summer stretch in MLS Next Pro, pushing the club's win percentage well above .500 for the season.</description>
   </item>
 
   <item>
     <title>New Haven United FC wins the NPSL North Atlantic Conference outright</title>
-    <link>https://ctsoccerhub.com/news.html#nhu-conference</link>
-    <guid isPermaLink="false">nhu-conference</guid>
+    <link>https://ctsoccerhub.com/news/nhu-conference.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/nhu-conference.html</guid>
     <pubDate>Sun, 19 Jul 2026 16:00:00 GMT</pubDate>
     <description>In just its second season, New Haven United finished 1st in the North Atlantic Conference before advancing to the NPSL National Semifinal — the deepest playoff run by a Connecticut NPSL club.</description>
   </item>
 
   <item>
     <title>USL League Two regular season wraps up for AC Connecticut and CT Rush</title>
-    <link>https://ctsoccerhub.com/news.html#usl2-season-wrap</link>
-    <guid isPermaLink="false">usl2-season-wrap</guid>
+    <link>https://ctsoccerhub.com/news/usl2-season-wrap.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/usl2-season-wrap.html</guid>
     <pubDate>Sun, 12 Jul 2026 16:00:00 GMT</pubDate>
     <description>Both Connecticut clubs closed out the Northeast Division regular season — CT Rush finished 8th, AC Connecticut 9th. CT Rush's debut USL2 season is now complete.</description>
   </item>
 
   <item>
     <title>CT United FC opens inaugural season with a 3–1 road win over FC Cincinnati 2</title>
-    <link>https://ctsoccerhub.com/news.html#ctu-debut</link>
-    <guid isPermaLink="false">ctu-debut</guid>
+    <link>https://ctsoccerhub.com/news/ctu-debut.html</link>
+    <guid isPermaLink="true">https://ctsoccerhub.com/news/ctu-debut.html</guid>
     <pubDate>Sun, 01 Mar 2026 17:00:00 GMT</pubDate>
     <description>Connecticut's first-ever MLS Next Pro club made history in its debut match, the first step in a season that has since seen the club climb to a winning record.</description>
   </item>
