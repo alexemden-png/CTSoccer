@@ -150,6 +150,7 @@ function pageHtml(story) {
     .badge-event { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
     .badge-site { background: rgba(168,85,247,.14); color: #c084fc; border: 1px solid rgba(168,85,247,.22); }
     .badge-recap { background: rgba(92,221,139,.12); color: #5CDD8B; border: 1px solid rgba(92,221,139,.2); }
+    .badge-spotlight { background: rgba(244,114,182,.14); color: #f472b6; border: 1px solid rgba(244,114,182,.22); }
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
@@ -278,6 +279,7 @@ function pageHtml(story) {
           <h4 style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.78);margin:0 0 18px;">Company</h4>
           <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
             <li><a href="../about.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">About Us</a></li>
+            <li><a href="../faq.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">FAQ</a></li>
             <li><a href="../news.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">News &amp; Events</a></li>
             <li><a href="../whats-new.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">What's New</a></li>
             <li><a href="../partners.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Partners</a></li>
