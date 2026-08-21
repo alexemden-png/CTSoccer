@@ -1,115 +1,4 @@
-// Generates clubs-by-town.html — a single, crawlable directory of every
-// tracked CT soccer club grouped alphabetically by town, for searches like
-// "[town] youth soccer club."
-//
-// Data source: merges CJSA_DIRECTORY (162 lightweight CJSA member entries,
-// clean city fields) with the handful of ALL_CLUBS entries that have no
-// CJSA_DIRECTORY row linking to them via edpClubId (pro/semi-pro clubs like
-// Hartford Athletic that aren't CJSA youth members, plus a few youth/EDP
-// clubs CJSA's list doesn't carry). Ginga FC serves three towns (Woodbridge,
-// Hamden & Madison) and is listed once under each.
-//
-// Each row links to its rich profile at clubs/<id>.html when one exists,
-// otherwise to its real external website from CJSA_DIRECTORY.
-//
-// Also keeps sitemap.xml in sync (single entry, upserted by <loc> match).
-//
-// Run with: node generate-town-directory.mjs
-
-import fs from 'fs';
-import path from 'path';
-import vm from 'vm';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const clubsDataSrc = fs.readFileSync(path.join(__dirname, 'clubs-data.js'), 'utf8');
-const cjsaSrc = fs.readFileSync(path.join(__dirname, 'cjsa-directory.js'), 'utf8');
-const sandbox = {};
-vm.createContext(sandbox);
-vm.runInContext(clubsDataSrc, sandbox);
-vm.runInContext(cjsaSrc, sandbox);
-const { ALL_CLUBS, CJSA_DIRECTORY } = vm.runInContext('({ALL_CLUBS, CJSA_DIRECTORY})', sandbox);
-
-function esc(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function slugify(s) {
-  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-}
-
-// ---- Build merged rows: { town, name, richId, website } ----
-const edpIds = new Set(CJSA_DIRECTORY.filter(c => c.edpClubId).map(c => c.edpClubId));
-const extras = ALL_CLUBS.filter(c => !edpIds.has(c.id));
-
-const rows = [];
-for (const c of CJSA_DIRECTORY) {
-  rows.push({ town: c.city.trim(), name: c.name, richId: c.edpClubId || null, website: c.website || null });
-}
-for (const c of extras) {
-  const towns = c.id === 'ginga-fc' ? ['Woodbridge', 'Hamden', 'Madison'] : [c.city];
-  for (const t of towns) {
-    rows.push({ town: t.trim(), name: c.name, richId: c.id, website: c.website || null });
-  }
-}
-
-const byTown = {};
-for (const r of rows) (byTown[r.town] = byTown[r.town] || []).push(r);
-for (const t of Object.keys(byTown)) byTown[t].sort((a, b) => a.name.localeCompare(b.name));
-const towns = Object.keys(byTown).sort((a, b) => a.localeCompare(b));
-
-const TOTAL_CLUBS = rows.length;
-const TOTAL_TOWNS = towns.length;
-
-// ---- Index (jump links) ----
-function indexHtml() {
-  const chips = towns.map(t => `<a href="#${esc(slugify(t))}" style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.65);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);white-space:nowrap;transition:color .2s,border-color .2s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.22)'" onmouseout="this.style.color='rgba(255,255,255,.65)';this.style.borderColor='rgba(255,255,255,.08)'">${esc(t)}</a>`).join('\n        ');
-  return `
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        ${chips}
-    </div>`;
-}
-
-// ---- Per-town sections ----
-function rowHtml(r) {
-  const href = r.richId ? `clubs/${esc(r.richId)}.html` : esc(r.website);
-  const external = !r.richId;
-  return `
-        <li style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.18)';this.style.background='#182740'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--navy-800)'">
-          <a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''} style="font-size:.92rem;font-weight:700;color:#fff;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--accent-lt)'" onmouseout="this.style.color='#fff'">${esc(r.name)}</a>
-          ${r.richId ? `<span style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-lt);background:rgba(43,124,233,.12);border:1px solid rgba(43,124,233,.22);padding:3px 8px;border-radius:5px;flex-shrink:0;">Full Profile</span>` : `<svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`}
-        </li>`;
-}
-
-function townSectionHtml(town) {
-  const clubs = byTown[town];
-  return `
-    <section id="${esc(slugify(town))}" style="scroll-margin-top:80px;margin-bottom:32px;">
-      <h2 style="font-size:1.05rem;font-weight:800;color:#fff;margin:0 0 12px;display:flex;align-items:baseline;gap:8px;">${esc(town)} <span style="font-size:.78rem;font-weight:600;color:rgba(255,255,255,.35);">${clubs.length} club${clubs.length === 1 ? '' : 's'}</span></h2>
-      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;">${clubs.map(rowHtml).join('')}
-      </ul>
-    </section>`;
-}
-
-function collectionJsonLd(canonical) {
-  const data = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: 'CT Soccer Clubs by Town',
-    description: `Directory of ${TOTAL_CLUBS} youth, adult, and professional soccer clubs across ${TOTAL_TOWNS} Connecticut towns.`,
-    url: canonical,
-    isPartOf: { '@type': 'WebSite', name: 'CT Soccer', url: 'https://ctsoccerhub.com/' },
-  };
-  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
-}
-
-function pageHtml() {
-  const title = 'CT Soccer Clubs by Town | Find a Club Near You in Connecticut';
-  const description = `Browse ${TOTAL_CLUBS} Connecticut soccer clubs grouped by town — youth, adult, and pro/semi-pro. Find the club nearest you across ${TOTAL_TOWNS} CT towns.`;
-  const canonical = 'https://ctsoccerhub.com/clubs-by-town.html';
-
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
@@ -118,36 +7,71 @@ function pageHtml() {
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${esc(title)}</title>
-  <meta name="description" content="${esc(description)}">
-  <link rel="canonical" href="${canonical}">
+  <title>CT Pro Soccer Standings Predictor | CT Soccer</title>
+  <meta name="description" content="Pick results for Hartford Athletic and CT United FC's next known matches and see how it would shift the real league table — a what-if tool, not a full season projection.">
+  <link rel="canonical" href="https://ctsoccerhub.com/standings-predictor.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="${esc(title)}">
-  <meta property="og:description" content="${esc(description)}">
-  <meta property="og:url" content="${canonical}">
+  <meta property="og:title" content="CT Pro Soccer Standings Predictor">
+  <meta property="og:description" content="Pick results for upcoming matches and see how it would shift the real league table for CT's pro and semi-pro clubs.">
+  <meta property="og:url" content="https://ctsoccerhub.com/standings-predictor.html">
   <meta name="twitter:card" content="summary">
-  ${collectionJsonLd(canonical)}
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="clubs-data.js"></script>
   <style>
     :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
+    html[data-theme="light"] .club-badge-abbr { filter: invert(1) hue-rotate(180deg) !important; color: #0D1B2A !important; }
     *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
     html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
     a { color: inherit; }
     .btn-primary{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%);color:#fff;font-weight:700;font-size:.85rem;padding:9px 18px;border-radius:9px;text-decoration:none;border:none;cursor:pointer;font-family:'Montserrat',Arial,sans-serif;transition:opacity .18s,transform .18s;box-shadow:0 4px 14px rgba(43,124,233,.35);}
     .btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 2px; border-radius: 4px; }
+
+    .club-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px; }
+    .club-tab { flex-shrink: 0; display: flex; align-items: center; gap: 8px; background: var(--navy-800); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 16px; cursor: pointer; transition: border-color .15s, background .15s; font-family: 'Montserrat', Arial, sans-serif; }
+    .club-tab:hover { border-color: rgba(255,255,255,.2); }
+    .club-tab.active { border-color: var(--accent); background: rgba(43,124,233,.1); }
+    .club-tab-badge { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .club-tab-name { font-size: .8rem; font-weight: 700; color: #fff; white-space: nowrap; }
+
+    .match-card { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; }
+    .outcome-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .outcome-btn { flex: 1; min-width: 100px; background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.1); border-radius: 9px; padding: 10px 12px; color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-size: .78rem; font-weight: 700; cursor: pointer; transition: border-color .15s, background .15s; text-align: center; }
+    .outcome-btn:hover { border-color: rgba(43,124,233,.4); }
+    .outcome-btn.selected { background: rgba(43,124,233,.16); border-color: var(--accent); color: var(--accent-lt); }
+
+    .projection-box { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin: 20px 0; }
+    .projection-compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+    .proj-col { text-align: center; }
+    .proj-label { font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 8px; }
+    .proj-rank { font-size: 1.6rem; font-weight: 800; color: #fff; }
+    .proj-sub { font-size: .78rem; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+    .status-banner { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: .85rem; color: rgba(255,255,255,.6); line-height: 1.6; }
+
+    .std-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .std-table th { text-align: left; font-size: .65rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: rgba(255,255,255,.35); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .std-table th.num, .std-table td.num { text-align: center; }
+    .std-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.04); color: rgba(255,255,255,.7); }
+    .std-table tr.self-row td { background: rgba(43,124,233,.1); color: #fff; font-weight: 700; }
+    .std-table tr.self-row td:first-child { border-radius: 6px 0 0 6px; }
+    .std-table tr.self-row td:last-child { border-radius: 0 6px 6px 0; }
+
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
-    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 2px; border-radius: 4px; }
     ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
     @media (max-width: 640px) {
       body { padding-bottom: 88px; }
       .mobile-bottom-nav { display: flex !important; }
       nav.sub-nav { padding: 0 16px !important; }
       .nav-crumb { display: none !important; }
+      .projection-compare { grid-template-columns: 1fr; }
+      .std-table { font-size: .74rem; }
+      .std-table th, .std-table td { padding: 7px 6px; }
     }
   </style>
 </head>
@@ -179,35 +103,30 @@ function pageHtml() {
       <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
     </a>
     <svg class="nav-crumb" width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    <span class="nav-crumb" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Clubs by Town</span>
+    <span class="nav-crumb" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Standings Predictor</span>
     <div style="flex:1;"></div>
     <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
-    <a href="dashboard.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap;">Dashboard</a>
+    <a href="dashboard.html?section=standings" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap;">Standings</a>
   </nav>
 
-  <div style="max-width:900px;margin:0 auto;padding:0 24px;">
+  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
     <div style="display:flex;align-items:center;gap:10px;padding:20px 0 0;font-size:.78rem;color:rgba(255,255,255,.35);flex-wrap:wrap;">
       <a href="index.html" style="text-decoration:none;color:inherit;">Home</a>
       <span>/</span>
-      <span style="color:rgba(255,255,255,.6);">Clubs by Town</span>
+      <span style="color:rgba(255,255,255,.6);">Standings Predictor</span>
     </div>
 
     <!-- HERO -->
-    <div style="padding:20px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;">
-      <h1 style="margin:0 0 10px;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.2;">Connecticut Soccer Clubs by Town</h1>
-      <p style="margin:0;font-size:.92rem;line-height:1.7;color:rgba(255,255,255,.55);max-width:640px;">Every tracked youth, adult, and professional club in the state, grouped by the town it's based in — ${TOTAL_CLUBS} clubs across ${TOTAL_TOWNS} towns. Jump to a town below, or find your own club on the <a href="dashboard.html" style="color:var(--accent-lt);">Full Directory</a>.</p>
+    <div style="padding:20px 0 28px;">
+      <h1 style="margin:0 0 10px;font-size:clamp(1.4rem,4vw,1.9rem);font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.2;">Standings Predictor</h1>
+      <p style="margin:0;font-size:.9rem;line-height:1.7;color:rgba(255,255,255,.55);">Pick results for a club's next known matches and see how it would shift the real league table. This is a "what if my next game goes this way" tool, not a full-season projection — it only covers matches already on the schedule, and assumes every other team's record stays exactly as currently listed.</p>
     </div>
 
-    <!-- JUMP LINKS -->
-    ${indexHtml()}
+    <div id="club-tabs" class="club-tabs"></div>
+    <div id="club-panel"></div>
 
-    <!-- TOWN SECTIONS -->
-    <div style="margin-top:28px;">
-      ${towns.map(townSectionHtml).join('')}
-    </div>
-
-    <div style="text-align:center;padding:16px 0 48px;">
-      <a href="dashboard.html" class="btn-primary">Browse the Full Directory &rarr;</a>
+    <div style="text-align:center;padding:20px 0 40px;">
+      <a href="dashboard.html?section=standings" style="font-size:.85rem;font-weight:700;color:var(--accent-lt);text-decoration:none;">See the real, current standings &rarr;</a>
     </div>
   </div>
 
@@ -216,7 +135,7 @@ function pageHtml() {
     @media (max-width: 1024px) { .ctf-footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; } }
     @media (max-width: 640px)  { .ctf-footer-grid { grid-template-columns: 1fr; gap: 32px; } }
   </style>
-  <footer style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;">
+  <footer style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;margin-top:20px;">
     <div style="max-width:1180px;margin:0 auto;padding:0 24px;">
 
       <div class="ctf-footer-grid" style="padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.06);">
@@ -254,11 +173,11 @@ function pageHtml() {
             <li><a href="dashboard.html?section=standings" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Adult Leagues</a></li>
             <li><a href="tournaments.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Tournaments</a></li>
             <li><a href="coaching-clinics.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Coaching Clinics</a></li>
-            <li><a href="clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.85);text-decoration:none;">Clubs by Town</a></li>
+            <li><a href="clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Clubs by Town</a></li>
             <li><a href="compare.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Compare Clubs</a></li>
             <li><a href="events.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Events</a></li>
             <li><a href="find-a-club.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Find a Club</a></li>
-            <li><a href="standings-predictor.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Standings Predictor</a></li>
+            <li><a href="standings-predictor.html" style="font-size:.875rem;color:rgba(255,255,255,.85);text-decoration:none;">Standings Predictor</a></li>
           </ul>
         </div>
 
@@ -266,6 +185,7 @@ function pageHtml() {
           <h4 style="font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.78);margin:0 0 18px;">Company</h4>
           <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
             <li><a href="about.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">About Us</a></li>
+            <li><a href="faq.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">FAQ</a></li>
             <li><a href="news.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">News &amp; Events</a></li>
             <li><a href="whats-new.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">What's New</a></li>
             <li><a href="partners.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Partners</a></li>
@@ -299,24 +219,195 @@ function pageHtml() {
       </div>
     </div>
   </footer>
+
+  <script>
+    const SIM_CLUB_IDS = ['hartford-athletic', 'ct-united-fc', 'new-haven-united-fc', 'ac-connecticut', 'connecticut-rush-usl2'];
+    const ordinal = (n) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v-20)%10] || s[v] || s[0]); };
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function rankInfo(table) {
+      const sorted = [...table.rows].sort((a, b) => standingsRowPts(b, table.type) - standingsRowPts(a, table.type));
+      const idx = sorted.findIndex((r) => r.abbr === table.selfAbbr);
+      const row = sorted[idx];
+      return { rank: idx + 1, total: sorted.length, sorted, row };
+    }
+
+    // Deep-clones the table and applies a sequence of hypothetical outcomes
+    // to this club's own row only — no other team's record changes, since
+    // we don't track their remaining schedules. Goal differential is never
+    // touched by a simulated outcome (we don't invent a scoreline); it stays
+    // at each team's real current value, used only as the natural sort
+    // tiebreak within a shared points total.
+    function simulateTable(clubId, selections) {
+      const table = LEAGUE_STANDINGS[clubId];
+      const clone = { ...table, rows: table.rows.map((r) => ({ ...r })) };
+      const row = clone.rows.find((r) => r.abbr === clone.selfAbbr);
+      const isShootout = clone.type === 'shootout';
+      selections.forEach((outcome) => {
+        if (!outcome) return;
+        if (outcome === 'W') row.w += 1;
+        else if (outcome === 'L') row.l += 1;
+        else if (outcome === 'D') row.d = (row.d || 0) + 1;
+        else if (outcome === 'SOW') row.sow = (row.sow || 0) + 1;
+        else if (outcome === 'SOL') row.sol = (row.sol || 0) + 1;
+      });
+      return clone;
+    }
+
+    function outcomeOptions(isShootout) {
+      return isShootout
+        ? [['W', 'Win'], ['SOW', 'Draw, win SO'], ['SOL', 'Draw, lose SO'], ['L', 'Loss']]
+        : [['W', 'Win'], ['D', 'Draw'], ['L', 'Loss']];
+    }
+
+    function recordLabel(row, isShootout) {
+      return isShootout ? `${row.w}-${row.sow||0}-${row.sol||0}-${row.l}` : `${row.w}-${row.d||0}-${row.l}`;
+    }
+    function recordSubLabel(isShootout) {
+      return isShootout ? 'W-SOW-SOL-L' : 'W-D-L';
+    }
+
+    function stdTableHtml(table, currentSelfAbbr) {
+      const { sorted } = rankInfo(table);
+      const isShootout = table.type === 'shootout';
+      return `
+        <table class="std-table">
+          <thead><tr>
+            <th class="num">#</th><th>Club</th><th class="num">${isShootout ? 'W-SOW-SOL-L' : 'W-D-L'}</th><th class="num">Pts</th>
+          </tr></thead>
+          <tbody>
+            ${sorted.map((r, i) => `
+              <tr class="${r.abbr === currentSelfAbbr ? 'self-row' : ''}">
+                <td class="num">${i + 1}</td>
+                <td>${esc(r.name)}</td>
+                <td class="num">${recordLabel(r, isShootout)}</td>
+                <td class="num">${standingsRowPts(r, table.type)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    let activeClubId = null;
+    const selections = {}; // clubId -> array of outcome strings, one per upcoming match
+
+    function renderTabs() {
+      const el = document.getElementById('club-tabs');
+      el.innerHTML = SIM_CLUB_IDS.map((id) => {
+        const c = getClubById(id);
+        return `
+          <button class="club-tab ${id === activeClubId ? 'active' : ''}" onclick="selectClub('${id}')">
+            <div class="club-tab-badge" style="background:${c.primary}22;border:1.5px solid ${c.primary}55;">
+              <span class="club-badge-abbr" style="font-size:.62rem;font-weight:900;color:${c.primary};">${c.abbr}</span>
+            </div>
+            <span class="club-tab-name">${esc(c.abbr)}</span>
+          </button>`;
+      }).join('');
+    }
+
+    function selectClub(id) {
+      activeClubId = id;
+      renderTabs();
+      renderPanel();
+    }
+
+    function matchCardHtml(club, match, idx, isShootout) {
+      const opts = outcomeOptions(isShootout);
+      const current = selections[club.id][idx];
+      return `
+        <div class="match-card">
+          <div style="font-size:.95rem;font-weight:800;color:#fff;">${match.home ? 'vs' : '@'} ${esc(match.opponent)}</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-top:2px;">${esc(match.date)}${match.time ? ` &middot; ${esc(match.time)}` : ''}</div>
+          <div class="outcome-row">
+            ${opts.map(([val, label]) => `<button class="outcome-btn ${current === val ? 'selected' : ''}" onclick="pickOutcome('${club.id}', ${idx}, '${val}')">${label}</button>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    function pickOutcome(clubId, idx, val) {
+      selections[clubId][idx] = selections[clubId][idx] === val ? null : val; // click again to clear
+      renderPanel();
+    }
+
+    function resetSelections() {
+      const club = getClubById(activeClubId);
+      selections[activeClubId] = (club.upcoming || []).map(() => null);
+      renderPanel();
+    }
+
+    function renderPanel() {
+      const panel = document.getElementById('club-panel');
+      const club = getClubById(activeClubId);
+      const table = LEAGUE_STANDINGS[club.id];
+      const isShootout = table.type === 'shootout';
+      const current = rankInfo(table);
+
+      const headerHtml = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+          <div style="width:44px;height:44px;border-radius:11px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span class="club-badge-abbr" style="font-size:1rem;font-weight:900;color:${club.primary};">${club.abbr}</span>
+          </div>
+          <div>
+            <div style="font-size:1.05rem;font-weight:800;color:#fff;">${esc(club.name)}</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,.45);">${esc(club.league)} &middot; Currently ${ordinal(current.rank)} of ${current.total}</div>
+          </div>
+        </div>`;
+
+      // Season concluded — nothing to simulate, show final table only.
+      if (club.seasonStatus === 'concluded') {
+        panel.innerHTML = headerHtml + `
+          <div class="status-banner"><strong style="color:#fff;">Season complete.</strong> This is ${esc(club.name)}'s final standing for the season — there's nothing left to predict.</div>
+          ${stdTableHtml(table, table.selfAbbr)}`;
+        return;
+      }
+
+      // Active season, but nothing scheduled on file — show current table only.
+      if (!club.upcoming || !club.upcoming.length) {
+        panel.innerHTML = headerHtml + `
+          <div class="status-banner"><strong style="color:#fff;">No upcoming matches on file right now.</strong> ${esc(club.name)}'s season is ongoing, but we don't have a next fixture logged to simulate yet — here's where they stand currently.</div>
+          ${stdTableHtml(table, table.selfAbbr)}`;
+        return;
+      }
+
+      // Interactive: real known upcoming matches to pick outcomes for.
+      if (!selections[club.id]) selections[club.id] = club.upcoming.map(() => null);
+      const projectedTable = simulateTable(club.id, selections[club.id]);
+      const projected = rankInfo(projectedTable);
+      const hasPicks = selections[club.id].some(Boolean);
+      const rankDelta = current.rank - projected.rank; // positive = moved up
+
+      panel.innerHTML = headerHtml + `
+        <div class="status-banner">Pick a result for each match below to see how it would shift the table. Assumes every other team's remaining results stay exactly as currently listed — this isn't a full-season projection, just these known games.</div>
+        <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:4px;">Upcoming matches</div>
+        ${club.upcoming.map((m, i) => matchCardHtml(club, m, i, isShootout)).join('')}
+
+        <div class="projection-box">
+          <div class="projection-compare">
+            <div class="proj-col">
+              <div class="proj-label">Current</div>
+              <div class="proj-rank">${ordinal(current.rank)}</div>
+              <div class="proj-sub">${recordLabel(current.row, isShootout)} &middot; ${standingsRowPts(current.row, table.type)} pts</div>
+            </div>
+            <div style="font-size:1.4rem;color:rgba(255,255,255,.25);">&rarr;</div>
+            <div class="proj-col">
+              <div class="proj-label">Projected</div>
+              <div class="proj-rank" style="color:${!hasPicks ? '#fff' : rankDelta > 0 ? '#5CDD8B' : rankDelta < 0 ? '#ff7070' : '#fff'};">${ordinal(projected.rank)}</div>
+              <div class="proj-sub">${recordLabel(projected.row, isShootout)} &middot; ${standingsRowPts(projected.row, table.type)} pts</div>
+            </div>
+          </div>
+          ${hasPicks ? `<div style="text-align:center;margin-top:14px;"><button class="outcome-btn" style="max-width:160px;margin:0 auto;" onclick="resetSelections()">Reset</button></div>` : ''}
+        </div>
+
+        <div style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,.6);margin:20px 0 10px;">${hasPicks ? 'Projected table' : 'Current table'}</div>
+        ${stdTableHtml(hasPicks ? projectedTable : table, table.selfAbbr)}`;
+    }
+
+    // ---- Init ----
+    activeClubId = SIM_CLUB_IDS[0];
+    renderTabs();
+    renderPanel();
+  </script>
 </body>
 </html>
-`;
-}
-
-// ---- Sitemap: upsert this single URL, keeping everything else untouched ----
-function updateSitemap() {
-  const sitemapPath = path.join(__dirname, 'sitemap.xml');
-  let xml = fs.readFileSync(sitemapPath, 'utf8');
-  const loc = 'https://ctsoccerhub.com/clubs-by-town.html';
-  if (xml.includes(`<loc>${loc}</loc>`)) return false;
-  const entry = `\n  <url>\n    <loc>${loc}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-  xml = xml.replace('</urlset>', `${entry}</urlset>`);
-  fs.writeFileSync(sitemapPath, xml, 'utf8');
-  return true;
-}
-
-fs.writeFileSync(path.join(__dirname, 'clubs-by-town.html'), pageHtml(), 'utf8');
-console.log(`Generated clubs-by-town.html — ${TOTAL_CLUBS} clubs across ${TOTAL_TOWNS} towns`);
-const added = updateSitemap();
-console.log(added ? 'Added clubs-by-town.html to sitemap.xml' : 'clubs-by-town.html already in sitemap.xml — left untouched');
