@@ -229,7 +229,7 @@ function pageHtml() {
             <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
           </div>
           <p style="font-size:.875rem;line-height:1.72;color:rgba(255,255,255,.38);max-width:280px;margin:0 0 22px;">
-            Connecticut's premier soccer community - connecting players, coaches, and fans statewide since 2010.
+            Connecticut's premier soccer community - connecting players, coaches, and fans statewide since 2026.
           </p>
           <div style="display:flex;gap:8px;">
             <a href="#" aria-label="Facebook"  style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
