@@ -115,9 +115,15 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .fade-in{animation:fadeIn .35s cubic-bezier(.16,1,.3,1) both;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1B2A4A;border:1px solid rgba(43,124,233,.4);color:#fff;padding:12px 22px;border-radius:12px;font-size:.875rem;font-weight:600;z-index:9999;transition:transform .3s cubic-bezier(.16,1,.3,1);white-space:nowrap;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .reaction-btn{display:flex;align-items:center;gap:5px;border-radius:20px;padding:5px 11px;cursor:pointer;font-size:.8rem;font-family:'Montserrat',Arial,sans-serif;color:#fff;transition:background .15s,border-color .15s,transform .15s;}
+    .reaction-btn:active{transform:scale(.92);}
   </style>
 </head>
 <body>
+
+  <div id="toast" class="toast"></div>
 
   <nav class="mobile-bottom-nav" aria-label="Mobile club navigation">
     <a class="mobile-bottom-item" href="index.html">
@@ -248,6 +254,36 @@
         }
       }
 
+      // Match reactions (🔥/👏/😢). recentResults entries have no built-in ID,
+      // so each match is identified by a deterministic key derived from its
+      // date+opponent+score. One Firestore doc per user per match (the doc ID
+      // encodes the uid), so re-clicking the same emoji or picking a new one
+      // is just a delete/overwrite — that's what enforces one reaction per
+      // user per match rather than any app-level dedup logic.
+      const REACTION_EMOJI = { fire: '🔥', clap: '👏', cry: '😢' };
+      const reactionCounts = {}; // matchKey -> { fire, clap, cry }
+      const myReactions = {};    // matchKey -> emoji key the signed-in user picked, or absent
+      function matchKey(r) {
+        return (club.id + '_' + (r.date||'') + '_' + (r.opponent||'') + '_' + (r.score||''))
+          .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+      if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && !club.isDirectoryOnly) {
+        try {
+          let me = {};
+          try { me = ctsoccerGetUser() || {}; } catch(e) {}
+          const rSnap = await db.collection('matchReactions').where('clubId', '==', club.id).get();
+          rSnap.docs.forEach(doc => {
+            const d = doc.data();
+            if (!REACTION_EMOJI[d.emoji]) return;
+            if (!reactionCounts[d.matchKey]) reactionCounts[d.matchKey] = { fire: 0, clap: 0, cry: 0 };
+            reactionCounts[d.matchKey][d.emoji]++;
+            if (me.firebaseUid && d.uid === me.firebaseUid) myReactions[d.matchKey] = d.emoji;
+          });
+        } catch (err) {
+          console.info('[Firestore] match reactions unavailable:', err.message);
+        }
+      }
+
       let followed = false;
       try {
         const u = ctsoccerGetUser() || {};
@@ -292,6 +328,90 @@
         const col = r==='W'?'#5CDD8B':r==='L'?'#ff7070':'#F5A800';
         return `<span class="result-dot" style="background:${col};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;"></span>`;
       }
+
+      function toast(msg, dur=2600) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(()=>el.classList.remove('show'), dur);
+      }
+
+      function reactionBarHtml(r) {
+        const key = matchKey(r);
+        const counts = reactionCounts[key] || { fire: 0, clap: 0, cry: 0 };
+        const mine = myReactions[key];
+        return Object.entries(REACTION_EMOJI).map(([k, emoji]) => {
+          const active = mine === k;
+          const label = k === 'fire' ? 'Fire' : k === 'clap' ? 'Nice' : 'Rough one';
+          return `
+            <button type="button" class="reaction-btn" onclick="toggleReaction('${key}','${k}',this)" aria-label="React with ${label}" style="background:${active?'rgba(43,124,233,.18)':'rgba(255,255,255,.05)'};border:1px solid ${active?'rgba(43,124,233,.5)':'rgba(255,255,255,.1)'};" onmouseover="if(!this.classList.contains('is-active'))this.style.borderColor='rgba(255,255,255,.3)'" onmouseout="this.style.borderColor='${active?'rgba(43,124,233,.5)':'rgba(255,255,255,.1)'}'">
+              <span>${emoji}</span><span style="font-weight:700;color:rgba(255,255,255,.6);min-width:8px;text-align:left;">${counts[k] || ''}</span>
+            </button>`;
+        }).join('');
+      }
+
+      function resultsListHtml() {
+        return (club.recentResults||[]).map(r=>`
+          <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.15)'" onmouseout="this.style.borderColor='rgba(255,255,255,.07)'">
+            <div style="padding:16px 20px;display:flex;align-items:center;gap:14px;">
+              <span style="width:32px;height:32px;border-radius:8px;background:${r.result==='W'?'rgba(92,221,139,.14)':r.result==='L'?'rgba(255,112,112,.14)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.28)':r.result==='L'?'rgba(255,112,112,.28)':'rgba(245,168,0,.22)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:.9rem;font-weight:700;color:#fff;">${club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.opponent}</div>
+                <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${r.date} &middot; ${r.home===false?'Away':'Home'}${r.manager ? ' &middot; <span style="color:var(--accent-lt);">Submitted by team manager</span>' : ''}</div>
+              </div>
+              <div style="font-size:1.3rem;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.02em;flex-shrink:0;background:rgba(255,255,255,.06);border-radius:8px;padding:6px 16px;">${r.score}</div>
+            </div>
+            <div style="padding:10px 20px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px;">
+              <span style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.26);text-transform:uppercase;letter-spacing:.06em;margin-right:2px;">React</span>
+              ${reactionBarHtml(r)}
+            </div>
+          </div>
+        `).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);">No results available yet.</div>';
+      }
+
+      async function toggleReaction(key, emojiKey, btnEl) {
+        let user = null;
+        try { user = ctsoccerGetUser(); } catch(e) {}
+        if (!user || !user.firebaseUid || user.isGuest) {
+          toast('Sign in to react to match results');
+          return;
+        }
+        if (!(typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY)) {
+          toast('Reactions are unavailable right now');
+          return;
+        }
+        const prev = myReactions[key];
+        const removing = prev === emojiKey;
+        if (!reactionCounts[key]) reactionCounts[key] = { fire: 0, clap: 0, cry: 0 };
+
+        // Optimistic UI update, reverted below if the Firestore write fails.
+        if (prev) reactionCounts[key][prev] = Math.max(0, reactionCounts[key][prev] - 1);
+        if (removing) delete myReactions[key];
+        else { reactionCounts[key][emojiKey]++; myReactions[key] = emojiKey; }
+        const listEl = document.getElementById('results-list');
+        if (listEl) listEl.innerHTML = resultsListHtml();
+
+        try {
+          const ref = db.collection('matchReactions').doc(key + '__' + user.firebaseUid);
+          if (removing) {
+            await ref.delete();
+          } else {
+            await ref.set({
+              clubId: club.id, matchKey: key, uid: user.firebaseUid, emoji: emojiKey,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        } catch (err) {
+          console.warn('[Firestore] reaction failed:', err.message);
+          toast('Could not save your reaction — try again');
+          // Revert the optimistic update.
+          if (!removing) reactionCounts[key][emojiKey] = Math.max(0, reactionCounts[key][emojiKey] - 1);
+          if (prev) reactionCounts[key][prev] = (reactionCounts[key][prev] || 0) + 1;
+          if (prev) myReactions[key] = prev; else delete myReactions[key];
+          if (listEl) listEl.innerHTML = resultsListHtml();
+        }
+      }
+      window.toggleReaction = toggleReaction;
 
       let activeTab = 'overview';
       function showTab(name) {
@@ -512,17 +632,8 @@
 
           <!-- RESULTS -->
           <div id="tab-results" style="display:none;" class="fade-in">
-            <div style="display:flex;flex-direction:column;gap:9px;">
-              ${(club.recentResults||[]).map(r=>`
-                <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(255,255,255,.15)'" onmouseout="this.style.borderColor='rgba(255,255,255,.07)'">
-                  <span style="width:32px;height:32px;border-radius:8px;background:${r.result==='W'?'rgba(92,221,139,.14)':r.result==='L'?'rgba(255,112,112,.14)':'rgba(245,168,0,.12)'};border:1px solid ${r.result==='W'?'rgba(92,221,139,.28)':r.result==='L'?'rgba(255,112,112,.28)':'rgba(245,168,0,.22)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;font-weight:800;color:${r.result==='W'?'#5CDD8B':r.result==='L'?'#ff7070':'#F5A800'};">${r.result}</span>
-                  <div style="flex:1;min-width:0;">
-                    <div style="font-size:.9rem;font-weight:700;color:#fff;">${club.name} <span style="color:var(--muted);font-weight:500;">vs</span> ${r.opponent}</div>
-                    <div style="font-size:.73rem;color:rgba(255,255,255,.3);margin-top:3px;">${r.date} &middot; ${r.home===false?'Away':'Home'}${r.manager ? ' &middot; <span style="color:var(--accent-lt);">Submitted by team manager</span>' : ''}</div>
-                  </div>
-                  <div style="font-size:1.3rem;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.02em;flex-shrink:0;background:rgba(255,255,255,.06);border-radius:8px;padding:6px 16px;">${r.score}</div>
-                </div>
-              `).join('') || '<div style="padding:40px;text-align:center;color:var(--muted);">No results available yet.</div>'}
+            <div id="results-list" style="display:flex;flex-direction:column;gap:9px;">
+              ${resultsListHtml()}
             </div>
           </div>
 
