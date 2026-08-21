@@ -6,6 +6,13 @@
 // generate-rss-feed.mjs so the result is immediately live as a real
 // news/*.html page.
 //
+// Also drafts ready-to-post Instagram and X/Twitter captions for the week
+// (social-posts/<id>.txt) — a casual hook built from the week's single most
+// notable result (biggest fresh win, or best league position if nobody
+// notched a fresh win), the real ctsoccerhub.com recap link, and a few
+// hashtags. This is draft text only — nothing here posts on your behalf;
+// copy-paste and review before publishing.
+//
 // IMPORTANT — data freshness: this script does NOT fetch live data itself.
 // I tried adding a live TheSportsDB fetch directly into this script, but
 // hit a hard wall in my dev environment: any .mjs file here that calls
@@ -47,15 +54,22 @@ function esc(s) {
 
 function standingsPts(row) { return row.w * 3 + (row.d || 0); }
 
-// "5th of 12 in USL Championship" — or null if this club has no standings table.
-function positionText(club) {
+// { rank, total } from the club's own standings table, or null if it has none.
+function positionInfo(club) {
   const table = LEAGUE_STANDINGS[club.id];
   if (!table) return null;
   const sorted = [...table.rows].sort((a, b) => standingsPts(b) - standingsPts(a));
   const idx = sorted.findIndex(r => r.abbr === table.selfAbbr);
   if (idx === -1) return null;
-  const ord = (n) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
-  return `${ord(idx + 1)} of ${sorted.length} in ${club.league}`;
+  return { rank: idx + 1, total: sorted.length };
+}
+
+const ordinal = (n) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+
+// "5th of 12 in USL Championship" — or null if this club has no standings table.
+function positionText(club) {
+  const info = positionInfo(club);
+  return info ? `${ordinal(info.rank)} of ${info.total} in ${club.league}` : null;
 }
 
 // A result more than this many days old, with no seasonStatus flag set,
@@ -67,6 +81,90 @@ function daysAgo(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return null;
   return Math.round((Date.now() - d.getTime()) / 86400000);
+}
+
+// ---- Social caption helpers ----
+
+// "2-1" -> 1 (goal margin, from the listed club's perspective — scores are
+// always recorded as "our goals-their goals" regardless of home/away).
+function goalMargin(score) {
+  const [us, them] = score.split('-').map(Number);
+  return us - them;
+}
+
+// "New Haven United FC" -> "#NewHavenUnitedFC". Strips parentheticals (e.g.
+// "CT Rush (USL2)" -> "#CTRush") so the tag stays clean.
+function hashtagFromName(name) {
+  const stripped = name.replace(/\([^)]*\)/g, '');
+  const tag = stripped.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(Boolean).join('');
+  return tag ? `#${tag}` : null;
+}
+
+// Picks the one storyline worth leading a social caption with. Prefers a
+// fresh win (biggest margin first, so a blowout beats a squeaker), then
+// falls back to the best fresh league position, then to nothing (a
+// generic hook gets used instead) — never invents a highlight that isn't
+// backed by real data.
+function pickHighlight(clubs) {
+  const fresh = clubs
+    .filter((c) => c.seasonStatus !== 'concluded' && c.recentResults && c.recentResults[0])
+    .map((c) => ({ club: c, result: c.recentResults[0] }))
+    .filter(({ result }) => {
+      const age = daysAgo(result.date);
+      return age == null || age <= STALE_AFTER_DAYS;
+    });
+
+  const wins = fresh.filter(({ result }) => result.result === 'W')
+    .sort((a, b) => goalMargin(b.result.score) - goalMargin(a.result.score));
+  if (wins.length) return { type: 'win', club: wins[0].club, result: wins[0].result };
+
+  const ranked = fresh
+    .map(({ club }) => ({ club, info: positionInfo(club) }))
+    .filter(({ info }) => info)
+    .sort((a, b) => a.info.rank - b.info.rank);
+  if (ranked.length) return { type: 'position', club: ranked[0].club, info: ranked[0].info };
+
+  return null;
+}
+
+// Builds the Instagram (looser, a couple sentences) and X/Twitter (tight,
+// single hook + link) captions for this week's recap. Tone is deliberately
+// more casual than the recap page itself — a hook to make someone click
+// through, not a restatement of the article.
+function buildSocialCaptions(highlight, canonicalUrl) {
+  const baseTags = ['#CTSoccer', '#ConnecticutSoccer'];
+
+  let hookLong, hookShort, extraTags = [];
+  if (highlight && highlight.type === 'win') {
+    const { club, result } = highlight;
+    const where = result.home ? 'at home' : 'on the road';
+    hookLong = `${club.name} picked up a ${result.score} win over ${result.opponent} ${where} this week ⚽🔥`;
+    hookShort = `${club.name} beat ${result.opponent} ${result.score} this week 🔥`;
+    extraTags = [hashtagFromName(club.name), hashtagFromName(club.league)].filter(Boolean);
+  } else if (highlight && highlight.type === 'position') {
+    const { club, info } = highlight;
+    hookLong = `${club.name} sits ${ordinal(info.rank)} of ${info.total} in ${club.league} heading into this week ⚽`;
+    hookShort = `${club.name} is ${ordinal(info.rank)} of ${info.total} in ${club.league} right now.`;
+    extraTags = [hashtagFromName(club.name), hashtagFromName(club.league)].filter(Boolean);
+  } else {
+    hookLong = `Another week in the books across Connecticut soccer ⚽`;
+    hookShort = `This week's CT soccer recap is here.`;
+  }
+
+  const tags = [...baseTags, ...extraTags].slice(0, 6).join(' ');
+
+  const instagram = [
+    hookLong,
+    `Here's the full rundown — who won, who's up next, and where every CT club stands right now.`,
+    ``,
+    `Full recap 👉 ${canonicalUrl}`,
+    ``,
+    tags,
+  ].join('\n');
+
+  const twitter = `${hookShort} Full recap: ${canonicalUrl} ${tags}`;
+
+  return { instagram, twitter };
 }
 
 function resultSentence(club) {
@@ -109,7 +207,7 @@ const clubBlocks = CT_CLUBS.map(club => {
 
 const today = new Date();
 const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-const isoDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+const isoDate = today.toLocaleDateString('en-CA'); // YYYY-MM-DD, local time (not UTC — avoids rolling to the wrong day depending on time of day)
 const id = `week-${isoDate}`;
 
 const title = `This Week in CT Soccer — ${dateStr}`;
@@ -183,6 +281,32 @@ fs.writeFileSync(newsDataPath, newSrc, 'utf8');
 console.log(existing ? `Updated existing recap "${id}" in news-data.js` : `Added new recap "${id}" to news-data.js`);
 if (commentary) console.log('Kept your existing commentary for this week.');
 else console.log(`Tip: open news-data.js, find "${id}", and fill in its "commentary" field, then re-run generate-news-pages.mjs alone to pick it up.`);
+
+// ---- Draft social captions (Instagram + X/Twitter) for this week's recap.
+// Always the real production URL, never localhost — these get copy-pasted
+// straight into a post, not clicked from a dev environment. Written as a
+// plain text file for the user to review and post by hand; nothing here
+// posts on anyone's behalf. ----
+const canonicalUrl = `https://ctsoccerhub.com/news/${id}.html`;
+const highlight = pickHighlight(CT_CLUBS);
+const { instagram, twitter } = buildSocialCaptions(highlight, canonicalUrl);
+
+const socialDir = path.join(__dirname, 'social-posts');
+if (!fs.existsSync(socialDir)) fs.mkdirSync(socialDir, { recursive: true });
+const socialPath = path.join(socialDir, `${id}.txt`);
+const socialFile = [
+  `INSTAGRAM`,
+  `---------`,
+  instagram,
+  ``,
+  ``,
+  `TWITTER / X`,
+  `-----------`,
+  twitter,
+  ``,
+].join('\n');
+fs.writeFileSync(socialPath, socialFile, 'utf8');
+console.log(`Drafted social captions -> social-posts/${id}.txt`);
 
 // ---- Chain the two generators so the recap is immediately live. ----
 execFileSync(process.execPath, ['generate-news-pages.mjs'], { cwd: __dirname, stdio: 'inherit' });
