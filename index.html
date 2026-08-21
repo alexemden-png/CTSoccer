@@ -242,7 +242,7 @@
       .check-item svg { width: 18px; height: 18px; }
       #programs, #community, #join, #contact, footer { padding-left: 0; padding-right: 0; }
       .grid-footer { grid-template-columns: 1fr; }
-      #contact-form .grid-2col, #signup-form .grid-2col, #contact-form > div:nth-child(1) {
+      #contact-form .grid-2col, #contact-form > div:nth-child(1) {
         grid-template-columns: 1fr !important;
       }
       #join .btn-primary, #join .btn-outline {
@@ -1012,89 +1012,6 @@
   </footer>
 
 
-  <!-- SIGNUP MODAL -->
-  <div id="signup-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;">
-    <div id="modal-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);"></div>
-    <div style="position:relative;z-index:1;background:var(--navy-800);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:48px;max-width:460px;width:calc(100% - 48px);box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(0,174,91,.12);">
-      <button id="modal-close" style="position:absolute;top:18px;right:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
-      </button>
-
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
-        <div style="width:42px;height:42px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px;">
-          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
-        </div>
-        <div>
-          <div style="font-size:1.1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">Join CT Soccer</div>
-          <div style="font-size:.78rem;color:rgba(255,255,255,.38);">Free to join. Takes 2 minutes.</div>
-        </div>
-      </div>
-
-      <form id="signup-form" style="display:flex;flex-direction:column;gap:16px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:6px;">First Name</label>
-            <input type="text" placeholder="Alex" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
-          </div>
-          <div>
-            <label style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:6px;">Last Name</label>
-            <input type="text" placeholder="Smith" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
-          </div>
-        </div>
-
-        <div>
-          <label style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:6px;">Email Address</label>
-          <input type="email" placeholder="you@example.com" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
-        </div>
-
-        <div>
-          <label style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:6px;">Password</label>
-          <input type="password" placeholder="Min. 8 characters" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;font-size:.9rem;color:#fff;font-family:'Montserrat',Arial,sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
-        </div>
-
-        <div>
-          <label style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.38);display:block;margin-bottom:6px;">I am a...</label>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(0,174,91,.5);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
-              <input type="radio" name="role" value="player" checked style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:var(--accent-lt);">⚽ Player</div>
-            </label>
-            <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
-              <input type="radio" name="role" value="coach" style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">📋 Coach</div>
-            </label>
-            <label class="role-opt" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;">
-              <input type="radio" name="role" value="fan" style="display:none;">
-              <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);">🏟️ Fan</div>
-            </label>
-          </div>
-        </div>
-
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
-          <input type="checkbox" name="staySignedIn" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);">
-          <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Stay signed in</span>
-        </label>
-
-        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:.975rem;margin-top:4px;">
-          Create My Account
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
-        </button>
-      </form>
-
-      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
-        <span style="font-size:.72rem;color:rgba(255,255,255,.35);text-transform:uppercase;font-weight:700;">Or</span>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
-      </div>
-
-      <button onclick="continueAsGuest()" class="btn-outline" style="width:100%;justify-content:center;padding:12px;font-size:.9rem;margin-top:16px;">
-        Continue as Guest
-      </button>
-
-      <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.25);margin:18px 0 0;">Already a member? <a href="login.html" style="color:var(--accent);text-decoration:none;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sign in</a></p>
-    </div>
-  </div>
-
   <script>
     const menuBtn    = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -1160,7 +1077,13 @@
           if (signedInUser && signedInUser.firstName && !signedInUser.isGuest) {
             window.location.href = 'dashboard.html';
           } else {
-            openModal();
+            // Route straight to the real Firebase-backed signup flow — this
+            // used to open an in-page modal with its own duplicate signup
+            // form that never called Firebase Auth, so accounts created here
+            // silently ended up without a firebaseUid (broke following
+            // across devices, the People directory, notifications, and match
+            // reactions). One real signup path instead of two.
+            window.location.href = 'register.html';
           }
           return;
         }
@@ -1168,72 +1091,6 @@
         if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
       });
     });
-
-    const modal    = document.getElementById('signup-modal');
-    const backdrop = document.getElementById('modal-backdrop');
-    const closeBtn = document.getElementById('modal-close');
-
-    function openModal() {
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal() {
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-    backdrop.addEventListener('click', closeModal);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-    document.querySelectorAll('.role-opt').forEach(label => {
-      label.addEventListener('click', () => {
-        document.querySelectorAll('.role-opt').forEach(l => {
-          l.style.borderColor = 'rgba(255,255,255,.1)';
-          l.querySelector('div').style.color = 'rgba(255,255,255,.5)';
-        });
-        label.style.borderColor = 'rgba(0,174,91,.5)';
-        label.querySelector('div').style.color = 'var(--accent-lt)';
-      });
-    });
-
-    document.getElementById('signup-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const inputs    = e.target.querySelectorAll('input[type="text"],input[type="email"],input[type="password"]');
-      const firstName = inputs[0].value.trim();
-      const lastName  = inputs[1].value.trim();
-      const email     = inputs[2].value.trim();
-      const password  = inputs[3].value;
-      const role      = e.target.querySelector('input[name="role"]:checked').value;
-      const staySignedIn = e.target.querySelector('input[name="staySignedIn"]').checked;
-      const user = {
-        firstName, lastName, email, password, role,
-        isGuest: false,
-        joined: new Date().toISOString(),
-        followedClubs: [],
-        notifications: true,
-        stats: { goals:0, assists:0, appearances:0, rating:' - ' }
-      };
-      ctsoccerSetUser(user, staySignedIn);
-      window.location.href = 'dashboard.html';
-    });
-
-    function continueAsGuest() {
-      const guest = {
-        firstName: 'Guest',
-        lastName: 'User',
-        email: 'guest@ctsoccer.local',
-        role: 'fan',
-        isGuest: true,
-        joined: new Date().toISOString(),
-        followedClubs: [],
-        notifications: false,
-        stats: { goals:0, assists:0, appearances:0, rating:' - ' }
-      };
-      ctsoccerSetUser(guest, false);
-      closeModal();
-      window.location.href = 'dashboard.html';
-    }
   </script>
 
   <!-- Soccer pitch canvas background for hero -->
