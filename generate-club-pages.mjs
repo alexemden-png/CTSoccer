@@ -366,6 +366,7 @@ function pageHtml(club) {
             <li><a href="../dashboard.html?section=standings" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Adult Leagues</a></li>
             <li><a href="../tournaments.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Tournaments</a></li>
             <li><a href="../coaching-clinics.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Coaching Clinics</a></li>
+            <li><a href="../clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Clubs by Town</a></li>
           </ul>
         </div>
 

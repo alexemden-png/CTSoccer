@@ -1,4 +1,115 @@
-<!DOCTYPE html>
+// Generates clubs-by-town.html — a single, crawlable directory of every
+// tracked CT soccer club grouped alphabetically by town, for searches like
+// "[town] youth soccer club."
+//
+// Data source: merges CJSA_DIRECTORY (162 lightweight CJSA member entries,
+// clean city fields) with the handful of ALL_CLUBS entries that have no
+// CJSA_DIRECTORY row linking to them via edpClubId (pro/semi-pro clubs like
+// Hartford Athletic that aren't CJSA youth members, plus a few youth/EDP
+// clubs CJSA's list doesn't carry). Ginga FC serves three towns (Woodbridge,
+// Hamden & Madison) and is listed once under each.
+//
+// Each row links to its rich profile at clubs/<id>.html when one exists,
+// otherwise to its real external website from CJSA_DIRECTORY.
+//
+// Also keeps sitemap.xml in sync (single entry, upserted by <loc> match).
+//
+// Run with: node generate-town-directory.mjs
+
+import fs from 'fs';
+import path from 'path';
+import vm from 'vm';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const clubsDataSrc = fs.readFileSync(path.join(__dirname, 'clubs-data.js'), 'utf8');
+const cjsaSrc = fs.readFileSync(path.join(__dirname, 'cjsa-directory.js'), 'utf8');
+const sandbox = {};
+vm.createContext(sandbox);
+vm.runInContext(clubsDataSrc, sandbox);
+vm.runInContext(cjsaSrc, sandbox);
+const { ALL_CLUBS, CJSA_DIRECTORY } = vm.runInContext('({ALL_CLUBS, CJSA_DIRECTORY})', sandbox);
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function slugify(s) {
+  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+// ---- Build merged rows: { town, name, richId, website } ----
+const edpIds = new Set(CJSA_DIRECTORY.filter(c => c.edpClubId).map(c => c.edpClubId));
+const extras = ALL_CLUBS.filter(c => !edpIds.has(c.id));
+
+const rows = [];
+for (const c of CJSA_DIRECTORY) {
+  rows.push({ town: c.city.trim(), name: c.name, richId: c.edpClubId || null, website: c.website || null });
+}
+for (const c of extras) {
+  const towns = c.id === 'ginga-fc' ? ['Woodbridge', 'Hamden', 'Madison'] : [c.city];
+  for (const t of towns) {
+    rows.push({ town: t.trim(), name: c.name, richId: c.id, website: c.website || null });
+  }
+}
+
+const byTown = {};
+for (const r of rows) (byTown[r.town] = byTown[r.town] || []).push(r);
+for (const t of Object.keys(byTown)) byTown[t].sort((a, b) => a.name.localeCompare(b.name));
+const towns = Object.keys(byTown).sort((a, b) => a.localeCompare(b));
+
+const TOTAL_CLUBS = rows.length;
+const TOTAL_TOWNS = towns.length;
+
+// ---- Index (jump links) ----
+function indexHtml() {
+  const chips = towns.map(t => `<a href="#${esc(slugify(t))}" style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.65);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);white-space:nowrap;transition:color .2s,border-color .2s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.22)'" onmouseout="this.style.color='rgba(255,255,255,.65)';this.style.borderColor='rgba(255,255,255,.08)'">${esc(t)}</a>`).join('\n        ');
+  return `
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        ${chips}
+    </div>`;
+}
+
+// ---- Per-town sections ----
+function rowHtml(r) {
+  const href = r.richId ? `clubs/${esc(r.richId)}.html` : esc(r.website);
+  const external = !r.richId;
+  return `
+        <li style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--navy-800);border:1px solid var(--border);border-radius:12px;">
+          <a href="${href}"${external ? ' target="_blank" rel="noopener"' : ''} style="font-size:.92rem;font-weight:700;color:#fff;text-decoration:none;">${esc(r.name)}</a>
+          ${r.richId ? `<span style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-lt);background:rgba(43,124,233,.12);border:1px solid rgba(43,124,233,.22);padding:3px 8px;border-radius:5px;flex-shrink:0;">Full Profile</span>` : `<svg width="13" height="13" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`}
+        </li>`;
+}
+
+function townSectionHtml(town) {
+  const clubs = byTown[town];
+  return `
+    <section id="${esc(slugify(town))}" style="scroll-margin-top:80px;margin-bottom:32px;">
+      <h2 style="font-size:1.05rem;font-weight:800;color:#fff;margin:0 0 12px;display:flex;align-items:baseline;gap:8px;">${esc(town)} <span style="font-size:.78rem;font-weight:600;color:rgba(255,255,255,.35);">${clubs.length} club${clubs.length === 1 ? '' : 's'}</span></h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;">${clubs.map(rowHtml).join('')}
+      </ul>
+    </section>`;
+}
+
+function collectionJsonLd(canonical) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'CT Soccer Clubs by Town',
+    description: `Directory of ${TOTAL_CLUBS} youth, adult, and professional soccer clubs across ${TOTAL_TOWNS} Connecticut towns.`,
+    url: canonical,
+    isPartOf: { '@type': 'WebSite', name: 'CT Soccer', url: 'https://ctsoccerhub.com/' },
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+}
+
+function pageHtml() {
+  const title = 'CT Soccer Clubs by Town | Find a Club Near You in Connecticut';
+  const description = `Browse ${TOTAL_CLUBS} Connecticut soccer clubs grouped by town — youth, adult, and pro/semi-pro. Find the club nearest you across ${TOTAL_TOWNS} CT towns.`;
+  const canonical = 'https://ctsoccerhub.com/clubs-by-town.html';
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <script defer src="/_vercel/insights/script.js"></script>
@@ -6,61 +117,34 @@
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>About CT Soccer — Connecticut's Soccer Hub</title>
-  <meta name="description" content="CT Soccer is a hub for Connecticut soccer — real club profiles, tournaments, coaching clinics, and a community for players, coaches, team managers, and fans. Learn what we are and how our data is sourced.">
-  <link rel="canonical" href="https://ctsoccerhub.com/about.html">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(title)}</title>
+  <meta name="description" content="${esc(description)}">
+  <link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta name="twitter:card" content="summary">
+  ${collectionJsonLd(canonical)}
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy:     #0D1B2A;
-      --navy-800: #111f31;
-      --navy-700: #162338;
-      --accent:   #2B7CE9;
-      --accent-lt:#5BA3F5;
-      --muted:    rgba(255,255,255,.55);
-      --border:   rgba(255,255,255,.08);
-    }
+    :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
-    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
-    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 28px; }
-    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
-    .nav-link:hover { color: #fff; }
-    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
-
-    .doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
-    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
-    .doc .intro { font-size: .98rem; line-height: 1.8; color: var(--muted); margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
-    .doc section { margin-bottom: 40px; }
-    .doc h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; }
-    .doc p { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
-    .doc ul { margin: 0 0 14px 20px; }
-    .doc li { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 8px; }
-    .doc li strong { color: rgba(255,255,255,.85); }
-    .doc a { color: var(--accent-lt); text-decoration: none; }
-    .doc a:hover { text-decoration: underline; }
-    .audience-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 8px; }
-    .audience-card { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px; text-align: center; }
-    .audience-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
-    .audience-card .label { font-size: .82rem; font-weight: 700; color: #fff; }
-    .source-list { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; }
-
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    a { color: inherit; }
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
     @media (max-width: 640px) {
       body { padding-bottom: 88px; }
-      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
-      .nav-inner > div { width: 100%; justify-content: space-between; }
-      .nav-inner > div > a.nav-link { display: none; }
-      .nav-inner > div > a { font-size: .75rem; }
       .mobile-bottom-nav { display: flex !important; }
-      .audience-grid { grid-template-columns: repeat(2,1fr); }
+      nav.sub-nav { padding: 0 16px !important; }
+      .nav-crumb { display: none !important; }
     }
   </style>
 </head>
@@ -84,90 +168,44 @@
     </a>
   </nav>
 
-  <nav>
-    <div class="nav-inner">
-      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
-          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
-        </div>
-        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
-      </a>
-      <div style="display:flex;align-items:center;gap:28px;">
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-        <a href="tournaments.html" class="nav-link">Tournaments</a>
-        <a href="news.html" class="nav-link">News</a>
-        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
-        <a href="account.html" class="btn-primary">My Account</a>
+  <nav class="sub-nav" style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
       </div>
-    </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg class="nav-crumb" width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="nav-crumb" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Clubs by Town</span>
+    <div style="flex:1;"></div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="dashboard.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap;">Dashboard</a>
   </nav>
 
-  <div class="doc">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
-      <span style="color:rgba(255,255,255,.2);">/</span>
-      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">About</span>
+  <div style="max-width:900px;margin:0 auto;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 0 0;font-size:.78rem;color:rgba(255,255,255,.35);flex-wrap:wrap;">
+      <a href="index.html" style="text-decoration:none;color:inherit;">Home</a>
+      <span>/</span>
+      <span style="color:rgba(255,255,255,.6);">Clubs by Town</span>
     </div>
 
-    <h1>About CT Soccer</h1>
+    <!-- HERO -->
+    <div style="padding:20px 0 28px;border-bottom:1px solid var(--border);margin-bottom:28px;">
+      <h1 style="margin:0 0 10px;font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.2;">Connecticut Soccer Clubs by Town</h1>
+      <p style="margin:0;font-size:.92rem;line-height:1.7;color:rgba(255,255,255,.55);max-width:640px;">Every tracked youth, adult, and professional club in the state, grouped by the town it's based in — ${TOTAL_CLUBS} clubs across ${TOTAL_TOWNS} towns. Jump to a town below, or find your own club on the <a href="dashboard.html" style="color:var(--accent-lt);">Full Directory</a>.</p>
+    </div>
 
-    <p class="intro">
-      CT Soccer (ctsoccerhub.com) is a hub for Connecticut soccer — one place to find real club profiles, live
-      results, tournaments, coaching clinic listings, and a community feed for the people who make up the state's
-      soccer scene, from Hartford Athletic's professional roster down to town-level youth clubs.
-    </p>
+    <!-- JUMP LINKS -->
+    ${indexHtml()}
 
-    <section id="who-its-for">
-      <h2>Who it's for</h2>
-      <p>CT Soccer is built for four overlapping groups:</p>
-      <div class="audience-grid">
-        <div class="audience-card"><div class="icon">&#9917;</div><div class="label">Players</div></div>
-        <div class="audience-card"><div class="icon">&#128203;</div><div class="label">Coaches</div></div>
-        <div class="audience-card"><div class="icon">&#128188;</div><div class="label">Team Managers</div></div>
-        <div class="audience-card"><div class="icon">&#127943;</div><div class="label">Fans</div></div>
-      </div>
-      <p style="margin-top:16px;">
-        Whether you're a player following Hartford Athletic's season, a parent trying to find the right youth club
-        or an upcoming tryout, a coach comparing CJSA course pricing, or a team manager keeping your roster and
-        results up to date, CT Soccer is meant to be the fastest way to find what you're looking for.
-      </p>
-    </section>
+    <!-- TOWN SECTIONS -->
+    <div style="margin-top:28px;">
+      ${towns.map(townSectionHtml).join('')}
+    </div>
 
-    <section id="what-you-can-do">
-      <h2>What's on the site</h2>
-      <ul>
-        <li><strong>Club Dashboard</strong> — profiles for Connecticut's professional, semi-professional, and youth clubs, with live results for Hartford Athletic, AC Connecticut, and CT Rush pulled automatically from TheSportsDB.</li>
-        <li><strong>Tournaments</strong> — a browsable list of CJSA and EDP tournaments across the state.</li>
-        <li><strong>Coaching Clinics</strong> — every CJSA and US Soccer coaching course available in Connecticut, with real pricing.</li>
-        <li><strong>Soccer Assistant</strong> — a guided recommendation tool to help match players and families with the right club or course.</li>
-        <li><strong>News</strong> — season storylines and auto-updating match results for CT's real clubs.</li>
-        <li><strong>People &amp; Community</strong> — a directory and social feed for the CT Soccer community, once you create a free account.</li>
-      </ul>
-    </section>
-
-    <section id="data-sources">
-      <h2>How our data is sourced</h2>
-      <p>We're not making this up as we go — club and league data comes from a mix of real, named sources:</p>
-      <div class="source-list">
-        <ul style="margin-bottom:0;">
-          <li><strong>CJSA</strong> (Connecticut Junior Soccer Association) — the club directory and coaching course listings are sourced from cjsa.org.</li>
-          <li><strong>US Soccer</strong> — national coaching license pricing and course structure via the US Soccer Learning Center (learning.ussoccer.com).</li>
-          <li><strong>TheSportsDB</strong> — a public sports-data API that powers live match results and fixtures for Hartford Athletic, AC Connecticut, and CT Rush.</li>
-          <li><strong>Official league standings</strong> — USL Championship, MLS Next Pro, NPSL, and USL League Two tables sourced from each league's own site (uslchampionship.com, mlsnextpro.com, npsl.com, uslleaguetwo.com).</li>
-          <li><strong>Club websites &amp; submissions</strong> — youth and competitive club contact info, tryout details, and program descriptions are gathered from clubs' own public websites. If you run a CT club and see something out of date, <a href="index.html#contact">let us know</a> and we'll fix it.</li>
-        </ul>
-      </div>
-      <p style="margin-top:16px;">
-        Some club descriptions and season stats are still being verified against live sources — see our
-        <a href="terms-of-service.html#accuracy">Terms of Service</a> for the full accuracy disclaimer before relying
-        on anything here for a real decision (like a tryout date). When in doubt, confirm directly with the club.
-      </p>
-    </section>
-
-    <section id="contact">
-      <h2>Questions or corrections</h2>
-      <p>Reach us through our <a href="index.html#contact">contact form</a>, or see our <a href="privacy-policy.html">Privacy Policy</a> and <a href="terms-of-service.html">Terms of Service</a> for more on how the site works.</p>
-    </section>
+    <div style="text-align:center;padding:16px 0 48px;">
+      <a href="dashboard.html" style="display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:10px;text-decoration:none;">Browse the Full Directory &rarr;</a>
+    </div>
   </div>
 
   <style>
@@ -213,7 +251,7 @@
             <li><a href="dashboard.html?section=standings" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Adult Leagues</a></li>
             <li><a href="tournaments.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Tournaments</a></li>
             <li><a href="coaching-clinics.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Coaching Clinics</a></li>
-            <li><a href="clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Clubs by Town</a></li>
+            <li><a href="clubs-by-town.html" style="font-size:.875rem;color:rgba(255,255,255,.85);text-decoration:none;">Clubs by Town</a></li>
           </ul>
         </div>
 
@@ -256,3 +294,22 @@
   </footer>
 </body>
 </html>
+`;
+}
+
+// ---- Sitemap: upsert this single URL, keeping everything else untouched ----
+function updateSitemap() {
+  const sitemapPath = path.join(__dirname, 'sitemap.xml');
+  let xml = fs.readFileSync(sitemapPath, 'utf8');
+  const loc = 'https://ctsoccerhub.com/clubs-by-town.html';
+  if (xml.includes(`<loc>${loc}</loc>`)) return false;
+  const entry = `\n  <url>\n    <loc>${loc}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+  xml = xml.replace('</urlset>', `${entry}</urlset>`);
+  fs.writeFileSync(sitemapPath, xml, 'utf8');
+  return true;
+}
+
+fs.writeFileSync(path.join(__dirname, 'clubs-by-town.html'), pageHtml(), 'utf8');
+console.log(`Generated clubs-by-town.html — ${TOTAL_CLUBS} clubs across ${TOTAL_TOWNS} towns`);
+const added = updateSitemap();
+console.log(added ? 'Added clubs-by-town.html to sitemap.xml' : 'clubs-by-town.html already in sitemap.xml — left untouched');

@@ -343,4 +343,10 @@
     <priority>0.6</priority>
   </url>
   <!-- END NEWS PAGES -->
+
+  <url>
+    <loc>https://ctsoccerhub.com/clubs-by-town.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
