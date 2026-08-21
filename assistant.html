@@ -80,6 +80,8 @@
   </div>
 
   <script src="clubs-data.js"></script>
+  <script src="cjsa-directory.js"></script>
+  <script src="club-match.js"></script>
   <script>
     let user = {};
     try { user = ctsoccerGetUser() || {}; } catch(e) {}
@@ -95,30 +97,22 @@
       { id:'c-license', name:'US Soccer C License', tier:'c', price:'$400', ageBand:['U6-U8','U9-U10','U11-U12','U13+'], note:'For experienced coaches ready to work with competitive teams.' },
     ];
 
-    function classifyYouthLevel(club) {
-      const l = club.league || '';
-      if (/MLS NEXT|ECNL/i.test(l)) return 'elite';
-      if (/EDP/i.test(l)) return 'competitive';
-      return 'recreational';
-    }
-
-    const AGE_BANDS = { 'U9-U11': ['U9','U10','U11'], 'U12-U14': ['U12','U13','U14'], 'U15-U19': ['U15','U16','U17','U18','U19'] };
-
+    // classifyYouthLevel() and AGE_BANDS now come from club-match.js, shared
+    // with find-a-club.html — same matching logic, same candidate pool
+    // (every CJSA_DIRECTORY club, not just the 38 rich ALL_CLUBS profiles),
+    // so the quiz and this assistant give consistent answers.
     function recommendClubs(a) {
-      let pool, usedFallback = false;
       if (a.playerType === 'youth') {
-        pool = ALL_CLUBS.filter(c => c.type === 'youth' && (c.ageGroups||[]).some(x => (AGE_BANDS[a.age]||[]).includes(x)));
-        const leveled = pool.filter(c => classifyYouthLevel(c) === a.level);
-        if (leveled.length) pool = leveled; else usedFallback = true;
-      } else {
-        pool = CT_CLUBS.filter(c => a.adultLevel === 'pro' ? c.tier === 'Professional' : c.tier !== 'Professional');
+        const { results, notes } = matchClubs({ town: a.location || '', ageBand: a.age || '', level: a.level || '', travel: 'anywhere' });
+        return { list: results, notes };
       }
+      let pool = CT_CLUBS.filter(c => a.adultLevel === 'pro' ? c.tier === 'Professional' : c.tier !== 'Professional');
       if (a.location) {
         const loc = a.location.toLowerCase().trim();
         const exact = pool.filter(c => c.city.toLowerCase().includes(loc) || loc.includes(c.city.toLowerCase()));
         if (exact.length) pool = [...exact, ...pool.filter(c => !exact.includes(c))];
       }
-      return { list: pool.slice(0, 5), usedFallback };
+      return { list: pool.slice(0, 5), notes: [] };
     }
 
     function recommendCourses(a) {
@@ -256,6 +250,7 @@
         { label: 'Recreational / house league', onSelect: () => { answers.level = 'recreational'; think(() => askLocation(onComplete)); } },
         { label: 'Competitive travel (EDP)', onSelect: () => { answers.level = 'competitive'; think(() => askLocation(onComplete)); } },
         { label: 'Elite (ECNL / MLS Next)', onSelect: () => { answers.level = 'elite'; think(() => askLocation(onComplete)); } },
+        { label: 'Not sure — show me everything', onSelect: () => { answers.level = 'unsure'; think(() => askLocation(onComplete)); } },
       ]);
     }
 
@@ -277,15 +272,13 @@
     }
 
     function showClubResults(onComplete) {
-      const { list, usedFallback } = recommendClubs(answers);
+      const { list, notes } = recommendClubs(answers);
       if (!list.length) {
         botMsg("I couldn't find a real match for that combination on the site yet — try the full <a href='dashboard.html?section=clubs' style='color:var(--accent-lt);'>Club Directory</a> instead.");
         onComplete();
         return;
       }
-      botMsg(usedFallback
-        ? `No clubs at exactly that competitiveness level matched your age group, so here are the closest real options by age group instead:`
-        : `Here's what I'd recommend, based on real clubs in the site's directory:`);
+      botMsg(notes && notes.length ? notes.join('<br>') : `Here's what I'd recommend, based on real clubs in the site's directory:`);
       const div = document.createElement('div');
       div.className = 'msg-in';
       div.style.cssText = 'display:flex;flex-direction:column;gap:10px;padding-left:40px;';
@@ -296,7 +289,8 @@
     }
 
     function clubRecCardHtml(c) {
-      const sub = c.type === 'youth' ? `${c.leagueShort} &middot; ${(c.ageGroups||[]).slice(0,4).join(', ')}${(c.ageGroups||[]).length>4?'…':''}` : `${c.leagueShort} &middot; ${c.league}`;
+      const ageLabel = clubAgeRangeLabel(c);
+      const sub = c.type === 'youth' ? `Ages ${ageLabel || 'not listed'}` : `${c.leagueShort} &middot; ${c.league}`;
       return `
         <a href="club.html?id=${c.id}" class="rec-card">
           <div class="club-badge-abbr" style="width:44px;height:44px;border-radius:10px;background:${c.primary}22;border:1.5px solid ${c.primary}55;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:${c.primary};flex-shrink:0;">${c.abbr}</div>
