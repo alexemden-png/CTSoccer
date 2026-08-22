@@ -6,60 +6,41 @@
   <meta charset="UTF-8">
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>What's New — CT Soccer</title>
-  <meta name="description" content="Recent updates and new features added to CT Soccer, in reverse chronological order.">
-  <link rel="canonical" href="https://ctsoccerhub.com/whats-new.html">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>This Season in Review | CT Soccer</title>
+  <meta name="description" content="How Hartford Athletic, CT United FC, New Haven United FC, AC Connecticut, and CT Rush have done this season — real records, league position, and notable results.">
+  <link rel="canonical" href="https://ctsoccerhub.com/season-review.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="This Season in Review — CT Pro & Semi-Pro Soccer">
+  <meta property="og:description" content="Real records, league standings, and notable results for Connecticut's 5 pro and semi-pro soccer clubs this season.">
+  <meta property="og:url" content="https://ctsoccerhub.com/season-review.html">
+  <meta name="twitter:card" content="summary">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="clubs-data.js"></script>
   <style>
-    :root {
-      --navy:     #0D1B2A;
-      --navy-800: #111f31;
-      --navy-700: #162338;
-      --accent:   #2B7CE9;
-      --accent-lt:#5BA3F5;
-      --muted:    rgba(255,255,255,.55);
-      --border:   rgba(255,255,255,.08);
-    }
+    :root { --navy:#0D1B2A; --navy-800:#162236; --accent:#2B7CE9; --accent-lt:#5BA3FF; --border:rgba(255,255,255,.07); --muted:rgba(255,255,255,.42); }
     html[data-theme="light"] { filter: invert(1) hue-rotate(180deg); }
     html[data-theme="light"] img, html[data-theme="light"] video, html[data-theme="light"] canvas, html[data-theme="light"] iframe { filter: invert(1) hue-rotate(180deg); }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', Arial, sans-serif; background: var(--navy); color: #fff; min-height: 100vh; }
-    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,27,42,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 24px; }
-    .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 28px; }
-    .nav-link { font-size: .875rem; font-weight: 600; color: rgba(255,255,255,.55); text-decoration: none; transition: color .2s; }
-    .nav-link:hover { color: #fff; }
-    .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg,#2B7CE9 0%,#1a5cb8 100%); color: #fff; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: .85rem; padding: 9px 18px; border-radius: 9px; text-decoration: none; border: none; cursor: pointer; transition: opacity .18s, transform .18s; box-shadow: 0 4px 14px rgba(43,124,233,.35); }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    html[data-theme="light"] .club-badge-abbr { filter: invert(1) hue-rotate(180deg) !important; color: #0D1B2A !important; }
+    *,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+    html,body{margin:0;padding:0;background:var(--navy);color:#fff;font-family:'Montserrat',Arial,sans-serif;}
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-lt); outline-offset: 2px; border-radius: 4px; }
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
-    .doc { max-width: 720px; margin: 0 auto; padding: 56px 24px 100px; }
-    .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
-    .doc .intro { font-size: .98rem; line-height: 1.8; color: var(--muted); margin-bottom: 44px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
-
-    .month-group { margin-bottom: 40px; }
-    .month-label { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 16px; }
-    .entry-list { display: flex; flex-direction: column; gap: 4px; }
-    .entry { display: flex; gap: 16px; padding: 16px 18px; background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; }
-    .entry-icon { font-size: 1.2rem; flex-shrink: 0; line-height: 1.3; }
-    .entry-title { font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
-    .entry-desc { font-size: .85rem; line-height: 1.65; color: var(--muted); }
-    .entry-tag { display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; margin-bottom: 6px; }
-    .tag-feature { background: rgba(43,124,233,.15); color: var(--accent-lt); border: 1px solid rgba(43,124,233,.25); }
-    .tag-improvement { background: rgba(92,221,139,.12); color: #5CDD8B; border: 1px solid rgba(92,221,139,.2); }
-    .tag-fix { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+    .season-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 8px; }
 
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .mobile-bottom-item svg { width: 17px; height: 17px; }
+    ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px;}
     @media (max-width: 640px) {
       body { padding-bottom: 88px; }
-      .nav-inner { height: auto; min-height: 64px; padding: 10px 0; flex-wrap: wrap; }
-      .nav-inner > div { width: 100%; justify-content: space-between; }
-      .nav-inner > div > a.nav-link { display: none; }
-      .nav-inner > div > a { font-size: .75rem; }
       .mobile-bottom-nav { display: flex !important; }
-      .entry { flex-direction: column; gap: 6px; }
+      nav.sub-nav { padding: 0 16px !important; }
+      .nav-crumb { display: none !important; }
+      .season-stat-grid { grid-template-columns: repeat(2,1fr); }
     }
   </style>
 </head>
@@ -83,83 +64,34 @@
     </a>
   </nav>
 
-  <nav>
-    <div class="nav-inner">
-      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-        <div style="width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px;flex-shrink:0;">
-          <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
-        </div>
-        <span style="font-size:1rem;font-weight:800;letter-spacing:-.025em;color:#fff;">CT Soccer</span>
-      </a>
-      <div style="display:flex;align-items:center;gap:28px;">
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-        <a href="tournaments.html" class="nav-link">Tournaments</a>
-        <a href="news.html" class="nav-link">News</a>
-        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
-        <a href="account.html" class="btn-primary">My Account</a>
+  <nav class="sub-nav" style="position:sticky;top:0;z-index:200;background:rgba(13,27,42,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 32px;gap:16px;">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;padding:2px;flex-shrink:0;">
+        <img src="logo.png" alt="CT Soccer" style="width:100%;height:100%;object-fit:contain;">
       </div>
-    </div>
+      <span style="font-size:.88rem;font-weight:800;color:#fff;">CT Soccer</span>
+    </a>
+    <svg class="nav-crumb" width="14" height="14" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <span class="nav-crumb" style="font-size:.88rem;font-weight:600;color:rgba(255,255,255,.5);">Season in Review</span>
+    <div style="flex:1;"></div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark theme" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><span class="theme-toggle-icon">&#9728;&#65039;</span></button>
+    <a href="standings-predictor.html" style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);text-decoration:none;padding:7px 14px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);white-space:nowrap;">Standings Predictor</a>
   </nav>
 
-  <div class="doc">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-      <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
-      <span style="color:rgba(255,255,255,.2);">/</span>
-      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">What's New</span>
+  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:20px 0 0;font-size:.78rem;color:rgba(255,255,255,.35);flex-wrap:wrap;">
+      <a href="index.html" style="text-decoration:none;color:inherit;">Home</a>
+      <span>/</span>
+      <span style="color:rgba(255,255,255,.6);">Season in Review</span>
     </div>
 
-    <h1>What's New</h1>
-    <p class="intro">
-      Recent updates and new features on CT Soccer, newest first. This page is updated by hand as things ship —
-      if something looks missing, it probably just hasn't been added here yet.
-    </p>
-
-    <div class="month-group">
-      <div class="month-label">August 2026</div>
-      <div class="entry-list">
-        <div class="entry">
-          <div class="entry-icon">🔔</div>
-          <div>
-            <span class="entry-tag tag-feature">New</span>
-            <div class="entry-title">Notifications for clubs you follow</div>
-            <div class="entry-desc">Following a club now syncs to your account, and a notification bell on your Dashboard and Account page lets you know when a club you follow has a new match result posted.</div>
-          </div>
-        </div>
-        <div class="entry">
-          <div class="entry-icon">🛡️</div>
-          <div>
-            <span class="entry-tag tag-improvement">Improved</span>
-            <div class="entry-title">Team Manager access now requires approval</div>
-            <div class="entry-desc">Requesting to manage a club's match results and roster now goes through a review step instead of being granted instantly, so match results stay trustworthy.</div>
-          </div>
-        </div>
-        <div class="entry">
-          <div class="entry-icon">👥</div>
-          <div>
-            <span class="entry-tag tag-feature">New</span>
-            <div class="entry-title">Member directory (People)</div>
-            <div class="entry-desc">Search and browse other players, coaches, and fans on CT Soccer, filter by role or club, and follow the people you want to keep up with — only public profile info is ever shown.</div>
-          </div>
-        </div>
-        <div class="entry">
-          <div class="entry-icon">⚽</div>
-          <div>
-            <span class="entry-tag tag-feature">New</span>
-            <div class="entry-title">Team Manager match result submissions</div>
-            <div class="entry-desc">Approved Team Managers can now submit real match results for their club, visible to anyone browsing that club's page.</div>
-          </div>
-        </div>
-        <div class="entry">
-          <div class="entry-icon">☁️</div>
-          <div>
-            <span class="entry-tag tag-improvement">Improved</span>
-            <div class="entry-title">Accounts moved to the cloud</div>
-            <div class="entry-desc">Accounts, profiles, and club follows are now stored server-side instead of only in your browser — sign in from any device and everything is right where you left it.</div>
-          </div>
-        </div>
-      </div>
+    <!-- HERO -->
+    <div style="padding:20px 0 28px;">
+      <h1 style="margin:0 0 10px;font-size:clamp(1.4rem,4vw,1.9rem);font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1.2;">This Season in Review</h1>
+      <p style="margin:0;font-size:.9rem;line-height:1.7;color:rgba(255,255,255,.55);">How Connecticut's 5 pro and semi-pro clubs have done — real records, league standings, and notable results. Some seasons below are complete, others still in progress; each is labeled. We only show a "Biggest Win" or "Toughest Loss" when we actually have that match on record — a couple of clubs only have partial match-by-match data logged, and we'd rather leave a gap than guess.</p>
     </div>
 
+    <div id="season-cards"></div>
   </div>
 
   <style>
@@ -167,7 +99,7 @@
     @media (max-width: 1024px) { .ctf-footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; } }
     @media (max-width: 640px)  { .ctf-footer-grid { grid-template-columns: 1fr; gap: 32px; } }
   </style>
-  <footer style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;">
+  <footer style="background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px;margin-top:20px;">
     <div style="max-width:1180px;margin:0 auto;padding:0 24px;">
 
       <div class="ctf-footer-grid" style="padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.06);">
@@ -210,7 +142,7 @@
             <li><a href="events.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Events</a></li>
             <li><a href="find-a-club.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Find a Club</a></li>
             <li><a href="standings-predictor.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Standings Predictor</a></li>
-            <li><a href="season-review.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Season in Review</a></li>
+            <li><a href="season-review.html" style="font-size:.875rem;color:rgba(255,255,255,.85);text-decoration:none;">Season in Review</a></li>
           </ul>
         </div>
 
@@ -252,5 +184,156 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    const REVIEW_CLUB_IDS = ['hartford-athletic', 'ct-united-fc', 'new-haven-united-fc', 'ac-connecticut', 'connecticut-rush-usl2'];
+    const ordinal = (n) => { const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v-20)%10] || s[v] || s[0]); };
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function rankInfo(table) {
+      const sorted = [...table.rows].sort((a, b) => standingsRowPts(b, table.type) - standingsRowPts(a, table.type));
+      const idx = sorted.findIndex((r) => r.abbr === table.selfAbbr);
+      const row = sorted[idx];
+      return { rank: idx + 1, total: sorted.length, row };
+    }
+
+    function recordLabel(row, isShootout) {
+      return isShootout ? `${row.w}-${row.sow||0}-${row.sol||0}-${row.l}` : `${row.w}-${row.d||0}-${row.l}`;
+    }
+
+    // Season is treated as concluded the same way standings-predictor.html
+    // does: the explicit flag, or an empty upcoming list — a club can be
+    // genuinely done without seasonStatus being set (see New Haven's case).
+    function isConcluded(club) {
+      return club.seasonStatus === 'concluded' || !club.upcoming || !club.upcoming.length;
+    }
+
+    function marginOf(r) {
+      const parts = String(r.score || '').split('-').map(Number);
+      return Math.abs((parts[0] || 0) - (parts[1] || 0));
+    }
+
+    // Only pulls from real recorded results — never invents a "biggest win"
+    // or "toughest loss" for a club whose recentResults happens not to
+    // include one, which is a real gap for a couple of these clubs.
+    function bestResultsFor(club) {
+      const results = club.recentResults || [];
+      const wins = results.filter((r) => r.result === 'W');
+      const losses = results.filter((r) => r.result === 'L');
+      const bestWin = wins.length ? wins.reduce((a, b) => (marginOf(b) > marginOf(a) ? b : a)) : null;
+      const toughestLoss = losses.length ? losses.reduce((a, b) => (marginOf(b) > marginOf(a) ? b : a)) : null;
+      return { bestWin, toughestLoss };
+    }
+
+    // If a real result happened after the standings table's own "as of"
+    // date, say so explicitly — otherwise a newer result sitting next to an
+    // older record (Hartford's case: a real Aug 15 win shown under an
+    // Aug 9 snapshot) reads as an unexplained contradiction rather than
+    // what it actually is: two honestly-dated sources that haven't caught
+    // up to each other yet. Silently skips the check for standings whose
+    // "updated" field isn't a clean date (e.g. "Season complete").
+    function isAfterStandingsSnapshot(resultDate, tableUpdated) {
+      const r = new Date(resultDate);
+      const t = new Date(tableUpdated);
+      if (isNaN(r) || isNaN(t)) return false;
+      return r > t;
+    }
+
+    function resultCardHtml(label, r, color, tableUpdated) {
+      if (!r) return '';
+      const vs = r.home === false ? `@ ${esc(r.opponent)}` : `vs ${esc(r.opponent)}`;
+      const newerNote = isAfterStandingsSnapshot(r.date, tableUpdated)
+        ? `<div style="font-size:.68rem;color:rgba(255,255,255,.32);margin-top:6px;">Not yet reflected in the record above — happened after that standings snapshot.</div>`
+        : '';
+      return `
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${color};margin-bottom:6px;">${label}</div>
+          <div style="font-size:.92rem;font-weight:700;color:#fff;">${vs}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:.75rem;color:rgba(255,255,255,.4);">${esc(r.date)}</span>
+            <span style="font-size:1rem;font-weight:800;color:#fff;">${esc(r.score)}</span>
+          </div>
+          ${newerNote}
+        </div>`;
+    }
+
+    function clubSeasonCardHtml(club) {
+      const table = LEAGUE_STANDINGS[club.id];
+      const isShootout = table.type === 'shootout';
+      const { rank, total, row } = rankInfo(table);
+      const gd = (row.gf || 0) - (row.ga || 0);
+      const concluded = isConcluded(club);
+      const { bestWin, toughestLoss } = bestResultsFor(club);
+
+      const statBlock = [
+        ['Record', recordLabel(row, isShootout)],
+        ['Points', String(standingsRowPts(row, table.type))],
+        ['GD', (gd > 0 ? '+' : '') + gd],
+        ['League Position', ordinal(rank) + ' of ' + total],
+      ];
+
+      // New Haven's own about copy already documents this specific season's
+      // real story (conference title, National Semifinal loss) — reused
+      // as-is rather than writing new narrative text on top of it. The
+      // other 4 clubs' about fields are club history, not this season, so
+      // they don't get this block.
+      const seasonStoryHtml = club.id === 'new-haven-united-fc'
+        ? `<p style="font-size:.85rem;line-height:1.75;color:rgba(255,255,255,.55);margin:16px 0 0;">${esc(club.about)}</p>`
+        : '';
+
+      const missingWinNote = !bestWin
+        ? `<div style="font-size:.78rem;color:rgba(255,255,255,.35);font-style:italic;margin-top:10px;">We don't have individual match data for ${esc(club.name)}'s wins this season — see the season record above.</div>`
+        : '';
+
+      return `
+        <div style="background:var(--navy-800);border:1px solid var(--border);border-radius:18px;padding:26px 28px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div style="width:52px;height:52px;border-radius:13px;background:${club.primary}22;border:2px solid ${club.primary}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="club-badge-abbr" style="font-size:1.1rem;font-weight:900;color:${club.primary};">${esc(club.abbr)}</span>
+              </div>
+              <div>
+                <div style="font-size:1.15rem;font-weight:800;color:#fff;">${esc(club.name)}</div>
+                <div style="font-size:.8rem;color:rgba(255,255,255,.45);">${esc(club.league)} &middot; ${esc(club.tier)}</div>
+              </div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 12px;border-radius:7px;background:${concluded ? 'rgba(255,255,255,.08)' : 'rgba(92,221,139,.12)'};color:${concluded ? 'rgba(255,255,255,.5)' : '#5CDD8B'};border:1px solid ${concluded ? 'rgba(255,255,255,.12)' : 'rgba(92,221,139,.3)'};">
+              ${concluded ? '' : '<span style="width:6px;height:6px;border-radius:50%;background:#5CDD8B;display:inline-block;animation:pulse 1.5s infinite;"></span>'}
+              ${concluded ? 'Season Complete' : 'Season In Progress'}
+            </span>
+          </div>
+
+          <div class="season-stat-grid">
+            ${statBlock.map(([k, v]) => `
+              <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:1.05rem;font-weight:800;color:#fff;">${esc(v)}</div>
+                <div style="font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">${esc(k)}</div>
+              </div>`).join('')}
+          </div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-bottom:18px;">
+            As of ${esc(table.updated)} &middot; via <a href="${esc(table.sourceUrl)}" target="_blank" rel="noopener" style="color:var(--accent-lt);text-decoration:none;">${esc(table.sourceLabel)}</a> &#8599;
+          </div>
+
+          ${(bestWin || toughestLoss) ? `
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              ${resultCardHtml('Biggest Win', bestWin, '#5CDD8B', table.updated)}
+              ${resultCardHtml('Toughest Loss', toughestLoss, '#ff7070', table.updated)}
+            </div>` : ''}
+          ${missingWinNote}
+          ${seasonStoryHtml}
+
+          <div style="margin-top:18px;">
+            <a href="club.html?id=${encodeURIComponent(club.id)}" style="font-size:.85rem;font-weight:700;color:var(--accent-lt);text-decoration:none;">View full club page &rarr;</a>
+          </div>
+        </div>`;
+    }
+
+    document.getElementById('season-cards').innerHTML = REVIEW_CLUB_IDS
+      .map((id) => clubSeasonCardHtml(getClubById(id)))
+      .join('');
+  </script>
 </body>
 </html>
