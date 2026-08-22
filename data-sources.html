@@ -7,9 +7,9 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>About CT Soccer — Connecticut's Soccer Hub</title>
-  <meta name="description" content="CT Soccer is a hub for Connecticut soccer — real club profiles, tournaments, coaching clinics, and a community for players, coaches, team managers, and fans. Learn what we are and how our data is sourced.">
-  <link rel="canonical" href="https://ctsoccerhub.com/about.html">
+  <title>Data Sources — How We Get Our Data — CT Soccer</title>
+  <meta name="description" content="Where CT Soccer's club data comes from: live results from TheSportsDB, the CJSA club directory, hand-researched club profiles, Team Manager submissions, and direct corrections from clubs.">
+  <link rel="canonical" href="https://ctsoccerhub.com/data-sources.html">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -36,19 +36,20 @@
     .doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
     .doc h1 { font-size: clamp(1.9rem,4.5vw,2.6rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; margin-bottom: 12px; }
     .doc .intro { font-size: .98rem; line-height: 1.8; color: var(--muted); margin-bottom: 40px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
-    .doc section { margin-bottom: 40px; }
-    .doc h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 14px; }
+    .doc section { margin-bottom: 36px; }
+    .doc h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.02em; color: #fff; margin-bottom: 12px; }
     .doc p { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
     .doc ul { margin: 0 0 14px 20px; }
     .doc li { font-size: .92rem; line-height: 1.8; color: var(--muted); margin-bottom: 8px; }
     .doc li strong { color: rgba(255,255,255,.85); }
     .doc a { color: var(--accent-lt); text-decoration: none; }
     .doc a:hover { text-decoration: underline; }
-    .audience-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 8px; }
-    .audience-card { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px; text-align: center; }
-    .audience-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
-    .audience-card .label { font-size: .82rem; font-weight: 700; color: #fff; }
-    .source-list { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; }
+    .source-card { background: var(--navy-800); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
+    .source-card .num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; background: rgba(43,124,233,.15); color: var(--accent-lt); font-size: .78rem; font-weight: 800; margin-right: 10px; flex-shrink: 0; }
+    .source-card h3 { display: flex; align-items: center; font-size: 1.02rem; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .source-card p { margin-bottom: 0; }
+    .source-card p + p { margin-top: 10px; }
+    .cta-box { background: rgba(43,124,233,.08); border: 1px solid rgba(43,124,233,.22); border-radius: 14px; padding: 22px 24px; }
 
     .mobile-bottom-nav { position: fixed; top: auto; left: 12px; right: 12px; bottom: 12px; z-index: 300; display: none; align-items: center; justify-content: space-around; gap: 6px; padding: 8px 8px 10px; border-radius: 20px; background: rgba(13,27,42,.92); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 20px 40px rgba(0,0,0,.35), 0 0 1px rgba(255,255,255,.1); }
     .mobile-bottom-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; border-radius: 14px; color: rgba(255,255,255,.6); text-decoration: none; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
@@ -60,7 +61,6 @@
       .nav-inner > div > a.nav-link { display: none; }
       .nav-inner > div > a { font-size: .75rem; }
       .mobile-bottom-nav { display: flex !important; }
-      .audience-grid { grid-template-columns: repeat(2,1fr); }
     }
   </style>
 </head>
@@ -106,61 +106,101 @@
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
       <a href="index.html" style="font-size:.8rem;color:rgba(255,255,255,.38);text-decoration:none;">Home</a>
       <span style="color:rgba(255,255,255,.2);">/</span>
-      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">About</span>
+      <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Data Sources</span>
     </div>
 
-    <h1>About CT Soccer</h1>
+    <h1>Data Sources</h1>
 
     <p class="intro">
-      CT Soccer (ctsoccerhub.com) is a hub for Connecticut soccer — one place to find real club profiles, live
-      results, tournaments, coaching clinic listings, and a community feed for the people who make up the state's
-      soccer scene, from Hartford Athletic's professional roster down to town-level youth clubs.
+      CT Soccer Hub pulls together information from a few different places — some of it live from public sports
+      data, some of it hand-researched, and some of it submitted directly by the clubs themselves. This page
+      explains exactly where everything comes from, how current it is, and what to do if something looks wrong.
     </p>
 
-    <section id="who-its-for">
-      <h2>Who it's for</h2>
-      <p>CT Soccer is built for four overlapping groups:</p>
-      <div class="audience-grid">
-        <div class="audience-card"><div class="icon">&#9917;</div><div class="label">Players</div></div>
-        <div class="audience-card"><div class="icon">&#128203;</div><div class="label">Coaches</div></div>
-        <div class="audience-card"><div class="icon">&#128188;</div><div class="label">Team Managers</div></div>
-        <div class="audience-card"><div class="icon">&#127943;</div><div class="label">Fans</div></div>
+    <section id="live-data">
+      <div class="source-card">
+        <h3><span class="num">1</span>Live match data — TheSportsDB</h3>
+        <p>
+          Four Connecticut clubs — Hartford Athletic, CT United FC, AC Connecticut, and CT Rush (USL2) — are
+          tracked through <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a>, a
+          public sports data service. This works in two layers:
+        </p>
+        <ul style="margin-top:10px;">
+          <li>Each club's season record and roster is refreshed by hand periodically and stamped with a "Data
+            Synced" date on its page, so you can always see exactly how current it is — it'll flag itself if that
+            date is more than a week old.</li>
+          <li>The most recent final score and next scheduled match are pulled live, in real time, every time you
+            load that club's page — not on a fixed schedule, but fresh at the moment you're looking at it.</li>
+        </ul>
+        <p>No other Connecticut clubs currently have a public data feed available, which is why this list is
+          short — it's a limitation of what data exists publicly, not a choice about which clubs matter.</p>
+      </div>
+    </section>
+
+    <section id="cjsa-directory">
+      <div class="source-card">
+        <h3><span class="num">2</span>Club directory — CJSA</h3>
+        <p>
+          The directory of Connecticut youth clubs (over 160 of them) — names, cities, and websites — is sourced
+          from the <a href="https://www.cjsa.org" target="_blank" rel="noopener">Connecticut Junior Soccer
+          Association</a>'s official club listing at cjsa.org. This is directory information only, not stats or
+          results, and it's updated in occasional batches rather than continuously, so a club's listed website or
+          contact link may lag behind if they've recently changed it.
+        </p>
+      </div>
+    </section>
+
+    <section id="researched-profiles">
+      <div class="source-card">
+        <h3><span class="num">3</span>Club profiles — manually researched</h3>
+        <p>
+          The more detailed profiles for youth and academy clubs (coaching staff, tryout info, contact details)
+          were researched by hand from each club's own website and social media. These aren't refreshed on any
+          schedule — they reflect what was publicly available at the time they were written, and get updated when
+          a club reaches out with a correction (see below) or when we do another research pass.
+        </p>
+      </div>
+    </section>
+
+    <section id="team-manager-results">
+      <div class="source-card">
+        <h3><span class="num">4</span>Match results — submitted by Team Managers</h3>
+        <p>
+          Some match results you'll see on a club's page were entered directly by that club's own Team Manager,
+          not pulled from any outside source. This isn't open to anyone — a person has to request Team Manager
+          access for a specific club through their account, and that request is personally reviewed and approved
+          before they can submit anything.
+        </p>
+        <p>How current these are depends entirely on how often that club's manager updates them.</p>
+      </div>
+    </section>
+
+    <section id="club-corrections">
+      <div class="source-card">
+        <h3><span class="num">5</span>Corrections — from the clubs themselves</h3>
+        <p>
+          Several clubs have already reached out directly to correct details we had wrong — for example,
+          <strong>Inter CT FC</strong> contacted us to fix their location, colors, and coaching structure after
+          our initial research got parts of it wrong. We treat that as the most reliable source there is: if a
+          club tells us something about themselves is inaccurate, we fix it.
+        </p>
+      </div>
+    </section>
+
+    <section id="report-something">
+      <h2>Spot something wrong?</h2>
+      <div class="cta-box">
+        <p style="margin-bottom:16px;">
+          If you spot outdated or incorrect information anywhere on the site — a wrong coach's name, an old score,
+          a club that's missing entirely — use the form below. A real person reads every submission.
+        </p>
+        <a href="suggest.html" class="btn-primary" style="width:auto;">Suggest a Club or Correction &rarr;</a>
       </div>
       <p style="margin-top:16px;">
-        Whether you're a player following Hartford Athletic's season, a parent trying to find the right youth club
-        or an upcoming tryout, a coach comparing CJSA course pricing, or a team manager keeping your roster and
-        results up to date, CT Soccer is meant to be the fastest way to find what you're looking for.
+        See our <a href="terms-of-service.html#accuracy">Terms of Service</a> for the full accuracy disclaimer
+        before relying on anything here for a real decision, like a tryout date — when in doubt, confirm directly
+        with the club.
       </p>
-    </section>
-
-    <section id="what-you-can-do">
-      <h2>What's on the site</h2>
-      <ul>
-        <li><strong>Club Dashboard</strong> — profiles for Connecticut's professional, semi-professional, and youth clubs, with live results for Hartford Athletic, CT United FC, AC Connecticut, and CT Rush pulled from TheSportsDB.</li>
-        <li><strong>Tournaments</strong> — a browsable list of CJSA and EDP tournaments across the state.</li>
-        <li><strong>Coaching Clinics</strong> — every CJSA and US Soccer coaching course available in Connecticut, with real pricing.</li>
-        <li><strong>Soccer Assistant</strong> — a guided recommendation tool to help match players and families with the right club or course.</li>
-        <li><strong>News</strong> — season storylines and auto-updating match results for CT's real clubs.</li>
-        <li><strong>People &amp; Community</strong> — a directory and social feed for the CT Soccer community, once you create a free account.</li>
-      </ul>
-    </section>
-
-    <section id="data-sources">
-      <h2>How our data is sourced</h2>
-      <p>
-        We're not making this up as we go — club and league data comes from a mix of real, named sources: live
-        results from TheSportsDB, the official CJSA club directory, club profiles researched by hand, match
-        results submitted directly by approved Team Managers, and corrections from the clubs themselves.
-      </p>
-      <p>
-        For the full breakdown of what comes from where, how current each type of data is, and how to report
-        something that looks wrong, see our <a href="data-sources.html">Data Sources</a> page.
-      </p>
-    </section>
-
-    <section id="contact">
-      <h2>Questions or corrections</h2>
-      <p>Reach us through our <a href="index.html#contact">contact form</a>, or see our <a href="privacy-policy.html">Privacy Policy</a> and <a href="terms-of-service.html">Terms of Service</a> for more on how the site works.</p>
     </section>
   </div>
 
@@ -195,7 +235,7 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="rgba(255,255,255,.55)"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
             </a>
             <a href="https://www.youtube.com/@CTsoccerhub" target="_blank" rel="noopener" aria-label="YouTube" style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
-              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/><path fill="#fff" d="M9.6 15.6V8.4L15.8 12z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/></svg>
             </a>
           </div>
         </div>
