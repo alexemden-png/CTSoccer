@@ -113,7 +113,7 @@
     </div>
 
     <h1>Privacy Policy</h1>
-    <div class="updated">Last updated: August 21, 2026</div>
+    <div class="updated">Last updated: August 22, 2026</div>
 
     <p class="intro">
       This Privacy Policy explains what information CT Soccer ("CT Soccer," "we," "us") collects when you use ctsoccerhub.com and its
@@ -155,7 +155,7 @@
         <li><strong>Team manager details</strong> — managing club, club website, contact email, roster entries, and match results you submit. Match results are stored under the relevant club and are visible to other signed-in users viewing that club's page. If you request Team Manager access for a club, we store that request and our approval/denial decision so we can review and audit who has manager access to which club.</li>
         <li><strong>Following relationships</strong> — the clubs you follow (stored on your profile) and the other CT Soccer users you follow or who follow you (stored separately, to power the People directory's follower/following counts and feeds).</li>
         <li><strong>Match reactions</strong> — if you react to a club's match result (🔥/👏/😢), we store which emoji you picked, tied to your account and that specific match, so we can show reaction counts and remember your own reaction. There's no comment or text field — a reaction is the only user-generated content this feature collects.</li>
-        <li><strong>Security settings</strong> — if you enable two-factor authentication, we store an authenticator secret key and one-time backup codes in your Firestore profile record, protected by the same account-level access rules as the rest of your data — not by separate encryption. Honestly: this feature is still in an early state — it stores this setup data and shows you a configuration screen, but signing in doesn't yet actually verify a second-factor code, so turning it on doesn't add real login protection today. We never store your password itself — that's handled entirely by Firebase Authentication.</li>
+        <li><strong>Security settings</strong> — if you enable two-factor authentication, we store an authenticator secret key and one-time backup codes in your Firestore profile record. This is real, standards-based verification (TOTP, RFC 6238) — after your password, signing in genuinely requires a current code from your authenticator app or an unused backup code, checked with real cryptographic math. Honestly, one limitation worth knowing: this site has no paid backend, so that check runs client-side rather than being enforced by a server — real protection against the vast majority of account-takeover attempts, but not a strictly unbypassable guarantee the way a server-enforced check would be. The secret and backup codes themselves are protected by the same account-level Firestore access rules as the rest of your data, not by separate field-level encryption — a deliberate choice, not an oversight, since a password-derived encryption key would break irrecoverably (and silently) on password reset. We never store your password itself — that's handled entirely by Firebase Authentication.</li>
       </ul>
       <h3>Content you post</h3>
       <p>The Community feed is designed to let you upload photos or videos and write captions. Uploads require Firebase Cloud Storage, which isn't active yet (see Section 4), so as of this writing you can't upload photos or videos there, and no post content is currently being collected or stored. When Storage goes live, we'll describe here where and how that content is stored.</p>
