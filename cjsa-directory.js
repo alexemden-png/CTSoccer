@@ -7,7 +7,7 @@
 // used as a fallback profile via getClubById() in clubs-data.js.
 const CJSA_DIRECTORY = [
   { id:'ansonia-soccer-club', name:'Ansonia Soccer Club', city:'Ansonia', website:'https://clubs.bluesombrero.com/ansonia' },
-  { id:'ajax-wrona', name:'Ajax (Wrona)', city:'Wrona', website:'https://wronasoccer.com/' },
+  { id:'ajax-wrona', name:'Ajax (Wrona)', city:'Bristol', website:'https://wronasoccer.com/' },
   { id:'avon-soccer-club', name:'Avon Soccer Club', city:'Avon', website:'http://www.avonsoccerclub.org/' },
   { id:'beachside-sc', name:'Beachside Soccer Club', city:'Norwalk', website:'https://beachsidesoccer.org/', edpClubId:'beachside-sc' },
   { id:'berlin-youth-soccer-association', name:'Berlin Youth Soccer Association', city:'Berlin', website:'https://www.bysa.org' },
