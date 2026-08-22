@@ -7,6 +7,8 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="totp.js"></script>
+  <script src="google-auth.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Join CT Soccer — Create Your Free Account</title>
   <meta name="description" content="Create a free CT Soccer account to follow clubs, join the community, and manage your player or team profile.">
@@ -122,6 +124,36 @@
     }
     .role-opt.selected .role-label { color: var(--accent-lt); }
     .role-label { font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.5); transition: color .2s; }
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #fff;
+      color: #1f1f1f;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: .875rem;
+      padding: 12px 20px;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,.15);
+      cursor: pointer;
+      width: 100%;
+      transition: opacity .18s, transform .18s;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    }
+    .btn-google:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-google:active { transform: translateY(0); }
+    .btn-google:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .msg-error {
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: .82rem;
+      color: #fca5a5;
+      display: none;
+    }
     .mobile-app-bar {
       position: fixed;
       left: 12px;
@@ -227,6 +259,7 @@
       </a>
     </div>
 
+    <div id="register-form-wrap">
     <form id="register-form" style="display:flex;flex-direction:column;gap:16px;">
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -290,10 +323,113 @@
       </button>
     </form>
 
+    <div style="display:flex;align-items:center;gap:12px;margin:22px 0;">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+      <span style="font-size:.7rem;font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.28);">OR</span>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.1);"></div>
+    </div>
+
+    <button type="button" class="btn-google" id="google-signin-btn" onclick="handleGoogleClick()">
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div id="google-signin-error" class="msg-error" style="margin-top:12px;"></div>
+
     <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
       Already a member?
       <a href="login.html" style="color:var(--accent-lt);text-decoration:none;font-weight:700;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sign in</a>
     </p>
+    </div>
+
+    <div id="tfa-challenge-wrap" style="display:none;">
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Two-Factor Authentication</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:20px;">Enter the 6-digit code from your authenticator app.</div>
+      <label class="field-label">Code</label>
+      <input type="text" id="tfa-login-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;letter-spacing:.3em;font-size:1.1rem;font-weight:700;margin-bottom:8px;">
+      <div id="tfa-login-error" style="font-size:.75rem;color:#ff7070;margin:6px 0 10px;min-height:14px;"></div>
+      <button type="button" class="btn-primary" id="tfa-login-verify-btn" onclick="verifyLoginTfaCode()" style="width:100%;margin-bottom:14px;justify-content:center;">
+        Verify &amp; Sign In
+      </button>
+      <p style="text-align:center;">
+        <a href="#" id="tfa-toggle-backup-link" onclick="toggleBackupCodeMode(); return false;" style="font-size:.76rem;color:var(--accent-lt);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Use a backup code instead</a>
+      </p>
+      <p style="text-align:center;margin-top:10px;">
+        <a href="#" onclick="cancelTfaChallenge(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.28);text-decoration:none;">&larr; Back</a>
+      </p>
+    </div>
+
+    <div id="google-newuser-wrap" style="display:none;">
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Finish setting up your account</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:20px;">Just need a couple more details before you're in.</div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label class="field-label">First Name</label>
+            <input type="text" id="google-firstName" placeholder="First">
+          </div>
+          <div>
+            <label class="field-label">Last Name</label>
+            <input type="text" id="google-lastName" placeholder="Last">
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" style="margin-bottom:10px;">I am a...</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div class="role-opt" id="google-role-player" onclick="selectGoogleRole('player')">
+              <div class="role-label">⚽ Player</div>
+            </div>
+            <div class="role-opt" id="google-role-coach" onclick="selectGoogleRole('coach')">
+              <div class="role-label">📋 Coach</div>
+            </div>
+            <div class="role-opt selected" id="google-role-fan" onclick="selectGoogleRole('fan')">
+              <div class="role-label">🏟️ Fan</div>
+            </div>
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="google-agree-terms" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);margin-top:2px;">
+          <span style="font-size:.76rem;color:rgba(255,255,255,.5);line-height:1.4;">I agree to the <a href="terms-of-service.html" target="_blank" style="color:var(--accent-lt);">Terms of Service</a> and <a href="privacy-policy.html" target="_blank" style="color:var(--accent-lt);">Privacy Policy</a>.</span>
+        </label>
+
+        <div id="google-newuser-error" class="msg-error"></div>
+
+        <button type="button" class="btn-primary" id="google-newuser-btn" onclick="submitGoogleNewUser()" disabled>
+          Finish Sign Up
+        </button>
+        <p style="text-align:center;">
+          <a href="#" onclick="cancelGoogleFlow(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.28);text-decoration:none;">&larr; Cancel</a>
+        </p>
+      </div>
+    </div>
+
+    <div id="google-link-wrap" style="display:none;">
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Account already exists</div>
+      <div id="google-link-desc" style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:20px;"></div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label class="field-label">Password</label>
+          <input type="password" id="google-link-password" placeholder="Your password" autocomplete="current-password">
+        </div>
+
+        <div id="google-link-error" class="msg-error"></div>
+
+        <button type="button" class="btn-primary" id="google-link-btn" onclick="submitGoogleLinkPassword()">
+          Sign In &amp; Link Google
+        </button>
+        <p style="text-align:center;">
+          <a href="#" onclick="cancelGoogleFlow(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.28);text-decoration:none;">&larr; Cancel</a>
+        </p>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -380,6 +516,230 @@
       ctsoccerSetUser(user, true);
       window.location.href = 'dashboard.html';
     });
+
+    // ---- "Continue with Google" ----
+    // All Firebase calls and the new-vs-existing-vs-linking decision tree
+    // live in google-auth.js; this page only supplies the panels above and
+    // small callbacks that show/hide them. Unlike login.html, this page's
+    // 2FA challenge only ever serves the Google flow — there's no
+    // password-login path here — so it doesn't need a flow-source branch.
+    let pendingGoogleTfa = null;
+    let tfaUsingBackupCode = false;
+    let pendingGoogleNewUser = null;
+    let pendingGoogleLink = null;
+    let googleSelectedRole = 'fan';
+
+    function showGooglePanel(id) {
+      ['register-form-wrap', 'tfa-challenge-wrap', 'google-newuser-wrap', 'google-link-wrap'].forEach(function (pid) {
+        document.getElementById(pid).style.display = (pid === id) ? 'block' : 'none';
+      });
+    }
+
+    function showTfaChallenge() {
+      showGooglePanel('tfa-challenge-wrap');
+      document.getElementById('tfa-login-code').value = '';
+      document.getElementById('tfa-login-error').textContent = '';
+      document.getElementById('tfa-login-code').focus();
+    }
+
+    function cancelTfaChallenge() {
+      const g = pendingGoogleTfa;
+      pendingGoogleTfa = null;
+      document.getElementById('tfa-challenge-wrap').style.display = 'none';
+      // The pending googleAuthSignIn() call is still awaiting this resolve
+      // — it signs out and restores the form via its own onCancelled hook.
+      if (g) g.resolve(false);
+    }
+
+    function toggleBackupCodeMode() {
+      tfaUsingBackupCode = !tfaUsingBackupCode;
+      const input = document.getElementById('tfa-login-code');
+      const link = document.getElementById('tfa-toggle-backup-link');
+      document.getElementById('tfa-login-error').textContent = '';
+      if (tfaUsingBackupCode) {
+        input.placeholder = 'XXXX-XXXX';
+        input.maxLength = 9;
+        input.style.letterSpacing = '.15em';
+        link.textContent = 'Use your authenticator app instead';
+      } else {
+        input.placeholder = '000000';
+        input.maxLength = 6;
+        input.style.letterSpacing = '.3em';
+        link.textContent = 'Use a backup code instead';
+      }
+      input.value = '';
+      input.focus();
+    }
+
+    async function verifyLoginTfaCode() {
+      if (!pendingGoogleTfa) return;
+      const entered = document.getElementById('tfa-login-code').value.trim();
+      const errorEl = document.getElementById('tfa-login-error');
+      const btn = document.getElementById('tfa-login-verify-btn');
+      btn.disabled = true;
+
+      let ok = false;
+      let usedBackupIndex = -1;
+      const twoFactor = pendingGoogleTfa.twoFactor;
+
+      if (tfaUsingBackupCode) {
+        const codes = twoFactor.backupCodes || [];
+        usedBackupIndex = codes.findIndex(c => !c.used && c.code.toUpperCase() === entered.toUpperCase());
+        ok = usedBackupIndex !== -1;
+      } else {
+        ok = await verifyTotpCode(twoFactor.secret, entered);
+      }
+
+      if (!ok) {
+        btn.disabled = false;
+        errorEl.textContent = tfaUsingBackupCode ? 'Invalid or already-used backup code.' : 'Incorrect or expired code.';
+        return;
+      }
+
+      if (usedBackupIndex !== -1) {
+        const codes = twoFactor.backupCodes.slice();
+        codes[usedBackupIndex] = { ...codes[usedBackupIndex], used: true };
+        try {
+          await db.collection('users').doc(fbAuth.currentUser.uid).update({ 'twoFactor.backupCodes': codes });
+        } catch (e) { /* best-effort — don't block sign-in on this */ }
+      }
+
+      const g = pendingGoogleTfa;
+      pendingGoogleTfa = null;
+      btn.disabled = false;
+      g.resolve(true);
+    }
+
+    function selectGoogleRole(role) {
+      googleSelectedRole = role;
+      ['player', 'coach', 'fan'].forEach(function (r) {
+        document.getElementById('google-role-' + r).classList.toggle('selected', r === role);
+      });
+    }
+
+    document.getElementById('google-agree-terms').addEventListener('change', function () {
+      document.getElementById('google-newuser-btn').disabled = !this.checked;
+    });
+
+    function submitGoogleNewUser() {
+      const firstName = document.getElementById('google-firstName').value.trim();
+      const lastName = document.getElementById('google-lastName').value.trim();
+      const errEl = document.getElementById('google-newuser-error');
+      errEl.style.display = 'none';
+
+      if (!firstName) {
+        errEl.textContent = 'Please enter your first name.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const p = pendingGoogleNewUser;
+      pendingGoogleNewUser = null;
+      if (p) p.resolve({ firstName, lastName, role: googleSelectedRole });
+    }
+
+    function submitGoogleLinkPassword() {
+      const password = document.getElementById('google-link-password').value;
+      const errEl = document.getElementById('google-link-error');
+      errEl.style.display = 'none';
+
+      if (!password) {
+        errEl.textContent = 'Please enter your password.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const p = pendingGoogleLink;
+      pendingGoogleLink = null;
+      if (p) p.resolve(password);
+    }
+
+    function cancelGoogleFlow() {
+      if (pendingGoogleNewUser) { const p = pendingGoogleNewUser; pendingGoogleNewUser = null; p.reject(new Error('cancelled')); }
+      if (pendingGoogleLink) { const p = pendingGoogleLink; pendingGoogleLink = null; p.reject(new Error('cancelled')); }
+      showGooglePanel('register-form-wrap');
+      document.getElementById('google-signin-btn').disabled = false;
+    }
+
+    // accounts.google.com sets Cross-Origin-Opener-Policy headers that block
+    // Firebase's usual window.closed polling, so if the user closes the
+    // Google popup without finishing, signInWithPopup()'s promise can just
+    // hang — leaving the button stuck disabled. This flag is true only
+    // while we're waiting on the popup itself (cleared the instant any hook
+    // fires, since that means the popup already closed on its own); if
+    // focus comes back to this window while it's still true, the popup was
+    // abandoned, so recover the UI instead of leaving it stuck.
+    let googlePopupPending = false;
+    window.addEventListener('focus', function () {
+      if (!googlePopupPending) return;
+      setTimeout(function () {
+        if (!googlePopupPending) return;
+        googlePopupPending = false;
+        document.getElementById('google-signin-btn').disabled = false;
+        showGooglePanel('register-form-wrap');
+      }, 1200);
+    });
+
+    async function handleGoogleClick() {
+      const btn = document.getElementById('google-signin-btn');
+      const errEl = document.getElementById('google-signin-error');
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      googlePopupPending = true;
+
+      await googleAuthSignIn({
+        onNewUser: function (googleUser) {
+          googlePopupPending = false;
+          return new Promise(function (resolve, reject) {
+            pendingGoogleNewUser = { resolve, reject };
+            const split = googleAuthSplitName(googleUser.displayName);
+            document.getElementById('google-firstName').value = split.firstName;
+            document.getElementById('google-lastName').value = split.lastName;
+            document.getElementById('google-agree-terms').checked = false;
+            document.getElementById('google-newuser-btn').disabled = true;
+            document.getElementById('google-newuser-error').style.display = 'none';
+            selectGoogleRole('fan');
+            showGooglePanel('google-newuser-wrap');
+          });
+        },
+        on2FANeeded: function (twoFactor) {
+          googlePopupPending = false;
+          return new Promise(function (resolve) {
+            pendingGoogleTfa = { twoFactor, resolve };
+            tfaUsingBackupCode = false;
+            showTfaChallenge();
+          });
+        },
+        onLinkPasswordNeeded: function (email) {
+          googlePopupPending = false;
+          return new Promise(function (resolve, reject) {
+            pendingGoogleLink = { resolve, reject, email };
+            document.getElementById('google-link-desc').textContent =
+              'An account already exists for ' + email + ' with a password. Enter it below to sign in and link your Google account.';
+            document.getElementById('google-link-password').value = '';
+            document.getElementById('google-link-error').style.display = 'none';
+            showGooglePanel('google-link-wrap');
+          });
+        },
+        onSuccess: function (user) {
+          googlePopupPending = false;
+          ctsoccerSetUser(user, true);
+          window.location.href = 'dashboard.html';
+        },
+        onError: function (message) {
+          googlePopupPending = false;
+          btn.disabled = false;
+          showGooglePanel('register-form-wrap');
+          errEl.textContent = message;
+          errEl.style.display = 'block';
+        },
+        onCancelled: function () {
+          googlePopupPending = false;
+          btn.disabled = false;
+          showGooglePanel('register-form-wrap');
+        },
+      });
+    }
   </script>
 </body>
 </html>

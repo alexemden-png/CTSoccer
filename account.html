@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="google-auth.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Account — CT Soccer</title>
   <meta name="description" content="Manage your CT Soccer profile, followed clubs, and team roster.">
@@ -571,6 +572,13 @@
         <button class="btn-primary" id="tfa-reauth-btn" onclick="tfaReauthAndProceed()" style="width:100%;justify-content:center;">Continue</button>
       </div>
 
+      <div id="tfa-step-reauth-google" style="display:none;">
+        <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Confirm It's You</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">This account signs in with Google, so confirm your Google account before setting up two-factor authentication.</div>
+        <div id="tfa-reauth-google-error" style="font-size:.75rem;color:#ff7070;margin-bottom:10px;min-height:14px;"></div>
+        <button class="btn-primary" id="tfa-reauth-google-btn" onclick="tfaReauthGoogleAndProceed()" style="width:100%;justify-content:center;">Continue with Google</button>
+      </div>
+
       <div id="tfa-step-setup" style="display:none;">
         <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Set Up Two-Factor Authentication</div>
         <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Scan this with an authenticator app (Google Authenticator, Authy, 1Password, etc.), or enter the setup key manually. Then enter the 6-digit code it shows you.</div>
@@ -1039,9 +1047,15 @@
       return;
     }
     tfaPendingSecret = null;
+    // Google-only accounts (no 'password' provider) never set a password,
+    // so the usual "confirm your password" reauth step would just fail —
+    // send them through a Google reauth popup instead.
+    const hasPassword = fbAuth.currentUser.providerData.some(p => p.providerId === 'password');
     document.getElementById('tfa-reauth-password').value = '';
     document.getElementById('tfa-reauth-error').textContent = '';
-    document.getElementById('tfa-step-reauth').style.display = '';
+    document.getElementById('tfa-reauth-google-error').textContent = '';
+    document.getElementById('tfa-step-reauth').style.display = hasPassword ? '' : 'none';
+    document.getElementById('tfa-step-reauth-google').style.display = hasPassword ? 'none' : '';
     document.getElementById('tfa-step-setup').style.display = 'none';
     document.getElementById('tfa-step-backup').style.display = 'none';
     document.getElementById('tfa-modal').style.display = 'flex';
@@ -1071,6 +1085,42 @@
     }
   }
 
+  // accounts.google.com sets Cross-Origin-Opener-Policy headers that block
+  // Firebase's usual window.closed polling, so if the user closes this
+  // popup without finishing, reauthenticateWithPopup()'s promise can just
+  // hang. If focus returns to this window before that promise has settled,
+  // assume it was abandoned and re-enable the button instead of leaving it
+  // stuck disabled forever.
+  let googleReauthPending = false;
+  window.addEventListener('focus', function () {
+    if (!googleReauthPending) return;
+    setTimeout(function () {
+      if (!googleReauthPending) return;
+      googleReauthPending = false;
+      const btn = document.getElementById('tfa-reauth-google-btn');
+      if (btn) btn.disabled = false;
+    }, 1200);
+  });
+
+  async function tfaReauthGoogleAndProceed() {
+    const errorEl = document.getElementById('tfa-reauth-google-error');
+    const btn = document.getElementById('tfa-reauth-google-btn');
+    btn.disabled = true;
+    googleReauthPending = true;
+    try {
+      await fbAuth.currentUser.reauthenticateWithPopup(googleAuthProvider());
+      googleReauthPending = false;
+      beginTfaSetup();
+    } catch (err) {
+      googleReauthPending = false;
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        errorEl.textContent = 'Could not verify: ' + err.message;
+      }
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
   function beginTfaSetup() {
     tfaPendingSecret = generateTotpSecret();
     document.getElementById('tfa-secret').textContent = tfaPendingSecret.match(/.{1,4}/g).join(' ');
@@ -1086,6 +1136,7 @@
     document.getElementById('tfa-code-input').value = '';
     document.getElementById('tfa-error').textContent = '';
     document.getElementById('tfa-step-reauth').style.display = 'none';
+    document.getElementById('tfa-step-reauth-google').style.display = 'none';
     document.getElementById('tfa-step-setup').style.display = '';
   }
 
@@ -1119,6 +1170,7 @@
       `<div style="${c.used ? 'color:rgba(255,255,255,.25);text-decoration:line-through;' : ''}">${c.code}${c.used ? ' (used)' : ''}</div>`
     ).join('');
     document.getElementById('tfa-step-reauth').style.display = 'none';
+    document.getElementById('tfa-step-reauth-google').style.display = 'none';
     document.getElementById('tfa-step-setup').style.display = 'none';
     document.getElementById('tfa-step-backup').style.display = '';
     document.getElementById('tfa-modal').style.display = 'flex';
