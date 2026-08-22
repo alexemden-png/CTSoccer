@@ -7,6 +7,7 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="totp.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Sign In — CT Soccer</title>
   <meta name="description" content="Sign in to your CT Soccer account.">
@@ -223,42 +224,61 @@
       </a>
     </div>
 
-    <form id="login-form" style="display:flex;flex-direction:column;gap:18px;">
-      <div id="error-msg">Incorrect email or password. Please try again.</div>
-      <div id="reset-msg"></div>
+    <div id="login-form-wrap">
+      <form id="login-form" style="display:flex;flex-direction:column;gap:18px;">
+        <div id="error-msg">Incorrect email or password. Please try again.</div>
+        <div id="reset-msg"></div>
 
-      <div>
-        <label class="field-label">Email Address</label>
-        <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
-      </div>
-
-      <div>
-        <label class="field-label">Password</label>
-        <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
-        <div style="text-align:right;margin-top:8px;">
-          <a href="#" onclick="handleForgotPassword(); return false;" style="font-size:.76rem;color:var(--accent-lt);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forgot your password?</a>
+        <div>
+          <label class="field-label">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
         </div>
-      </div>
 
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
-        <input type="checkbox" id="staySignedIn" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);">
-        <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Stay signed in</span>
-      </label>
+        <div>
+          <label class="field-label">Password</label>
+          <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
+          <div style="text-align:right;margin-top:8px;">
+            <a href="#" onclick="handleForgotPassword(); return false;" style="font-size:.76rem;color:var(--accent-lt);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forgot your password?</a>
+          </div>
+        </div>
 
-      <button type="submit" class="btn-primary" style="margin-top:4px;">
-        Sign In
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="staySignedIn" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);">
+          <span style="font-size:.8rem;color:rgba(255,255,255,.6);">Stay signed in</span>
+        </label>
+
+        <button type="submit" class="btn-primary" style="margin-top:4px;">
+          Sign In
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h9M9 4l3.5 3.5L9 11"/></svg>
+        </button>
+      </form>
+
+      <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
+        Don't have an account?
+        <a href="register.html" style="color:var(--accent-lt);text-decoration:none;font-weight:700;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register free</a>
+      </p>
+
+      <p style="text-align:center;margin-top:10px;">
+        <a href="#" onclick="continueAsGuest(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.2);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Continue as guest →</a>
+      </p>
+    </div>
+
+    <div id="tfa-challenge-wrap" style="display:none;">
+      <div style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Two-Factor Authentication</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:20px;">Enter the 6-digit code from your authenticator app.</div>
+      <label class="field-label">Code</label>
+      <input type="text" id="tfa-login-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align:center;letter-spacing:.3em;font-size:1.1rem;font-weight:700;margin-bottom:8px;">
+      <div id="tfa-login-error" style="font-size:.75rem;color:#ff7070;margin:6px 0 10px;min-height:14px;"></div>
+      <button type="button" class="btn-primary" id="tfa-login-verify-btn" onclick="verifyLoginTfaCode()" style="width:100%;margin-bottom:14px;justify-content:center;">
+        Verify &amp; Sign In
       </button>
-    </form>
-
-    <p style="text-align:center;font-size:.78rem;color:rgba(255,255,255,.28);margin:20px 0 0;">
-      Don't have an account?
-      <a href="register.html" style="color:var(--accent-lt);text-decoration:none;font-weight:700;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register free</a>
-    </p>
-
-    <p style="text-align:center;margin-top:10px;">
-      <a href="#" onclick="continueAsGuest(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.2);text-decoration:none;" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Continue as guest →</a>
-    </p>
+      <p style="text-align:center;">
+        <a href="#" id="tfa-toggle-backup-link" onclick="toggleBackupCodeMode(); return false;" style="font-size:.76rem;color:var(--accent-lt);text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Use a backup code instead</a>
+      </p>
+      <p style="text-align:center;margin-top:10px;">
+        <a href="#" onclick="cancelTfaChallenge(); return false;" style="font-size:.72rem;color:rgba(255,255,255,.28);text-decoration:none;">&larr; Back to sign in</a>
+      </p>
+    </div>
   </div>
 
   <script>
@@ -301,6 +321,93 @@
         stats: (localMatch && localMatch.stats) || { goals: 0, assists: 0, appearances: 0, rating: '—' },
         firebaseUid: doc.id,
       };
+    }
+
+    // ---- Two-Factor Authentication challenge ----
+    // Real RFC 6238 verification (totp.js) runs after a correct password,
+    // before a session is granted — see account.html for the full write-up
+    // of what this does and doesn't guarantee given there's no paid backend
+    // to enforce it server-side.
+    let pendingLogin = null;
+    let tfaUsingBackupCode = false;
+
+    function showTfaChallenge() {
+      document.getElementById('login-form-wrap').style.display = 'none';
+      document.getElementById('tfa-challenge-wrap').style.display = 'block';
+      document.getElementById('tfa-login-code').value = '';
+      document.getElementById('tfa-login-error').textContent = '';
+      document.getElementById('tfa-login-code').focus();
+    }
+
+    function cancelTfaChallenge() {
+      pendingLogin = null;
+      document.getElementById('login-form-wrap').style.display = '';
+      document.getElementById('tfa-challenge-wrap').style.display = 'none';
+    }
+
+    function toggleBackupCodeMode() {
+      tfaUsingBackupCode = !tfaUsingBackupCode;
+      const input = document.getElementById('tfa-login-code');
+      const link = document.getElementById('tfa-toggle-backup-link');
+      document.getElementById('tfa-login-error').textContent = '';
+      if (tfaUsingBackupCode) {
+        input.placeholder = 'XXXX-XXXX';
+        input.maxLength = 9;
+        input.style.letterSpacing = '.15em';
+        link.textContent = 'Use your authenticator app instead';
+      } else {
+        input.placeholder = '000000';
+        input.maxLength = 6;
+        input.style.letterSpacing = '.3em';
+        link.textContent = 'Use a backup code instead';
+      }
+      input.value = '';
+      input.focus();
+    }
+
+    async function verifyLoginTfaCode() {
+      if (!pendingLogin) return;
+      const entered = document.getElementById('tfa-login-code').value.trim();
+      const errorEl = document.getElementById('tfa-login-error');
+      const btn = document.getElementById('tfa-login-verify-btn');
+      btn.disabled = true;
+
+      let ok = false;
+      let usedBackupIndex = -1;
+      const twoFactor = pendingLogin.docData.twoFactor;
+
+      if (tfaUsingBackupCode) {
+        const codes = twoFactor.backupCodes || [];
+        usedBackupIndex = codes.findIndex(c => !c.used && c.code.toUpperCase() === entered.toUpperCase());
+        ok = usedBackupIndex !== -1;
+      } else {
+        ok = await verifyTotpCode(twoFactor.secret, entered);
+      }
+
+      if (!ok) {
+        btn.disabled = false;
+        errorEl.textContent = tfaUsingBackupCode ? 'Invalid or already-used backup code.' : 'Incorrect or expired code.';
+        return;
+      }
+
+      try {
+        // Re-establish the real session now that the second factor checked out.
+        const cred = await fbAuth.signInWithEmailAndPassword(pendingLogin.email, pendingLogin.password);
+
+        if (usedBackupIndex !== -1) {
+          const codes = twoFactor.backupCodes.slice();
+          codes[usedBackupIndex] = { ...codes[usedBackupIndex], used: true };
+          await db.collection('users').doc(cred.user.uid).update({ 'twoFactor.backupCodes': codes });
+        }
+
+        const freshDoc = await db.collection('users').doc(cred.user.uid).get();
+        const user = userFromFirestoreDoc(freshDoc, pendingLogin.email, pendingLogin.localMatch);
+        ctsoccerSetUser(user, pendingLogin.staySignedIn);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        btn.disabled = false;
+        errorEl.textContent = 'Could not complete sign-in: ' + err.message;
+      }
     }
 
     async function handleForgotPassword() {
@@ -360,6 +467,20 @@
         try {
           const cred = await fbAuth.signInWithEmailAndPassword(email, password);
           const doc = await db.collection('users').doc(cred.user.uid).get();
+          const docData = doc.data() || {};
+
+          if (docData.twoFactor && docData.twoFactor.enabled) {
+            // Password was correct, but don't leave a completed session
+            // sitting around before the second factor is verified — sign
+            // back out and hold here until the code checks out.
+            await fbAuth.signOut();
+            pendingLogin = { email, password, staySignedIn, docData, localMatch: localOk ? localMatch : null };
+            tfaUsingBackupCode = false;
+            submitBtn.disabled = false;
+            showTfaChallenge();
+            return;
+          }
+
           finishLogin(userFromFirestoreDoc(doc, email, localOk ? localMatch : null));
           return;
         } catch (err) {

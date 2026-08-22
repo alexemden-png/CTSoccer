@@ -7,6 +7,8 @@
   <script src="theme.js"></script>
   <script src="cookie-consent.js"></script>
   <script src="auth.js"></script>
+  <script src="totp.js"></script>
+  <script src="qrcode-generator.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -491,7 +493,7 @@
             <div style="font-size:.85rem;font-weight:800;color:#fff;">Two-Factor Authentication</div>
             <span id="tfa-badge" style="font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);">Disabled</span>
           </div>
-          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:14px;">Add an extra layer of security — after your password, you'll need a code from an authenticator app to sign in. We're building this properly before turning it on, so it isn't available yet.</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:14px;">Add an extra layer of security — after your password, you'll need a code from an authenticator app to sign in.</div>
           <div id="tfa-actions"></div>
         </div>
 
@@ -560,23 +562,30 @@
     <div class="card" style="max-width:440px;width:100%;position:relative;">
       <button onclick="closeTfaModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:none;width:28px;height:28px;border-radius:8px;color:rgba(255,255,255,.6);font-size:1rem;cursor:pointer;">&times;</button>
 
-      <div id="tfa-step-setup">
+      <div id="tfa-step-reauth">
+        <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Confirm Your Password</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">For your security, confirm your password before setting up two-factor authentication.</div>
+        <label class="field-label">Password</label>
+        <input type="password" id="tfa-reauth-password" placeholder="Your password" style="margin-bottom:8px;">
+        <div id="tfa-reauth-error" style="font-size:.75rem;color:#ff7070;margin-bottom:10px;min-height:14px;"></div>
+        <button class="btn-primary" id="tfa-reauth-btn" onclick="tfaReauthAndProceed()" style="width:100%;justify-content:center;">Continue</button>
+      </div>
+
+      <div id="tfa-step-setup" style="display:none;">
         <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:4px;">Set Up Two-Factor Authentication</div>
-        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Add this key to an authenticator app (Google Authenticator, Authy, 1Password, etc.), then enter the 6-digit code it generates.</div>
-        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-bottom:14px;">
-          <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px;">Setup Key</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:16px;">Scan this with an authenticator app (Google Authenticator, Authy, 1Password, etc.), or enter the setup key manually. Then enter the 6-digit code it shows you.</div>
+        <div id="tfa-qr" style="display:flex;justify-content:center;margin-bottom:14px;background:#fff;border-radius:10px;padding:12px;"></div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-bottom:16px;">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px;">Can't scan? Enter this key manually</div>
           <div style="display:flex;align-items:center;gap:8px;">
             <code id="tfa-secret" style="font-size:.95rem;font-weight:700;color:var(--accent-lt);letter-spacing:.08em;flex:1;word-break:break-all;">----</code>
             <button onclick="copyTfaSecret()" style="background:rgba(255,255,255,.07);border:none;border-radius:7px;padding:6px 10px;color:rgba(255,255,255,.6);cursor:pointer;font-size:.7rem;font-weight:700;">Copy</button>
           </div>
         </div>
-        <div style="background:rgba(245,168,0,.08);border:1px solid rgba(245,168,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.75rem;color:rgba(255,255,255,.55);line-height:1.6;">
-          <strong style="color:#F5A800;">Demo mode:</strong> this site has no backend to send real codes. Your current code is <strong id="tfa-demo-code" style="color:#fff;"></strong> — enter it below to simulate a real authenticator app.
-        </div>
         <label class="field-label">6-Digit Code</label>
         <input type="text" id="tfa-code-input" placeholder="000000" maxlength="6" inputmode="numeric" style="text-align:center;letter-spacing:.3em;font-size:1.1rem;font-weight:700;margin-bottom:8px;">
         <div id="tfa-error" style="font-size:.75rem;color:#ff7070;margin-bottom:10px;min-height:14px;"></div>
-        <button class="btn-primary" onclick="confirmTfaCode()" style="width:100%;justify-content:center;">Verify & Enable</button>
+        <button class="btn-primary" id="tfa-confirm-btn" onclick="confirmTfaCode()" style="width:100%;justify-content:center;">Verify & Enable</button>
       </div>
 
       <div id="tfa-step-backup" style="display:none;">
@@ -975,22 +984,23 @@
   }
 
   // ---- Two-Factor Authentication ----
-  // Not real TOTP yet — there's no RFC 6238 verification and login.html never
-  // challenges for a code, so enabling this stored a secret/backup codes
-  // without adding any actual login protection. Gated off (same pattern as
-  // STORAGE_ENABLED in firebase-config.js) until it's a real implementation.
-  const TFA_ENABLED = false;
-  function randomBase32(len) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-    let out = '';
-    for (let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
-    return out;
-  }
-  function randomDigits(len) {
-    let out = '';
-    for (let i=0;i<len;i++) out += Math.floor(Math.random()*10);
-    return out;
-  }
+  // Real RFC 6238 TOTP (see totp.js) — HMAC-SHA1 verified client-side via Web
+  // Crypto, with ±1 step (30s) clock-drift tolerance, and login.html now
+  // actually challenges for the code before signing in. There's still no
+  // paid backend (no Cloud Functions) to enforce this server-side, so it's
+  // real cryptographic verification but not a strictly unbypassable
+  // server-enforced boundary — see the Privacy Policy for the full picture.
+  //
+  // The secret is stored in Firestore protected by access-control rules
+  // only, not field-level encryption. That's a deliberate call, not an
+  // oversight: encrypting it with a key derived from the user's password
+  // would break irrecoverably on password reset (the old key becomes
+  // undecryptable, silently bricking 2FA), so for now we rely on the same
+  // Firestore security-rule boundary every other private field on this
+  // document already depends on. Password-derived encryption is a real,
+  // scoped future improvement — see project notes, not something skipped
+  // carelessly.
+  const TFA_ENABLED = true;
 
   function renderTfaCard() {
     const badge = document.getElementById('tfa-badge');
@@ -1010,9 +1020,10 @@
     badge.style.color = enabled ? '#5CDD8B' : 'rgba(255,255,255,.4)';
     badge.style.borderColor = enabled ? 'rgba(92,221,139,.3)' : 'rgba(255,255,255,.12)';
     if (enabled) {
+      const unused = (user.twoFactor.backupCodes || []).filter(c => !c.used).length;
       actions.innerHTML = `
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn-outline" onclick="viewBackupCodes()" style="flex:1;justify-content:center;">View Backup Codes</button>
+          <button class="btn-outline" onclick="viewBackupCodes()" style="flex:1;justify-content:center;">View Backup Codes (${unused} left)</button>
           <button class="btn-danger" onclick="disableTfa()" style="flex:1;justify-content:center;">Disable 2FA</button>
         </div>`;
     } else {
@@ -1020,39 +1031,83 @@
     }
   }
 
-  let tfaPendingSecret = null, tfaPendingCode = null;
+  let tfaPendingSecret = null;
 
   function openTfaModal() {
-    tfaPendingSecret = randomBase32(16);
-    tfaPendingCode = randomDigits(6);
-    document.getElementById('tfa-secret').textContent = tfaPendingSecret.match(/.{1,4}/g).join(' ');
-    document.getElementById('tfa-demo-code').textContent = tfaPendingCode;
-    document.getElementById('tfa-code-input').value = '';
-    document.getElementById('tfa-error').textContent = '';
-    document.getElementById('tfa-step-setup').style.display = '';
+    if (!(typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY && fbAuth.currentUser)) {
+      toast('Two-factor authentication requires a signed-in, cloud-synced account.');
+      return;
+    }
+    tfaPendingSecret = null;
+    document.getElementById('tfa-reauth-password').value = '';
+    document.getElementById('tfa-reauth-error').textContent = '';
+    document.getElementById('tfa-step-reauth').style.display = '';
+    document.getElementById('tfa-step-setup').style.display = 'none';
     document.getElementById('tfa-step-backup').style.display = 'none';
     document.getElementById('tfa-modal').style.display = 'flex';
   }
 
   function closeTfaModal() {
     document.getElementById('tfa-modal').style.display = 'none';
+    tfaPendingSecret = null;
     renderTfaCard();
+  }
+
+  async function tfaReauthAndProceed() {
+    const pw = document.getElementById('tfa-reauth-password').value;
+    const errorEl = document.getElementById('tfa-reauth-error');
+    const btn = document.getElementById('tfa-reauth-btn');
+    if (!pw) { errorEl.textContent = 'Enter your password to continue.'; return; }
+    btn.disabled = true;
+    try {
+      const cred = firebase.auth.EmailAuthProvider.credential(fbAuth.currentUser.email, pw);
+      await fbAuth.currentUser.reauthenticateWithCredential(cred);
+      beginTfaSetup();
+    } catch (err) {
+      errorEl.textContent = (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential')
+        ? 'Incorrect password.' : 'Could not verify: ' + err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function beginTfaSetup() {
+    tfaPendingSecret = generateTotpSecret();
+    document.getElementById('tfa-secret').textContent = tfaPendingSecret.match(/.{1,4}/g).join(' ');
+    try {
+      const uri = totpOtpauthUri(tfaPendingSecret, user.email || 'account', 'CT Soccer Hub');
+      const qr = qrcode(0, 'M');
+      qr.addData(uri);
+      qr.make();
+      document.getElementById('tfa-qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 8 });
+    } catch (e) {
+      document.getElementById('tfa-qr').innerHTML = '<div style="color:#888;font-size:.75rem;padding:20px;text-align:center;">QR code unavailable — use the manual key below.</div>';
+    }
+    document.getElementById('tfa-code-input').value = '';
+    document.getElementById('tfa-error').textContent = '';
+    document.getElementById('tfa-step-reauth').style.display = 'none';
+    document.getElementById('tfa-step-setup').style.display = '';
   }
 
   function copyTfaSecret() {
     navigator.clipboard?.writeText(tfaPendingSecret).then(()=>toast('Secret copied'));
   }
 
-  function confirmTfaCode() {
+  async function confirmTfaCode() {
     const entered = document.getElementById('tfa-code-input').value.trim();
-    if (entered !== tfaPendingCode) {
-      document.getElementById('tfa-error').textContent = 'Incorrect code. Check the demo code above and try again.';
+    const errorEl = document.getElementById('tfa-error');
+    const btn = document.getElementById('tfa-confirm-btn');
+    btn.disabled = true;
+    const valid = await verifyTotpCode(tfaPendingSecret, entered);
+    btn.disabled = false;
+    if (!valid) {
+      errorEl.textContent = 'Incorrect or expired code. Check your authenticator app and try again.';
       return;
     }
-    const backupCodes = Array.from({length:8}, () => randomDigits(4)+'-'+randomDigits(4));
+    const backupCodes = generateBackupCodes(8).map(code => ({ code, used: false }));
     user.twoFactor = { enabled: true, secret: tfaPendingSecret, backupCodes, enabledAt: new Date().toISOString() };
     saveUser();
-    document.getElementById('tfa-backup-codes').innerHTML = backupCodes.map(c=>`<div>${c}</div>`).join('');
+    document.getElementById('tfa-backup-codes').innerHTML = backupCodes.map(c=>`<div>${c.code}</div>`).join('');
     document.getElementById('tfa-step-setup').style.display = 'none';
     document.getElementById('tfa-step-backup').style.display = '';
     toast('Two-factor authentication enabled!');
@@ -1060,7 +1115,10 @@
 
   function viewBackupCodes() {
     if (!user.twoFactor?.backupCodes) return;
-    document.getElementById('tfa-backup-codes').innerHTML = user.twoFactor.backupCodes.map(c=>`<div>${c}</div>`).join('');
+    document.getElementById('tfa-backup-codes').innerHTML = user.twoFactor.backupCodes.map(c =>
+      `<div style="${c.used ? 'color:rgba(255,255,255,.25);text-decoration:line-through;' : ''}">${c.code}${c.used ? ' (used)' : ''}</div>`
+    ).join('');
+    document.getElementById('tfa-step-reauth').style.display = 'none';
     document.getElementById('tfa-step-setup').style.display = 'none';
     document.getElementById('tfa-step-backup').style.display = '';
     document.getElementById('tfa-modal').style.display = 'flex';
