@@ -107,6 +107,7 @@ const CT_CLUBS = [
     about: 'Led by president Jason Price and head coach Kledis Capollari — a former Hartford Athletic assistant and youth development lead — New Haven United reached the NPSL conference final in its debut 2025 season and won the North Atlantic Conference outright in 2026 before falling to eventual national runner-up Bristol Rhythm AFC in the club\'s first-ever National Semifinal appearance.',
     wins: 6, draws: 2, losses: 2,
     gf: 21, ga: 14,
+    seasonStatus: 'concluded',
     roster: [],
     recentResults: [
       { opponent: 'Bristol Rhythm AFC',      home: false, score: '0-2', result: 'L', date: 'Jul 25, 2026' },

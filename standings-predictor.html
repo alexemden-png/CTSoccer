@@ -178,6 +178,7 @@
             <li><a href="events.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Events</a></li>
             <li><a href="find-a-club.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Find a Club</a></li>
             <li><a href="standings-predictor.html" style="font-size:.875rem;color:rgba(255,255,255,.85);text-decoration:none;">Standings Predictor</a></li>
+            <li><a href="season-review.html" style="font-size:.875rem;color:rgba(255,255,255,.38);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.85)'" onmouseout="this.style.color='rgba(255,255,255,.38)'">Season in Review</a></li>
           </ul>
         </div>
 
@@ -355,18 +356,13 @@
           </div>
         </div>`;
 
-      // Season concluded — nothing to simulate, show final table only.
-      if (club.seasonStatus === 'concluded') {
+      // Season concluded — nothing to simulate, show final table only. Don't
+      // rely on the seasonStatus flag alone (a club can be genuinely done
+      // without it being set) — an empty upcoming list is just as reliable
+      // a signal here, since every currently-active club has real fixtures on file.
+      if (club.seasonStatus === 'concluded' || !club.upcoming || !club.upcoming.length) {
         panel.innerHTML = headerHtml + `
           <div class="status-banner"><strong style="color:#fff;">Season complete.</strong> This is ${esc(club.name)}'s final standing for the season — there's nothing left to predict.</div>
-          ${stdTableHtml(table, table.selfAbbr)}`;
-        return;
-      }
-
-      // Active season, but nothing scheduled on file — show current table only.
-      if (!club.upcoming || !club.upcoming.length) {
-        panel.innerHTML = headerHtml + `
-          <div class="status-banner"><strong style="color:#fff;">No upcoming matches on file right now.</strong> ${esc(club.name)}'s season is ongoing, but we don't have a next fixture logged to simulate yet — here's where they stand currently.</div>
           ${stdTableHtml(table, table.selfAbbr)}`;
         return;
       }
